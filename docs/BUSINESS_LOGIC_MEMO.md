@@ -1,14 +1,43 @@
 
 
-# 业务逻辑实现备忘录（增量更新 - Pro 阶段完成后）
+# 业务逻辑实现备忘录（增量更新 - P0任务完成）
 
 > **日期**：2026-03-09  
-> **版本**：2.1  
-> **更新类型**：增量更新
+> **版本**：2.2  
+> **更新类型**：P0任务完成更新
 
 ---
 
-## 本次更新：集成测试
+## 本次更新：P0 任务完成
+
+### 架构补充（已完成）
+
+| 模块 | domain/service | application/service | mapper | 状态 |
+|------|----------------|-------------------|--------|------|
+| bom | ✅ BomDomainService | ✅ BomApplicationService | ✅ BomMapper | ✅ |
+| inventory | ✅ InventoryDomainService | ✅ InventoryApplicationService | ✅ InventoryMapper | ✅ |
+| purchase | ✅ PurchaseDomainService | ✅ PurchaseApplicationService | ✅ PurchaseMapper | ✅ |
+| production | - | - | ✅ ProductionOrderMapper | ✅ |
+| mrp | - | ✅ (重构) | ✅ ItemMapper, SalesOrderMapper | ✅ |
+
+### 业务逻辑完善（已完成）
+
+| 任务 | 说明 | 状态 |
+|------|------|------|
+| MRP 接入物料数据 | ItemMapper + MrpApplicationService 重构 | ✅ |
+| MRP 接入需求数据 | SalesOrderMapper + MrpApplicationService 重构 | ✅ |
+| conversation 模块合并 | 从 master 合并到 develop | ✅ |
+
+### 待接入（TODO）
+
+| 模块 | 说明 | 后续工作 |
+|------|------|----------|
+| BOM | MrpApplicationService.loadBomMap() | 接入 BomMapper |
+| 库存 | MrpApplicationService.loadInventory() | 接入 InventoryMapper |
+| 在途采购 | loadPurchaseOnWay() | 接入 PurchaseMapper |
+| 在制生产 | loadProductionOnWay() | 接入 ProductionOrderMapper |
+
+---
 
 ### 新增测试代码
 
