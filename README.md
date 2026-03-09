@@ -13,7 +13,7 @@ AIGC:
 # AI MRP 智能物料需求计划系统
 
 > **项目代号**：AI-MRP  
-> **版本**：v1.0.0-SNAPSHOT  
+> **版本**：v1.0.0-Pro  
 > **创建日期**：2026-03-08
 
 ---
@@ -216,7 +216,7 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 
 ## 六、实施路径
 
-### Phase 1：MVP（3 个月）
+### Phase 1：MVP（4 周）✅ 完成
 
 - [x] 需求管理（订单/预测）
 - [x] BOM 管理（单层展开）
@@ -226,21 +226,35 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 
 **交付**：Web 版 MVP，可处理简单场景
 
-### Phase 2：智能化（3 个月）
+### Phase 2：Pro 智能化（4 周）✅ 完成
 
-- [ ] OR 排程优化
-- [ ] LLM 自然语言交互
-- [ ] 多层 BOM 展开
-- [ ] 生产工单生成
+- [x] AI 需求预测（时序模型）
+- [x] AI 安全库存推荐
+- [x] OR 排程优化（Google OR-Tools）
+- [x] 工艺路线/工作中心/资源管理
+- [x] 多层 BOM 展开
+- [x] 生产工单生成
+- [x] 甘特图展示
+- [x] What-if 场景模拟
+- [x] 插单影响分析
+- [x] 冲突检测
+- [x] 成本影响分析
+- [x] 风险监控与预警
+- [x] LLM 对话式交互
 
-**交付**：智能排程 + 语音交互
+**交付**：智能排程 + 语音交互 + 风险预警
 
-### Phase 3：企业级（3 个月）
+### Phase 3：Enterprise 企业级（规划中）
 
-- [ ] 多工厂/多仓库
+- [ ] 多工厂/多基地
+- [ ] 多仓库
+- [ ] 多产线
+- [ ] MPS+MRP+DRP 联动
 - [ ] 供应商协同平台
-- [ ] 实时数据采集集成
-- [ ] 高级分析报表
+- [ ] ERP 对接
+- [ ] 运营仪表盘
+- [ ] 高级报表
+- [ ] 微服务架构（Nacos/Gateway/SkyWalking）
 
 **交付**：完整企业版
 
@@ -248,11 +262,11 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 
 ## 七、版本规划
 
-| 版本 | 形态 | 定位 |
-|------|------|------|
-| **AI-MRP Lite** | SaaS | 小微企业，单一工厂 |
-| **AI-MRP Pro** | 桌面客户端 | 中小企业，多仓库 |
-| **AI-MRP Enterprise** | Web 应用 | 大型企业，多工厂/供应链协同 |
+| 版本 | 形态 | 定位 | 状态 |
+|------|------|------|------|
+| **v1.0.0-MVP** | Web 应用 | 核心 MRP 流程 | ✅ 已发布 |
+| **v1.0.0-Pro** | Web 应用 | 智能化能力 | ✅ 已发布 |
+| **v1.0.0-Enterprise** | Web 应用 | 企业级能力 | ⏳ 规划中 |
 
 ---
 
@@ -277,18 +291,18 @@ AI-MRP/
 │   │   ├── aimrp-common/        # 公共模块
 │   │   ├── aimrp-core/          # 核心域模块
 │   │   ├── aimrp-demand/        # 需求管理
-│   │   ├── aimrp-forecast/      # 预测模块
+│   │   ├── aimrp-forecast/      # 预测模块 ✅ Pro
 │   │   ├── aimrp-bom/           # BOM 管理
 │   │   ├── aimrp-inventory/     # 库存管理
 │   │   ├── aimrp-mrp/           # MRP 计算
 │   │   ├── aimrp-purchase/      # 采购管理
-│   │   ├── aimrp-production/    # 生产管理
-│   │   ├── aimrp-risk/          # 风险预警
-│   │   ├── aimrp-sandbox/       # 沙箱机制
-│   │   ├── aimrp-whatif/        # What-if 模拟
-│   │   ├── aimrp-conversation/  # 对话服务
+│   │   ├── aimrp-production/    # 生产管理+排程 ✅ Pro
+│   │   ├── aimrp-risk/          # 风险预警 ✅ Pro
+│   │   ├── aimrp-whatif/        # What-if模拟 ✅ Pro
+│   │   ├── aimrp-conversation/  # 对话服务 ✅ Pro
 │   │   ├── aimrp-system/        # 用户权限
-│   │   ├── aimrp-notification/  # 通知模块
+│   │   ├── aimrp-item/          # 物料主数据
+│   │   ├── aimrp-supplier/      # 供应商管理
 │   │   └── aimrp-api/           # API 入口
 │   │
 │   ├── ai-service/               # Python AI 微服务
@@ -333,28 +347,33 @@ AI-MRP/
 
 ### 已完成模块
 
-| 模块 | 功能 | API |
-|------|------|-----|
-| `aimrp-system` | 用户权限认证 | `/api/auth/*` |
-| `aimrp-item` | 物料主数据 | `/api/items` |
-| `aimrp-supplier` | 供应商管理 | `/api/suppliers` |
-| `aimrp-demand` | 销售订单 | `/api/orders` |
-| `aimrp-bom` | BOM管理 | `/api/boms` |
-| `aimrp-inventory` | 库存管理 | `/api/inventory` |
-| `aimrp-mrp` | MRP计算引擎 | `/api/mrp/*` |
-| `aimrp-purchase` | 采购管理 | `/api/purchase-orders/*` |
-| `aimrp-production` | 生产管理 | `/api/production-orders/*` |
+| 模块 | 功能 | API | 状态 |
+|------|------|-----|------|
+| `aimrp-system` | 用户权限认证 | `/api/auth/*` | ✅ |
+| `aimrp-item` | 物料主数据 | `/api/items` | ✅ |
+| `aimrp-supplier` | 供应商管理 | `/api/suppliers` | ✅ |
+| `aimrp-demand` | 销售订单 | `/api/orders` | ✅ |
+| `aimrp-bom` | BOM管理 | `/api/boms` | ✅ |
+| `aimrp-inventory` | 库存管理 | `/api/inventory` | ✅ |
+| `aimrp-mrp` | MRP计算引擎 | `/api/mrp/*` | ✅ |
+| `aimrp-purchase` | 采购管理 | `/api/purchase-orders/*` | ✅ |
+| `aimrp-production` | 生产管理+排程 | `/api/production-orders/*` | ✅ |
+| `aimrp-forecast` | AI需求预测+安全库存 | `/api/forecast/*` | ✅ |
+| `aimrp-risk` | 风险监控+预警 | `/api/risk/*` | ✅ |
+| `aimrp-conversation` | AI对话 | `/api/conversation/*` | ✅ |
+| `aimrp-whatif` | What-if模拟 | `/api/whatif/*` | ✅ |
+| `aimrp-notification` | 通知模块 | - | ⏳ |
 
-### 待开发模块
+### 待开发模块（Enterprise）
 
 | 模块 | 功能 |
 |------|------|
-| `aimrp-forecast` | AI需求预测 |
-| `aimrp-risk` | 风险预警 |
-| `aimrp-conversation` | AI对话 |
-| `aimrp-sandbox` | 沙箱机制 |
-| `aimrp-whatif` | What-if模拟 |
-| `aimrp-notification` | 通知模块 |
+| `aimrp-organization` | 组织架构管理 |
+| `aimrp-multi-warehouse` | 多仓库支持 |
+| `aimrp-mps` | MPS 主生产计划 |
+| `aimrp-drp` | DRP 配送需求计划 |
+| `aimrp-supplier-portal` | 供应商门户 |
+| `aimrp-report` | 报表模块 |
 
 ### API 响应规范
 
@@ -368,6 +387,23 @@ AI-MRP/
   "timestamp": 1709875200000
 }
 ```
+
+---
+
+## 十一、分支策略
+
+```
+master           → v1.0.0-MVP (已发布)
+release/mvp-1.0  → MVP 发布分支
+release/pro      → Pro 发布分支 (v1.0.0-Pro) ✅
+develop          → Enterprise 开发中
+```
+
+| 分支 | 用途 | Tag |
+|------|------|-----|
+| `master` | 生产发布 | v1.0.0-MVP |
+| `release/pro` | Pro发布 | v1.0.0-Pro |
+| `develop` | 开发主分支 | - |
 
 ---
 
