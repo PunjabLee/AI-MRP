@@ -82,17 +82,14 @@
 | 2 | 多仓库支持 | feature/enterprise-org-structure | ✅ 第一批次 |
 | 3 | MPS 主生产计划 | feature/enterprise-org-structure | ✅ 第一批次 |
 | 4 | 供应商门户 | feature/enterprise-org-structure | ✅ 第一批次 |
-| 5 | 多工厂支持 | - | ⏳ 待开发 |
-| 6 | DRP 配送计划 | - | ⏳ 待开发 |
-| 7 | 设备管理 | - | ⏳ 待开发 |
-| 8 | 质量管理 | - | ⏳ 待开发 |
-| 9 | 成本管理 | - | ⏳ 待开发 |
-| 10 | 预算管理 | - | ⏳ 待开发 |
-| 11 | 审批流 | - | ⏳ 待开发 |
-| 12 | 运营仪表盘 | - | ⏳ 待开发 |
-| 13 | 报表中心 | - | ⏳ 待开发 |
-| 14 | ERP对接 | - | ⏳ 待开发 |
-| 15 | 开放平台 | - | ⏳ 待开发 |
+| 5 | 设备管理 | feature/enterprise-batch2 | ✅ 第二批次 |
+| 6 | 质量管理 | feature/enterprise-batch2 | ✅ 第二批次 |
+| 7 | 成本管理 | feature/enterprise-batch2 | ✅ 第二批次 |
+| 8 | 报表中心 | feature/enterprise-batch3 | ✅ 第三批次 |
+| 9 | 系统集成 | feature/enterprise-batch3 | ✅ 第三批次 |
+| 10 | 运营仪表盘 | - | ⏳ 待补充 |
+| 11 | 预算管理 | - | ⏳ 待补充 |
+| 12 | 审批流 | - | ⏳ 待补充 |
 
 ### 1.5 Enterprise 微服务架构（规划中）
 
