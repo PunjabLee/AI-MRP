@@ -14,7 +14,7 @@
 |------|------|------|------|
 | MVP | 4周 | 核心MRP流程跑通 | ✅ 完成 |
 | Pro | 4周 | 智能化能力（AI预测/排程/风险） | ✅ 完成 |
-| Enterprise | 4周 | 企业级能力（微服务/多仓库/报表） | ⏳ 规划中 |
+| Enterprise | 12周 | 企业级能力（微服务/多仓库/报表） | ⏳ 规划中 |
 
 ### 1.2 MVP 阶段功能（已完成）
 
@@ -33,9 +33,23 @@
 | 11 | MRP计算引擎 | feature/mrp-calculation | ✅ |
 | 12 | 采购建议 | feature/purchase-suggestion | ✅ |
 | 13 | 用户权限 | feature/user-auth | ✅ |
-| 14 | 前端页面 | - | ✅ |
+| 14 | 前端页面 | feature/mvp-frontend-pages | ✅ |
 
-### 1.3 Pro 阶段功能（已完成）
+### 1.3 MVP 前端页面（已完成）
+
+| 页面 | 功能 | 状态 |
+|------|------|------|
+| OrderPage | 销售订单 | ✅ |
+| BomPage | BOM管理 | ✅ 新增 |
+| InventoryPage | 库存管理（含出入库） | ✅ 新增 |
+| ItemPage | 物料主数据 | ✅ 新增 |
+| SupplierPage | 供应商管理 | ✅ 新增 |
+| PurchasePage | 采购管理 | ✅ 新增 |
+| MrpPage | MRP计算 | ✅ |
+| RiskPage | 风险预警 | ✅ |
+| WhatIfPage | What-if模拟 | ✅ |
+
+### 1.4 Pro 阶段功能（已完成）
 
 | 序号 | 功能 | 分支 | 状态 |
 |------|------|------|------|
