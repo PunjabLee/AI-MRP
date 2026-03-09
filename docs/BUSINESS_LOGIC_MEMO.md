@@ -1,319 +1,230 @@
-
-
-# 业务逻辑实现备忘录（最终版）
+# 业务逻辑实现备忘录
 
 > **日期**：2026-03-09  
-> **版本**：3.0  
-> **状态**：✅ 完成度 100%
+> **版本**：4.0  
+> **状态**：✅ MVP + Pro 阶段完成，Enterprise 待开发
 
 ---
 
-## 业务逻辑完成状态
+## 一、产品功能规划总览
 
-| 模块 | domain/service | application | mapper | 状态 |
-|------|----------------|-------------|--------|------|
-| demand | ✅ | ✅ | ✅ | ✅ |
-| item | ✅ | ✅ | ✅ | ✅ |
-| supplier | ✅ | ✅ | ✅ | ✅ |
-| bom | ✅ | ✅ | ✅ | ✅ |
-| inventory | ✅ | ✅ | ✅ | ✅ |
-| purchase | ✅ | ✅ | ✅ | ✅ |
-| production | ✅ | ✅ | ✅ | ✅ |
-| mrp | ✅ | ✅ | ✅ | ✅ 完成 |
-| forecast | ✅ | ✅ | ✅ | ✅ 完成 |
-| risk | ✅ | ✅ | ✅ | ✅ 完成 |
-| whatif | ✅ | ✅ | ✅ | ✅ 完成 |
-| conversation | ✅ | ✅ | - | ✅ |
+### 1.1 迭代阶段
 
-### MRP 数据接入 ✅
+| 阶段 | 周期 | 目标 | 状态 |
+|------|------|------|------|
+| MVP | 4周 | 核心MRP流程跑通 | ✅ 完成 |
+| Pro | 4周 | 智能化能力（AI预测/排程/风险） | ✅ 完成 |
+| Enterprise | 4周 | 企业级能力（微服务/多仓库/报表） | ⏳ 规划中 |
 
-| 数据类型 | 状态 |
-|----------|------|
-| 物料数据 | ✅ |
-| BOM数据 | ✅ |
-| 库存数据 | ✅ |
-| 需求数据 | ✅ |
-| 在途采购 | ✅ |
-| 在制生产 | ✅ |
+### 1.2 MVP 阶段功能（已完成）
 
----
+| 序号 | 功能 | 分支 | 状态 |
+|------|------|------|------|
+| 1 | 项目初始化 | feature/project-init | ✅ |
+| 2 | 数据库设计 | feature/database-design | ✅ |
+| 3 | 公共模块 | feature/common-module | ✅ |
+| 4 | 销售订单CRUD | feature/demand-order-crud | ✅ |
+| 5 | 订单API | feature/demand-order-api | ✅ |
+| 6 | BOM管理 | feature/bom-management | ✅ |
+| 7 | BOM展开API | feature/bom-expand-api | ✅ |
+| 8 | 库存管理 | feature/inventory-stock | ✅ |
+| 9 | 物料主数据 | feature/item-management | ✅ |
+| 10 | 供应商管理 | feature/supplier-management | ✅ |
+| 11 | MRP计算引擎 | feature/mrp-calculation | ✅ |
+| 12 | 采购建议 | feature/purchase-suggestion | ✅ |
+| 13 | 用户权限 | feature/user-auth | ✅ |
+| 14 | 前端页面 | - | ✅ |
 
-## 剩余任务
+### 1.3 Pro 阶段功能（已完成）
 
-### Enterprise 微服务架构
+| 序号 | 功能 | 分支 | 状态 |
+|------|------|------|------|
+| 1 | AI需求预测 | feature/ai-demand-predict | ✅ |
+| 2 | 预测API+页面 | feature/ai-predict-api | ✅ |
+| 3 | AI安全库存 | feature/ai-safety-stock | ✅ |
+| 4 | 安全库存页面 | feature/ai-safety-stock-api | ✅ |
+| 5 | 工艺路线 | feature/process-route | ✅ |
+| 6 | 工作中心 | feature/work-center | ✅ |
+| 7 | 资源管理 | feature/resource | ✅ |
+| 8 | 工单工序 | feature/mo-operation | ✅ |
+| 9 | OR排程优化 | feature/ai-or-scheduler | ✅ |
+| 10 | 排程模型 | feature/ai-or-model | ✅ |
+| 11 | 甘特图 | feature/web-gantt | ✅ |
+| 12 | 影响分析 | feature/ai-impact-analysis | ✅ |
+| 13 | 冲突检测 | feature/ai-conflict-detect | ✅ |
+| 14 | 成本分析 | feature/ai-cost-analysis | ✅ |
+| 15 | What-if模拟 | feature/ai-whatif | ✅ |
+| 16 | 方案对比 | feature/ai-plan-compare | ✅ |
+| 17 | 风险监控 | feature/ai-risk-monitor | ✅ |
+| 18 | 风险预警 | feature/ai-risk-warning | ✅ |
+| 19 | 风险页面 | feature/web-risk-page | ✅ |
+| 20 | Pro集成测试 | feature/pro-integration | ✅ |
 
-- Nacos 部署
-- Gateway 配置
-- Feign 改造
-- SkyWalking/Sentinel/ELK
+### 1.4 Enterprise 阶段功能（规划中）
 
-### Enterprise 业务功能
-
-- 组织架构
-- 多仓库
-- 运营仪表盘
-- MPS+MRP+DRP
-
----
-
----
-
-## 本次更新：P1 剩余任务
-
-### 已完成
-
-| 模块 | domain/service | application | mapper | 状态 |
-|------|----------------|-------------|--------|------|
-| demand | ✅ | ✅ | ✅ | ✅ |
-| item | ✅ | ✅ | ✅ | ✅ |
-| supplier | ✅ | ✅ | ✅ | ✅ |
-| bom | ✅ | ✅ | ✅ | ✅ |
-| inventory | ✅ | ✅ | ✅ | ✅ |
-| purchase | ✅ | ✅ | ✅ | ✅ |
-| production | ✅ | ✅ | ✅ | ✅ |
-| mrp | ✅ | ✅ | ✅ | ✅ 完成 |
-| forecast | ✅ | ✅ | ✅ | ✅ 完成 |
-| risk | ✅ | ✅ | ✅ | ✅ 完成 |
-| whatif | ✅ | ✅ | ✅ | ✅ 完成 |
-
-### MRP 数据接入完成度
-
-| 数据类型 | 状态 |
-|----------|------|
-| 物料数据 | ✅ ItemMapper |
-| BOM数据 | ✅ BomMapper |
-| 库存数据 | ✅ InventoryMapper |
-| 需求数据 | ✅ SalesOrderMapper |
-| 在途采购 | ⏳ 待开发 |
-| 在制生产 | ⏳ 待开发 |
-
----
-
-## 剩余任务
-
-### P1
-
-| # | 任务 | 说明 |
-|---|------|------|
-| 1 | forecast mapper | 预测历史数据 |
-| 2 | risk mapper | 风险数据 |
-| 3 | whatif mapper | 场景数据 |
-| 4 | What-if 持久化 | 需数据库 |
-| 5 | 风险预警消息 | 需通知模块 |
-| 6 | MRP 在途/在制 | 待开发 |
-
-### P2
-
-| # | 任务 |
-|---|------|
-| 1 | 事务管理 |
-| 2 | 异常处理 |
-| 3 | 日志规范 |
-
----
-
----
-
-## 本次更新：P1 任务完成（第一部分）
-
-### 架构补充（已完成）
-
-| 模块 | domain/service | application | mapper | 状态 |
-|------|----------------|-------------|--------|------|
-| demand | ✅ DemandDomainService | ✅ DemandApplicationService | ✅ | ✅ |
-| item | ✅ ItemDomainService | ✅ ItemApplicationService | ✅ | ✅ |
-| supplier | ✅ SupplierDomainService | ✅ SupplierApplicationService | ✅ | ✅ |
-| production | ✅ SchedulerService | ✅ ProductionApplicationService | ✅ | ✅ |
-| forecast | ✅ | ✅ ForecastApplicationService | ❌ | ✅ |
-| risk | ✅ | ✅ RiskApplicationService | ❌ | ✅ |
-| whatif | ✅ | ✅ WhatIfApplicationService | ❌ | ✅ |
-
-> **注**：forecast/risk/whatif 的 mapper 待后续补充
-
----
-
-### 架构补充（已完成）
-
-| 模块 | domain/service | application/service | mapper | 状态 |
-|------|----------------|-------------------|--------|------|
-| bom | ✅ BomDomainService | ✅ BomApplicationService | ✅ BomMapper | ✅ |
-| inventory | ✅ InventoryDomainService | ✅ InventoryApplicationService | ✅ InventoryMapper | ✅ |
-| purchase | ✅ PurchaseDomainService | ✅ PurchaseApplicationService | ✅ PurchaseMapper | ✅ |
-| production | - | - | ✅ ProductionOrderMapper | ✅ |
-| mrp | - | ✅ (重构) | ✅ ItemMapper, SalesOrderMapper | ✅ |
-
-### 业务逻辑完善（已完成）
-
-| 任务 | 说明 | 状态 |
-|------|------|------|
-| MRP 接入物料数据 | ItemMapper + MrpApplicationService 重构 | ✅ |
-| MRP 接入需求数据 | SalesOrderMapper + MrpApplicationService 重构 | ✅ |
-| conversation 模块合并 | 从 master 合并到 develop | ✅ |
-
-### 待接入（TODO）
-
-| 模块 | 说明 | 后续工作 |
+| 序号 | 功能 | 预估工时 |
 |------|------|----------|
-| BOM | MrpApplicationService.loadBomMap() | 接入 BomMapper |
-| 库存 | MrpApplicationService.loadInventory() | 接入 InventoryMapper |
-| 在途采购 | loadPurchaseOnWay() | 接入 PurchaseMapper |
-| 在制生产 | loadProductionOnWay() | 接入 ProductionOrderMapper |
+| 1 | 组织架构管理 | 3d |
+| 2 | 组织API | 2d |
+| 3 | 多仓库支持 | 3d |
+| 4 | MPS+MRP+DRP联动 | 4d |
+| 5 | 供应商门户 | 4d |
+| 6 | 供应商API | 2d |
+| 7 | ERP对接 | 3d |
+| 8 | 开放平台 | 3d |
+| 9 | 运营仪表盘 | 3d |
+| 10 | 报表页面 | 3d |
+| 11 | 报表导出 | 2d |
+| 12 | Enterprise集成测试 | 3d |
+
+### 1.5 Enterprise 微服务架构（规划中）
+
+| 序号 | 功能 | 预估工时 |
+|------|------|----------|
+| 1 | Nacos注册/配置中心 | 3d |
+| 2 | Spring Cloud Gateway | 3d |
+| 3 | Feign调用改造 | 5d |
+| 4 | SkyWalking链路追踪 | 2d |
+| 5 | Sentinel熔断降级 | 2d |
+| 6 | ELK日志接入 | 3d |
 
 ---
 
-### 新增测试代码
+## 二、业务逻辑实现状态
+
+### 2.1 模块分层结构（100%完成）
+
+| 模块 | domain/service | application | mapper | 状态 |
+|------|----------------|-------------|--------|------|
+| demand | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| item | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| supplier | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| bom | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| inventory | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| purchase | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| production | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| mrp | ✅ 6 | ✅ 1 | ✅ 4 | ✅ |
+| forecast | ✅ 2 | ✅ 1 | ✅ 1 | ✅ |
+| risk | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| whatif | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
+| conversation | ✅ 3 | ✅ 1 | - | ✅ |
+
+### 2.2 MRP数据接入（100%完成）
+
+| 数据类型 | Mapper | 状态 |
+|----------|--------|------|
+| 物料数据 | ItemMapper | ✅ |
+| BOM数据 | BomMapper | ✅ |
+| 库存数据 | InventoryMapper | ✅ |
+| 需求数据 | SalesOrderMapper | ✅ |
+| 在途采购 | MrpPurchaseOnWayMapper | ✅ |
+| 在制生产 | MrpProductionOnWayMapper | ✅ |
+
+### 2.3 业务功能实现
+
+| 模块 | 功能 | 实现方式 | 状态 |
+|------|------|----------|------|
+| demand | 订单CRUD | DomainService + Mapper | ✅ |
+| item | 物料CRUD | DomainService + Mapper | ✅ |
+| supplier | 供应商CRUD | DomainService + Mapper | ✅ |
+| bom | BOM管理+BOM展开 | BomDomainService + BomApplicationService | ✅ |
+| inventory | 出入库 | InventoryDomainService + ApplicationService | ✅ |
+| purchase | 采购订单 | PurchaseDomainService + ApplicationService | ✅ |
+| production | 生产排程 | SchedulerService + ApplicationService | ✅ |
+| mrp | MRP计算 | MrpCalculator + BomExpander + DemandMerger | ✅ |
+| forecast | 需求预测+安全库存 | DemandForecastService + SafetyStockService | ✅ |
+| risk | 风险监控+预警 | RiskMonitorService + ApplicationService | ✅ |
+| whatif | 场景模拟 | WhatIfSimulationService + 持久化 | ✅ |
+| conversation | 对话服务 | IntentRecognition + EntityExtraction + Router | ✅ |
+
+---
+
+## 三、集成测试状态
+
+### 3.1 已完成测试
 
 | 测试类型 | 文件 | 覆盖范围 |
 |----------|------|----------|
-| MVP集成测试 | aimrp-mrp/.../MvpIntegrationTest.java | BOM展开、需求合并、净需求计算 |
-| Pro集成测试 | aimrp-forecast/.../ProIntegrationTest.java | 需求预测、安全库存、联动测试 |
+| MVP集成测试 | MvpIntegrationTest.java | BOM展开、需求合并、净需求计算 |
+| Pro集成测试 | ProIntegrationTest.java | 需求预测、安全库存、联动测试 |
+| 对话集成测试 | ConversationIntegrationTest.java | 对话流程 |
 
-> **注**：以上测试需要Java环境才能运行
+### 3.2 测试覆盖说明
 
----
-
-## Pro 阶段完成后整体分析
-
-### 模块架构总览（更新版）
-
-| 模块 | Java文件 | Mapper | Service | API | 业务逻辑 | 状态 |
-|------|----------|--------|---------|-----|----------|------|
-| demand | 4 | ✅ | ❌ | ✅ | 直接调用Mapper | 简化 |
-| item | 3 | ✅ | ❌ | ✅ | 直接调用Mapper | 简化 |
-| supplier | 3 | ✅ | ❌ | ✅ | 直接调用Mapper | 简化 |
-| bom | 2 | ❌ | ❌ | ✅ | 无 | 差 |
-| inventory | 2 | ❌ | ❌ | ✅ | 无 | 差 |
-| purchase | 4 | ❌ | ❌ | ✅ | 无 | 差 |
-| production | 10 | ❌ | ✅ | ✅ | 排程完整 | 中 |
-| mrp | 14 | ❌ | ✅ | ✅ | 成本新增 | 中 |
-| forecast | 5 | ❌ | ✅ | ✅ | 预测/安全库存 | 中 |
-| risk | 4 | ❌ | ✅ | ✅ | 监控/预警 | 中 |
-| whatif | 4 | ❌ | ✅ | ✅ | 模拟/对比 | 中 |
-| conversation | 0* | ❌ | ❌ | ❌ | 仅在master | 缺失 |
-
-> *注：conversation 模块文件仅存在于 master 分支，develop 分支未合并
+- MVP测试：覆盖完整MRP计算流程
+- Pro测试：覆盖AI预测+安全库存联动
+- 对话测试：覆盖意图识别→实体提取→路由执行
 
 ---
 
-## Pro 阶段新增功能分析
+## 四、技术架构说明
 
-### 2.1 成本影响分析（新增）
+### 4.1 模块调用方式
 
-| 组件 | 状态 | 说明 |
-|------|------|------|
-| CostImpactAnalysisService.java | ✅ 完整 | 直接成本、间接成本、ROI分析 |
-| CostAnalysisController.java | ✅ 完整 | REST API |
-| 业务逻辑差距 | ⚠️ | 需接入真实成本数据 |
+| 阶段 | 调用方式 | 说明 |
+|------|----------|------|
+| MVP/Pro | Maven依赖 + Spring DI | 同JVM内调用，高性能 |
+| Enterprise | Feign | 跨服务调用，微服务架构 |
 
-### 2.2 累计新增 Service
+### 4.2 分层架构
 
-| 模块 | Service | 功能 | 数据来源 |
-|------|---------|------|----------|
-| mrp | CostImpactAnalysisService | 成本分析 | 输入参数 |
-| mrp | ImpactAnalysisService | 影响分析 | 模拟 |
-| mrp | ConflictDetectionService | 冲突检测 | 模拟 |
-| whatif | WhatIfSimulationService | 模拟 | 内存 |
-| risk | RiskMonitorService | 风险监控 | 模拟 |
-| risk | RiskWarningController | 预警 | 日志 |
-| production | SchedulerService | 排程 | 模拟 |
+```
+api层        → 外部接口（REST）
+application层 → 业务流程编排、事务管理
+domain层     → 业务逻辑、领域服务
+infrastructure层 → 数据访问、第三方集成
+```
 
----
+### 4.3 编码规范（v1.2）
 
-## 核心差距总结（更新版）
-
-### 3.1 Mapper 层缺失
-
-| 模块 | Mapper | 状态 |
-|------|--------|------|
-| bom | ❌ | 需开发 |
-| inventory | ❌ | 需开发 |
-| purchase | ❌ | 需开发 |
-| production | ❌ | 需开发 |
-| mrp | ❌ | 需开发 |
-| forecast | ❌ | 需开发 |
-| risk | ❌ | 需开发 |
-
-### 3.2 Service 层缺失
-
-| 模块 | Service | 状态 |
-|------|---------|------|
-| demand | ❌ | 需开发 |
-| item | ❌ | 需开发 |
-| supplier | ❌ | 需开发 |
-| bom | ❌ | 需开发 |
-| inventory | ❌ | 需开发 |
-| purchase | ❌ | 需开发 |
-
-### 3.3 数据接入差距
-
-| 模块/功能 | 数据来源 | 目标 | 状态 |
-|-----------|----------|------|------|
-| MRP计算 | 模拟 | 数据库 | 需接入 |
-| 需求预测 | 模拟 | 历史订单 | 需接入 |
-| 安全库存 | 模拟 | 库存数据 | 需接入 |
-| 风险监控 | 模拟 | 库存/供应商 | 需接入 |
-| 排程 | 模拟 | 工单数据 | 需接入 |
-| What-if | 内存 | 持久化 | 需开发 |
-
-### 3.4 特殊问题
-
-| 问题 | 说明 | 状态 |
-|------|------|------|
-| conversation 模块 | 仅存在于 master 分支 | 需合并 |
-| 预警通知 | 仅日志输出 | 需接入消息 |
+| 类型 | 命名规范 | 示例 |
+|------|----------|------|
+| Entity | 业务名 | SalesOrder |
+| DomainService | 业务名+DomainService | BomDomainService |
+| ApplicationService | 业务名+ApplicationService | BomApplicationService |
+| Mapper | 表名+Mapper | SalesOrderMapper |
+| Controller | 业务名+Controller | SalesOrderController |
 
 ---
 
-## 待完善任务清单（更新版）
+## 五、版本演进记录
 
-### P0 - 必须完善
-
-| # | 模块 | 任务 | 差距 | 工时 |
-|---|------|------|------|------|
-| 1 | bom | Mapper + Service | 无 | 2d |
-| 2 | inventory | Mapper + Service | 无 | 2d |
-| 3 | purchase | Mapper + Service | 无 | 2d |
-| 4 | production | Mapper | 无 | 2d |
-| 5 | mrp | 接入物料/BOM/库存数据 | 模拟 | 2d |
-| 6 | conversation | 合并到develop | 仅在master | 1d |
-
-### P1 - 应该完善
-
-| # | 模块 | 任务 | 差距 | 工时 |
-|---|------|------|------|------|
-| 7 | forecast | 接入历史订单数据 | 模拟 | 2d |
-| 8 | risk | 接入真实数据+消息 | 模拟+日志 | 3d |
-| 9 | whatif | 场景持久化 | 内存 | 2d |
-| 10 | 所有模块 | 完善事务管理 | 无 | 3d |
-
----
-
-## Pro 阶段功能对照
-
-### 已完成（18项）
-
-| 功能 | 状态 | 业务逻辑 |
+| 版本 | 日期 | 变更内容 |
 |------|------|----------|
-| AI 需求预测 | ✅ | 简化 |
-| AI 安全库存 | ✅ | 简化 |
-| 工艺路线/资源 | ✅ | 简化 |
-| OR 排程 | ✅ | 简化 |
-| 甘特图 | ✅ | 可用 |
-| 影响分析 | ✅ | 简化 |
-| 冲突检测 | ✅ | 简化 |
-| What-if | ✅ | 简化 |
-| 风险监控 | ✅ | 简化 |
-| 风险预警 | ⚠️ | 日志 |
-| 成本分析 | ✅ | 简化 |
+| 1.0 | 2026-03-08 | 初始版本，记录Pro阶段分析 |
+| 2.0 | 2026-03-08 | 更新核心差距总结 |
+| 2.1 | 2026-03-09 | 集成测试添加 |
+| 2.2 | 2026-03-09 | P0任务完成更新 |
+| 2.3 | 2026-03-09 | P1任务第一部分完成 |
+| 2.4 | 2026-03-09 | 剩余任务更新 |
+| 3.0 | 2026-03-09 | 最终版，100%完成 |
+| 4.0 | 2026-03-09 | 全面更新，产品规划+迭代计划 |
 
 ---
 
-## 集成测试待办
+## 六、待完成任务
 
-| 任务 | 状态 |
-|------|------|
-| MVP 集成测试 | ⏳ |
-| Pro 集成测试 | ⏳ |
+### 6.1 Enterprise阶段
+
+#### 业务功能
+- 组织架构管理
+- 多仓库支持
+- MPS+MRP+DRP联动
+- 供应商门户
+- ERP对接
+- 运营仪表盘
+- 报表导出
+
+#### 微服务架构
+- Nacos部署
+- Gateway配置
+- Feign改造
+- SkyWalking/Sentinel/ELK
+
+### 6.2 优化任务
+- 事务管理完善
+- 异常处理规范
+- 日志规范
 
 ---
 
