@@ -1,18 +1,19 @@
 # AI MRP 完整功能分支清单
 
-> **版本**：1.0  
-> **日期**：2026-03-08
+> **版本**：1.1  
+> **日期**：2026-03-09  
+> **说明**：已更新功能完成状态
 
 ---
 
 ## 一、分支统计
 
-| 阶段 | 分支数 | 时间 |
-|------|--------|------|
-| MVP | 23 | W1-4 |
-| Pro | 16 | W5-8 |
-| Enterprise | 12 | W9-12 |
-| **总计** | **51** | 12 周 |
+| 阶段 | 规划数 | 已完成 | 进行中 | 待开发 |
+|------|--------|--------|--------|--------|
+| MVP | 22 | 21 | 1 | 0 |
+| Pro | 20 | 11 | 9 | 0 |
+| Enterprise | 12 | 0 | 0 | 12 |
+| **总计** | **54** | **32** | **10** | **12** |
 
 ---
 
@@ -20,33 +21,33 @@
 
 ### 2.1 基础设施（4 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/project-init` | 项目初始化（骨架 + Docker） | 2d |
-| `feature/database-design` | PostgreSQL 数据库设计 | 2d |
-| `feature/common-module` | 公共模块（Response/Exception） | 2d |
-| `feature/sandbox-mechanism` | 沙箱机制（数据/计算/AI/业务模拟） | 4d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/project-init` | 项目初始化（骨架 + Docker） | 2d | ✅ |
+| `feature/database-design` | PostgreSQL 数据库设计 | 2d | ✅ |
+| `feature/common-module` | 公共模块（Response/Exception） | 2d | ✅ |
+| `feature/sandbox-mechanism` | 沙箱机制 | 4d | ⏳ |
 
 ### 2.2 后端-需求模块（2 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/demand-order-crud` | 销售订单 CRUD | 3d |
-| `feature/demand-order-api` | 订单列表/详情 API | 2d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/demand-order-crud` | 销售订单 CRUD | 3d | ✅ |
+| `feature/demand-order-api` | 订单列表/详情 API | 2d | ✅ |
 
 ### 2.3 后端-BOM 模块（2 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/bom-management` | BOM 管理 CRUD | 3d |
-| `feature/bom-expand-api` | BOM 展开 API | 2d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/bom-management` | BOM 管理 CRUD | 3d | ✅ |
+| `feature/bom-expand-api` | BOM 展开 API | 2d | ✅ |
 
 ### 2.4 后端-库存模块（2 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/inventory-stock` | 库存管理 CRUD | 3d |
-| `feature/inventory-api` | 库存查询 API | 2d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/inventory-stock` | 库存管理 CRUD | 3d | ✅ |
+| `feature/inventory-api` | 库存查询 API | 2d | ✅ |
 
 ### 2.5 后端-MRP 模块（2 个）
 
@@ -83,48 +84,52 @@
 
 ---
 
-## 三、Pro 阶段分支（16 个）
+## 三、Pro 阶段分支（20 个）
 
 ### 3.1 AI 预测模块（4 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/ai-demand-predict` | AI 需求预测（Prophet） | 4d |
-| `feature/ai-predict-api` | 预测 API + 页面 | 2d |
-| `feature/ai-safety-stock` | AI 安全库存推荐 | 3d |
-| `feature/ai-safety-stock-api` | 安全库存页面 | 2d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/ai-demand-predict` | AI 需求预测（Prophet） | 4d | ✅ |
+| `feature/ai-predict-api` | 预测 API + 页面 | 2d | ✅ |
+| `feature/ai-safety-stock` | AI 安全库存推荐 | 3d | ✅ |
+| `feature/ai-safety-stock-api` | 安全库存页面 | 2d | ✅ |
 
-### 3.2 AI 排程模块（3 个）
+### 3.2 AI 排程模块（7 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/ai-or-scheduler` | OR 排程优化（OR-Tools） | 4d |
-| `feature/ai-or-model` | 排程数学模型 | 2d |
-| `feature/web-gantt` | 甘特图展示 | 3d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/process-route` | 工艺路线管理 | 3d | ✅ |
+| `feature/work-center` | 工作中心管理 | 2d | ✅ |
+| `feature/resource` | 资源管理 | 2d | ✅ |
+| `feature/mo-operation` | 工单工序明细 | 2d | ✅ |
+| `feature/ai-or-scheduler` | OR 排程优化（OR-Tools） | 4d | ✅ |
+| `feature/ai-or-model` | 排程数学模型 | 2d | ✅ |
+| `feature/web-gantt` | 甘特图展示 | 3d | ✅ |
 
 ### 3.3 AI 影响分析模块（5 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/ai-impact-analysis` | 插单影响分析引擎 | 3d |
-| `feature/ai-conflict-detect` | 冲突检测 | 2d |
-| `feature/ai-cost-analysis` | 成本影响分析 | 2d |
-| `feature/ai-whatif` | What-if 模拟 | 3d |
-| `feature/ai-plan-compare` | 方案对比 | 2d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/ai-impact-analysis` | 插单影响分析引擎 | 3d | ⏳ |
+| `feature/ai-conflict-detect` | 冲突检测 | 2d | ⏳ |
+| `feature/ai-cost-analysis` | 成本影响分析 | 2d | ⏳ |
+| `feature/ai-whatif` | What-if 模拟 | 3d | ⏳ |
+| `feature/ai-plan-compare` | 方案对比 | 2d | ⏳ |
 
 ### 3.4 AI 预警模块（3 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/ai-risk-monitor` | 风险监控 | 2d |
-| `feature/ai-risk-warning` | 风险预警 | 2d |
-| `feature/web-risk-page` | 风险预警页面 | 2d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/ai-risk-monitor` | 风险监控 | 2d | ⏳ |
+| `feature/ai-risk-warning` | 风险预警 | 2d | ⏳ |
+| `feature/web-risk-page` | 风险预警页面 | 2d | ⏳ |
 
 ### 3.5 测试（1 个）
 
-| 分支 | 功能 | 预估 |
-|------|------|------|
-| `feature/pro-integration` | Pro 集成测试 | 2d |
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/pro-integration` | Pro 集成测试 | 2d | ⏳ |
 
 ---
 
@@ -174,7 +179,23 @@
 
 ---
 
-## 五、分支总览表
+## 五、补充实现（额外完成）
+
+以下功能在开发过程中额外实现，未在原始规划中：
+
+| 分支 | 功能 | 状态 |
+|------|------|------|
+| `feature/user-auth` | 用户权限认证（JWT） | ✅ |
+| `feature/item-management` | 物料主数据管理 | ✅ |
+| `feature/supplier-management` | 供应商管理 | ✅ |
+| `feature/purchase-management` | 采购管理（订单+入库） | ✅ |
+| `feature/production-management` | 生产管理（工单+报工） | ✅ |
+| `feature/purchase-suggestion` | 采购建议生成 | ✅ |
+| `feature/production-report` | 生产报工 | ✅ |
+
+---
+
+## 六、分支总览表
 
 | # | 分支 | 功能 | 阶段 | 预估 |
 |---|------|------|------|------|
