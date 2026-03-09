@@ -44,8 +44,13 @@ class ApiService {
     return result.data;
   }
 
-  get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  get<T>(endpoint: string, options?: { params?: any }): Promise<T> {
+    let url = endpoint;
+    if (options?.params) {
+      const searchParams = new URLSearchParams(options.params);
+      url += `?${searchParams.toString()}`;
+    }
+    return this.request<T>(url, { method: 'GET' });
   }
 
   post<T>(endpoint: string, data?: unknown): Promise<T> {
@@ -67,5 +72,17 @@ class ApiService {
   }
 }
 
-export const api = new ApiService(API_BASE_URL);
-export default api;
+export const request = new ApiService(API_BASE_URL);
+export default request;
+
+// 导出各模块 API
+export { orderApi } from './order';
+export { inventoryApi } from './inventory';
+export { mrpApi } from './mrp';
+export { bomApi } from './bom';
+export { itemApi } from './item';
+export { supplierApi } from './supplier';
+export { purchaseApi } from './purchase';
+export { productionApi } from './production';
+export { riskApi } from './risk';
+export { whatIfApi } from './whatif';
