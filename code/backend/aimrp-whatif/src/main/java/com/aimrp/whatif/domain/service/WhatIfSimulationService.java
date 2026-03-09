@@ -1,22 +1,21 @@
 package com.aimrp.whatif.domain.service;
 
+import com.aimrp.whatif.infrastructure.persistence.mapper.WhatIfScenarioMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * What-if 模拟服务（领域服务）
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class WhatIfSimulationService {
     
-    /**
-     * 场景存储（内存 + TODO: 数据库持久化）
-     */
-    private final Map<String, Scenario> scenarios = new ConcurrentHashMap<>();
+    private final WhatIfScenarioMapper scenarioMapper;
     
     /**
      * 执行模拟
@@ -27,25 +26,21 @@ public class WhatIfSimulationService {
         SimulationResult result = new SimulationResult();
         result.setScenarioName(scenarioName);
         
-        // 模拟计算（简化版）
-        Map<String, Object> results = new HashMap<>();
-        results.put("input", parameters);
-        results.put("output", calculate(parameters));
-        results.put("timestamp", System.currentTimeMillis());
-        
+        // 模拟计算
+        Map<String, Object> results = calculate(parameters);
         result.setResults(results);
         
         // 对比基线
         result.setComparison(compareWithBaseline(parameters));
         
-        // 保存场景
-        saveScenario(scenarioName, parameters);
+        // 持久化场景
+        saveScenario(scenarioName, parameters, results);
         
         return result;
     }
     
     /**
-     * 计算（简化版）
+     * 计算
      */
     private Map<String, Object> calculate(Map<String, Object> parameters) {
         Map<String, Object> output = new HashMap<>();
@@ -71,47 +66,44 @@ public class WhatIfSimulationService {
         baseline.put("demand", 100);
         baseline.put("price", 10);
         
-        Map<String, Object> current = parameters;
-        
         Map<String, Object> comparison = new HashMap<>();
         comparison.put("baseline", baseline);
-        comparison.put("current", current);
-        comparison.put("delta", "需要计算");
+        comparison.put("current", parameters);
         
         return comparison;
     }
     
     /**
-     * 保存场景
+     * 保存场景到数据库
      */
-    private void saveScenario(String name, Map<String, Object> parameters) {
-        String id = UUID.randomUUID().toString();
-        Scenario scenario = new Scenario();
-        scenario.setId(id);
-        scenario.setName(name);
-        scenario.setParameters(parameters);
-        scenario.setCreatedAt(new Date());
-        
-        scenarios.put(id, scenario);
-        log.info("保存What-if场景: {}, id: {}", name, id);
-        
-        // TODO: 持久化到数据库
+    private void saveScenario(String name, Map<String, Object> parameters, Map<String, Object> results) {
+        try {
+            String paramsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(parameters);
+            String resultsJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(results);
+            
+            Long id = scenarioMapper.insertScenario(name, "system", "", paramsJson);
+            scenarioMapper.updateScenario(id, paramsJson, resultsJson);
+            
+            log.info("保存What-if场景到数据库: {}, id: {}", name, id);
+        } catch (Exception e) {
+            log.error("保存场景失败: {}", e.getMessage());
+        }
     }
     
     /**
      * 对比场景
      */
     public Map<String, Object> compare(String scenarioId1, String scenarioId2) {
-        Scenario s1 = scenarios.get(scenarioId1);
-        Scenario s2 = scenarios.get(scenarioId2);
+        var s1 = scenarioMapper.selectScenarioById(Long.parseLong(scenarioId1));
+        var s2 = scenarioMapper.selectScenarioById(Long.parseLong(scenarioId2));
         
         if (s1 == null || s2 == null) {
             throw new IllegalArgumentException("场景不存在");
         }
         
         Map<String, Object> result = new HashMap<>();
-        result.put("scenario1", s1.getResults());
-        result.put("scenario2", s2.getResults());
+        result.put("scenario1", s1.get("parameters"));
+        result.put("scenario2", s2.get("parameters"));
         
         return result;
     }
@@ -120,10 +112,20 @@ public class WhatIfSimulationService {
      * 获取所有场景
      */
     public List<Scenario> listScenarios() {
-        return new ArrayList<>(scenarios.values());
+        var scenarios = scenarioMapper.selectScenarios(null, null);
+        List<Scenario> result = new ArrayList<>();
+        
+        for (var row : scenarios) {
+            Scenario s = new Scenario();
+            s.setId(((Number) row.get("id")).longValue());
+            s.setName((String) row.get("scenario_name"));
+            s.setCreatedAt((java.util.Date) row.get("created_at"));
+            result.add(s);
+        }
+        
+        return result;
     }
     
-    // 内部类
     @lombok.Data
     public static class SimulationResult {
         private String scenarioName;
@@ -133,7 +135,7 @@ public class WhatIfSimulationService {
     
     @lombok.Data
     public static class Scenario {
-        private String id;
+        private Long id;
         private String name;
         private Map<String, Object> parameters;
         private Map<String, Object> results;

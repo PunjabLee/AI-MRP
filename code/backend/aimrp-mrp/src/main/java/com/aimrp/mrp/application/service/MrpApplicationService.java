@@ -8,6 +8,8 @@ import com.aimrp.mrp.domain.valueobject.MrpResult;
 import com.aimrp.mrp.domain.service.MrpCalculator;
 import com.aimrp.mrp.infrastructure.persistence.mapper.ItemMapper;
 import com.aimrp.mrp.infrastructure.persistence.mapper.SalesOrderMapper;
+import com.aimrp.mrp.infrastructure.persistence.mapper.MrpPurchaseOnWayMapper;
+import com.aimrp.mrp.infrastructure.persistence.mapper.MrpProductionOnWayMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ public class MrpApplicationService {
     private final SalesOrderMapper salesOrderMapper;
     private final BomMapper bomMapper;
     private final InventoryMapper inventoryMapper;
+    private final MrpPurchaseOnWayMapper purchaseOnWayMapper;
+    private final MrpProductionOnWayMapper productionOnWayMapper;
     
     /**
      * 执行 MRP 计算
@@ -235,18 +239,63 @@ public class MrpApplicationService {
     
     /**
      * 加载在途采购
-     * TODO: 从采购模块查询
      */
     private Map<String, List<MrpContext.PurchaseOnWayVO>> loadPurchaseOnWay() {
-        return new HashMap<>();
+        Map<String, List<MrpContext.PurchaseOnWayVO>> purchaseOnWay = new HashMap<>();
+        
+        try {
+            List<Map<String, Object>> list = purchaseOnWayMapper.selectPurchaseOnWay(null, null);
+            
+            for (Map<String, Object> row : list) {
+                MrpContext.PurchaseOnWayVO vo = MrpContext.PurchaseOnWayVO.builder()
+                        .purchaseOrderNo((String) row.get("order_no"))
+                        .itemCode((String) row.get("item_code"))
+                        .supplierCode((String) row.get("supplier_code"))
+                        .qty(new BigDecimal(row.get("qty").toString()))
+                        .receivedQty(row.get("received_qty") != null ? 
+                                new BigDecimal(row.get("received_qty").toString()) : BigDecimal.ZERO)
+                        .expectedDate((LocalDate) row.get("expected_date"))
+                        .status((String) row.get("status"))
+                        .build();
+                
+                purchaseOnWay.computeIfAbsent(vo.getItemCode(), k -> new ArrayList<>()).add(vo);
+            }
+            log.info("从采购模块加载在途: {} 条", list.size());
+        } catch (Exception e) {
+            log.warn("加载在途采购数据失败: {}", e.getMessage());
+        }
+        
+        return purchaseOnWay;
     }
     
     /**
      * 加载在制生产
-     * TODO: 从生产模块查询
      */
     private Map<String, List<MrpContext.ProductionOnWayVO>> loadProductionOnWay() {
-        return new HashMap<>();
+        Map<String, List<MrpContext.ProductionOnWayVO>> productionOnWay = new HashMap<>();
+        
+        try {
+            List<Map<String, Object>> list = productionOnWayMapper.selectProductionOnWay(null, null);
+            
+            for (Map<String, Object> row : list) {
+                MrpContext.ProductionOnWayVO vo = MrpContext.ProductionOnWayVO.builder()
+                        .moNo((String) row.get("mo_no"))
+                        .itemCode((String) row.get("item_code"))
+                        .qty(new BigDecimal(row.get("qty").toString()))
+                        .completedQty(row.get("completed_qty") != null ? 
+                                new BigDecimal(row.get("completed_qty").toString()) : BigDecimal.ZERO)
+                        .expectedFinishDate((LocalDate) row.get("expected_finish_date"))
+                        .status((String) row.get("status"))
+                        .build();
+                
+                productionOnWay.computeIfAbsent(vo.getItemCode(), k -> new ArrayList<>()).add(vo);
+            }
+            log.info("从生产模块加载在制: {} 条", list.size());
+        } catch (Exception e) {
+            log.warn("加载在制生产数据失败: {}", e.getMessage());
+        }
+        
+        return productionOnWay;
     }
     
     /**

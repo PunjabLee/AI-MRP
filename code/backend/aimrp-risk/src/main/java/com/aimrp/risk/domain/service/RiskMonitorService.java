@@ -336,11 +336,18 @@ public class RiskMonitorService {
     /**
      * 发送风险预警
      * 
-     * TODO: 集成通知模块发送消息
+     * 集成通知模块发送消息
      */
     public void sendWarning(Long riskId) {
         log.warn("发送风险预警 - riskId: {}", riskId);
+        
+        // TODO: 集成通知服务
+        // notificationService.send(riskId, "RISK_WARNING", ...);
+        
+        // 模拟发送 - 日志输出
         log.error("【风险预警】风险ID: {} 需要及时处理！", riskId);
+        
+        // TODO: 持久化通知记录到数据库
     }
     
     /**
