@@ -2,7 +2,7 @@
 
 > **日期**：2026-03-09  
 > **版本**：4.0  
-> **状态**：✅ MVP + Pro 阶段完成，Enterprise 待开发
+> **状态**：✅ MVP + Pro 阶段完成，Enterprise 开发中
 
 ---
 
@@ -74,7 +74,27 @@
 | 19 | 风险页面 | feature/web-risk-page | ✅ |
 | 20 | Pro集成测试 | feature/pro-integration | ✅ |
 
-### 1.4 Enterprise 阶段功能（规划中）
+### 1.4 Enterprise 阶段功能（开发中）
+
+| 序号 | 功能 | 分支 | 状态 |
+|------|------|------|------|
+| 1 | 组织架构管理 | feature/enterprise-org-structure | ✅ 第一批次 |
+| 2 | 多仓库支持 | feature/enterprise-org-structure | ✅ 第一批次 |
+| 3 | MPS 主生产计划 | feature/enterprise-org-structure | ✅ 第一批次 |
+| 4 | 供应商门户 | feature/enterprise-org-structure | ✅ 第一批次 |
+| 5 | 多工厂支持 | - | ⏳ 待开发 |
+| 6 | DRP 配送计划 | - | ⏳ 待开发 |
+| 7 | 设备管理 | - | ⏳ 待开发 |
+| 8 | 质量管理 | - | ⏳ 待开发 |
+| 9 | 成本管理 | - | ⏳ 待开发 |
+| 10 | 预算管理 | - | ⏳ 待开发 |
+| 11 | 审批流 | - | ⏳ 待开发 |
+| 12 | 运营仪表盘 | - | ⏳ 待开发 |
+| 13 | 报表中心 | - | ⏳ 待开发 |
+| 14 | ERP对接 | - | ⏳ 待开发 |
+| 15 | 开放平台 | - | ⏳ 待开发 |
+
+### 1.5 Enterprise 微服务架构（规划中）
 
 | 序号 | 功能 | 预估工时 |
 |------|------|----------|
