@@ -82,14 +82,14 @@ AIGC:
 | `feature/ai-or-scheduler` | OR 排程优化（OR-Tools） | 4d | - | ✅ |
 | `feature/ai-or-model` | 排程数学模型 | 2d | - | ✅ |
 | `feature/web-gantt` | 甘特图展示 | 3d | - | ✅ |
-| `feature/ai-impact-analysis` | 插单影响分析引擎 | 3d | - | ⏳ |
-| `feature/ai-conflict-detect` | 冲突检测 | 2d | - | ⏳ |
+| `feature/ai-impact-analysis` | 插单影响分析引擎 | 3d | - | ✅ |
+| `feature/ai-conflict-detect` | 冲突检测 | 2d | - | ✅ |
 | `feature/ai-cost-analysis` | 成本影响分析 | 2d | - | ⏳ |
-| `feature/ai-whatif` | What-if 模拟 | 3d | - | ⏳ |
-| `feature/ai-plan-compare` | 方案对比 | 2d | - | ⏳ |
-| `feature/ai-risk-monitor` | 风险监控 | 2d | - | ⏳ |
-| `feature/ai-risk-warning` | 风险预警 | 2d | - | ⏳ |
-| `feature/web-risk-page` | 风险预警页面 | 2d | - | ⏳ |
+| `feature/ai-whatif` | What-if 模拟 | 3d | - | ✅ |
+| `feature/ai-plan-compare` | 方案对比 | 2d | - | ✅ |
+| `feature/ai-risk-monitor` | 风险监控 | 2d | - | ✅ |
+| `feature/ai-risk-warning` | 风险预警 | 2d | - | ✅ |
+| `feature/web-risk-page` | 风险预警页面 | 2d | - | ✅ |
 | `feature/pro-integration` | Pro 集成测试 | 2d | - | ⏳ |
 
 ### 补充实现（额外完成）
