@@ -113,9 +113,61 @@ feature/<模块>-<功能简述>
 
 ---
 
-## 四、版本发布分支
+## 四、功能开发标准流程功能开发标准流程
 
-### 4.1 发布分支命名
+#4.1 开发步骤
+
+```
+1. 从 develop 创建功能分支
+   git checkout develop
+   git checkout -b feature/xxx
+
+2. 开发功能代码
+   - 编写 Entity/Mapper/Service/Controller
+   - 编写单元测试
+
+3. 开发完成后更新业务逻辑备忘录（必须）
+   - 更新 docs/BUSINESS_LOGIC_MEMO.md
+   - 增量更新，不删除历史内容
+   - 记录实现差距
+
+4. 提交代码
+   git add -A
+   git commit -m "feat: 功能描述"
+
+5. 推送并创建 PR
+   git push -u origin feature/xxx
+
+6. 合并到 develop
+   - 通过 PR 合并或直接合并
+```
+
+#4.2 业务逻辑备忘录更新规范
+
+每次功能开发完成后，必须更新 `docs/BUSINESS_LOGIC_MEMO.md`：
+
+| 更新内容 | 说明 |
+|----------|------|
+| 新增 Service | 记录功能实现 |
+| 业务逻辑差距 | 标注简化/模拟/待接入 |
+| 数据接入状态 | 模拟/数据库/待开发 |
+| Mapper/Service 缺失 | 记录待补充 |
+
+#4.3 更新模板
+
+```markdown
+### [模块名] 功能名
+
+| 组件 | 文件 | 实现程度 | 数据来源 | 状态 |
+|------|------|----------|----------|------|
+| Service | XxxService.java | 框架完整 | 模拟 | 待接入 |
+```
+
+---
+
+## 七、版本发布分支
+
+#4.1 发布分支命名
 
 ```
 release/v<major>.<minor>
@@ -126,7 +178,7 @@ release/v<major>.<minor>
 └── release/v2.0           # v2.0 发布
 ```
 
-### 4.2 版本号规范
+#4.2 版本号规范
 
 ```
 <major>.<minor>.<patch>
@@ -138,7 +190,7 @@ release/v<major>.<minor>
 - patch: 补丁版本，向后兼容 bug 修复
 ```
 
-### 4.3 发布流程
+#4.3 发布流程
 
 ```
 1. 从 develop 创建 release/v1.0 分支
@@ -150,7 +202,7 @@ release/v<major>.<minor>
 
 ---
 
-## 五、Hotfix 分支
+## 七、Hotfix 分支
 
 ### 5.1 命名规范
 
@@ -175,7 +227,7 @@ hotfix/<问题描述>
 
 ---
 
-## 六、分支操作命令
+## 七、分支操作命令
 
 ### 6.1 开始新功能
 
