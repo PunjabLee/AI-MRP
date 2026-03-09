@@ -1,218 +1,296 @@
-# 业务逻辑实现备忘录
+# 业务逻辑实现备忘录（深度版）
 
 > **日期**：2026-03-09  
-> **版本**：1.0  
-> **目的**：记录所有功能的业务逻辑实现程度，为后续完善提供清单
+> **版本**：2.0  
+> **分析深度**：基于代码级详细检查
 
 ---
 
-## 一、MVP 阶段业务逻辑实现情况
+## 一、模块架构总览
 
-### 1.1 需求管理（aimrp-demand）
+### 1.1 后端模块统计
 
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| 销售订单 CRUD | OrderService | ⚠️ 框架 | 需完善 | 待补充 |
-| 订单列表查询 | OrderService | ⚠️ 框架 | 需补充DAO | 待补充 |
-
-### 1.2 BOM 管理（aimrp-bom）
-
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| BOM 维护 | BomService | ⚠️ 框架 | 需补充DAO | 待补充 |
-| **BOM 展开** | **BomExpander** | ✅ **完整** | 需接入真实数据 | 待接入 |
-
-### 1.3 库存管理（aimrp-inventory）
-
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| 库存查询 | InventoryService | ⚠️ 框架 | 需补充DAO | 待补充 |
-| 入库操作 | InventoryService | ⚠️ 框架 | 需补充DAO | 待补充 |
-| 出库操作 | InventoryService | ⚠️ 框架 | 需补充DAO | 待补充 |
-
-### 1.4 MRP 计算（aimrp-mrp）
-
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| **需求合并** | **DemandMerger** | ✅ **完整** | 模拟数据 | 待接入真实数据 |
-| **净需求计算** | MrpCalculator | ✅ 框架完整 | 模拟数据 | 待接入真实数据 |
-| **采购建议生成** | MrpCalculator | ✅ 框架完整 | 模拟数据 | 待接入真实数据 |
-| 生产建议生成 | MrpCalculator | ✅ 框架完整 | 模拟数据 | 待接入真实数据 |
-
-### 1.5 采购管理（aimrp-purchase）
-
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| 采购订单 CRUD | PurchaseOrderService | ⚠️ 框架 | 需补充DAO | 待补充 |
-| 采购入库 | PurchaseReceiveService | ⚠️ 框架 | 需补充DAO | 待补充 |
-
-### 1.6 生产管理（aimrp-production）
-
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| 生产工单 CRUD | ProductionOrderService | ⚠️ 框架 | 需补充DAO | 待补充 |
-| 生产报工 | ProductionReportService | ⚠️ 框架 | 需补充DAO | 待补充 |
+| 模块 | Java文件 | Entity | Controller | Mapper | Service | 状态 |
+|------|----------|--------|------------|--------|---------|------|
+| demand | 4 | ✅ | ✅ | ✅ | ❌ | 简化 |
+| item | 3 | ✅ | ✅ | ✅ | ❌ | 简化 |
+| supplier | 3 | ✅ | ✅ | ✅ | ❌ | 简化 |
+| bom | 2 | ✅ | ✅ | ❌ | ❌ | 差 |
+| inventory | 2 | ✅ | ✅ | ❌ | ❌ | 差 |
+| purchase | 4 | ✅ | ✅ | ❌ | ❌ | 差 |
+| production | 10 | ✅ | ✅ | ❌ | ✅ | 中 |
+| mrp | 12 | ✅ | ✅ | ❌ | ✅ | 中 |
+| forecast | 5 | ✅ | ✅ | ❌ | ✅ | 中 |
+| risk | 4 | ✅ | ✅ | ❌ | ✅ | 中 |
+| whatif | 4 | ✅ | ✅ | ❌ | ✅ | 中 |
 
 ---
 
-## 二、Pro 阶段业务逻辑实现情况
+## 二、MVP 阶段详细分析
 
-### 2.1 AI 需求预测（aimrp-forecast）
+### 2.1 需求管理（aimrp-demand）
 
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| **需求预测** | **DemandForecastService** | ✅ **完整** | 模拟数据 | 待接入历史订单 |
-| 安全库存推荐 | SafetyStockService | ✅ **完整** | 模拟数据 | 待接入库存数据 |
+| 组件 | 文件 | 实现情况 | 详细说明 |
+|------|------|----------|----------|
+| Entity | SalesOrder.java | ✅ 完整 | 包含主从表结构 |
+| Entity | SalesOrderLine.java | ✅ 完整 | 订单明细 |
+| Controller | SalesOrderController.java | ⚠️ 直接调用Mapper | CRUD完整，但跳过Service层 |
+| Mapper | SalesOrderMapper.java | ✅ 完整 | 继承BaseMapper |
+| Service | 无 | ❌ 缺失 | 业务逻辑在Controller |
 
-### 2.2 OR 排程（aimrp-production）
+**差距**：
+- 缺少 Service 层（不符合DDD分层）
+- 业务逻辑分散在Controller
+- 无事务管理
 
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| 工艺路线管理 | ProcessRouteService | ⚠️ 框架 | 无 | 待开发 |
-| 工作中心管理 | WorkCenterService | ⚠️ 框架 | 无 | 待开发 |
-| 资源管理 | ResourceService | ⚠️ 框架 | 无 | 待开发 |
-| **排程优化** | **SchedulerService** | ✅ **完整** | 模拟数据 | 待接入工单数据 |
+### 2.2 物料管理（aimrp-item）
 
-### 2.3 What-if 模拟（aimrp-whatif）
+| 组件 | 文件 | 实现情况 |
+|------|------|----------|
+| Entity | Item.java | ✅ 完整 |
+| Controller | ItemController.java | ⚠️ 直接调用Mapper |
+| Mapper | ItemMapper.java | ✅ 完整 |
 
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| 场景创建 | WhatIfSimulationService | ✅ 框架完整 | 内存 | 需持久化 |
-| 影响分析 | WhatIfSimulationService | ⚠️ 简化 | 模拟数据 | 待完善 |
-| 方案对比 | WhatIfSimulationService | ✅ 框架完整 | 内存 | 需持久化 |
+**差距**：
+- 缺少 Service 层
+- 业务逻辑在 Controller
 
-### 2.4 风险监控（aimrp-risk）
+### 2.3 供应商管理（aimrp-supplier）
 
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| **库存风险检测** | **RiskMonitorService** | ✅ **完整** | 模拟数据 | 待接入库存 |
-| **供应商风险检测** | **RiskMonitorService** | ✅ **完整** | 模拟数据 | 待接入供应商 |
-| 需求风险检测 | RiskMonitorService | ⚠️ 简化 | 无 | 待完善 |
-| 生产风险检测 | RiskMonitorService | ⚠️ 简化 | 无 | 待完善 |
-| 风险预警发送 | RiskWarningController | ⚠️ 日志 | 无 | 待接入消息服务 |
+| 组件 | 文件 | 实现情况 |
+|------|------|----------|
+| Entity | Supplier.java | ✅ 完整 |
+| Controller | SupplierController.java | ⚠️ 直接调用Mapper |
+| Mapper | SupplierMapper.java | ✅ 完整 |
 
-### 2.5 影响分析（aimrp-mrp）
+**差距**：
+- 缺少 Service 层
 
-| 功能 | 服务类 | 实现程度 | 数据来源 | 状态 |
-|------|--------|----------|----------|------|
-| 插单影响分析 | ImpactAnalysisService | ⚠️ 简化 | 模拟数据 | 待完善 |
-| **冲突检测** | **ConflictDetectionService** | ✅ **完整** | 模拟数据 | 待接入排程数据 |
+### 2.4 BOM 管理（aimrp-bom）
+
+| 组件 | 文件 | 实现情况 |
+|------|------|----------|
+| Entity | Bom.java | ✅ 完整 |
+| Controller | BomController.java | ⚠️ 简化 |
+
+**差距**：
+- 缺少 Mapper
+- 缺少 Service
+- BOM展开逻辑在 BomExpander（mrp模块）
+
+### 2.5 库存管理（aimrp-inventory）
+
+| 组件 | 文件 | 实现情况 |
+|------|------|----------|
+| Entity | Inventory.java | ✅ 完整 |
+| Controller | InventoryController.java | ⚠️ 简化 |
+
+**差距**：
+- 缺少 Mapper
+- 缺少 Service
+- 无出入库事务处理
+
+### 2.6 采购管理（aimrp-purchase）
+
+| 组件 | 文件 | 实现情况 |
+|------|------|----------|
+| Entity | PurchaseOrder.java | ✅ 完整 |
+| Entity | PurchaseOrderLine.java | ✅ 完整 |
+| Entity | PurchaseReceive.java | ✅ 完整 |
+| Controller | PurchaseOrderController.java | ⚠️ 简化 |
+
+**差距**：
+- 缺少 Mapper
+- 缺少 Service
+- 采购入库逻辑未实现
+
+### 2.7 生产管理（aimrp-production）
+
+| 组件 | 文件 | 实现情况 |
+|------|------|----------|
+| Entity | ProductionOrder.java | ✅ 完整 |
+| Entity | ProductionReport.java | ✅ 完整 |
+| Entity | ProcessRoute.java | ✅ 完整 |
+| Entity | ProcessRouteLine.java | ✅ 完整 |
+| Entity | WorkCenter.java | ✅ 完整 |
+| Entity | Resource.java | ✅ 完整 |
+| Entity | MoOperation.java | ✅ 完整 |
+| Service | SchedulerService.java | ✅ 完整 |
+| Controller | ProductionController.java | ⚠️ 简化 |
+| Controller | SchedulerController.java | ✅ 完整 |
+
+**差距**：
+- 缺少 Mapper
+- 工艺路线CRUD未完善
+- 排程需接入真实工单数据
 
 ---
 
-## 三、AI 对话服务实现情况
+## 三、Pro 阶段详细分析
 
-### 3.1 意图识别（aimrp-conversation）
+### 3.1 MRP 计算（aimrp-mrp）
 
-| 功能 | 服务类 | 实现程度 | 状态 |
-|------|--------|----------|------|
-| **意图识别** | **IntentRecognitionService** | ✅ 完整 | 可用 |
-| **实体提取** | **EntityExtractionService** | ✅ 完整 | 可用 |
-| 执行路由 | ExecutionRouter | ⚠️ 框架 | 待注册处理器 |
+| 组件 | 文件 | 实现情况 | 数据来源 |
+|------|------|----------|----------|
+| Entity | MrpRun.java | ✅ 完整 | - |
+| Entity | MrpSuggestion.java | ✅ 完整 | - |
+| ValueObject | MrpContext.java | ✅ 完整 | - |
+| ValueObject | MrpResult.java | ✅ 完整 | - |
+| Service | MrpCalculator.java | ✅ 完整 | 模拟 |
+| Service | BomExpander.java | ✅ 完整 | 模拟 |
+| Service | DemandMerger.java | ✅ 完整 | 模拟 |
+| Service | ImpactAnalysisService.java | ⚠️ 简化 | 模拟 |
+| Service | ConflictDetectionService.java | ✅ 完整 | 模拟 |
+| Service | MrpApplicationService.java | ⚠️ 直接调用 | 模拟 |
+
+**关键问题**：
+- `MrpApplicationService.loadItems()` - TODO: 从数据库查询
+- `MrpApplicationService.loadBomMap()` - TODO: 从数据库查询
+- `MrpApplicationService.loadInventory()` - TODO: 从数据库查询
+- `MrpApplicationService.loadDemands()` - TODO: 从数据库查询
+- `MrpApplicationService.saveResult()` - TODO: 保存到数据库
+
+### 3.2 AI 预测（aimrp-forecast）
+
+| 组件 | 文件 | 实现情况 | 数据来源 |
+|------|------|----------|----------|
+| Model | ForecastResult.java | ✅ 完整 | - |
+| Service | DemandForecastService.java | ✅ 完整 | 模拟 |
+| Service | SafetyStockService.java | ✅ 完整 | 模拟 |
+| Controller | ForecastController.java | ✅ 完整 | - |
+| Controller | SafetyStockController.java | ✅ 完整 | - |
+
+**关键问题**：
+- DemandForecastService 使用模拟历史数据
+- SafetyStockService 使用模拟库存数据
+
+### 3.3 风险监控（aimrp-risk）
+
+| 组件 | 文件 | 实现情况 | 数据来源 |
+|------|------|----------|----------|
+| Model | RiskItem.java | ✅ 完整 | - |
+| Service | RiskMonitorService.java | ✅ 完整 | 模拟 |
+| Controller | RiskController.java | ✅ 完整 | - |
+| Controller | RiskWarningController.java | ⚠️ 日志输出 | - |
+
+**关键问题**：
+- 风险检测使用模拟数据
+- 预警发送只是日志打印，未接入消息服务
+
+### 3.4 What-if（aimrp-whatif）
+
+| 组件 | 文件 | 实现情况 | 数据来源 |
+|------|------|----------|----------|
+| Model | WhatIfScenario.java | ✅ 完整 | - |
+| Model | WhatIfResult.java | ✅ 完整 | - |
+| Service | WhatIfSimulationService.java | ✅ 框架 | 模拟 |
+| Controller | WhatIfController.java | ✅ 完整 | - |
+
+**关键问题**：
+- 场景数据在内存中，未持久化
+- 影响分析使用简化逻辑
+
+### 3.5 AI 对话（aimrp-conversation）
+
+| 组件 | 文件 | 实现情况 |
+|------|------|----------|
+| Service | IntentRecognitionService.java | ✅ 完整 |
+| Service | EntityExtractionService.java | ✅ 完整 |
+| Service | ExecutionRouter.java | ⚠️ 框架 |
+
+**关键问题**：
+- 执行路由未注册业务处理器
 
 ---
 
-## 四、实现差距分析
+## 四、核心差距总结
 
-### 4.1 数据接入差距
+### 4.1 分层架构差距
 
-| 模块 | 当前状态 | 目标状态 | 优先级 |
-|------|----------|----------|--------|
-| 订单数据 | 模拟 | 接入数据库 | P0 |
-| 物料数据 | 模拟 | 接入数据库 | P0 |
-| 库存数据 | 模拟 | 接入数据库 | P0 |
-| BOM数据 | 模拟 | 接入数据库 | P0 |
-| 供应商数据 | 模拟 | 接入数据库 | P1 |
-| 工艺路线 | 无 | 需开发 | P1 |
+| 问题 | 影响 | 优先级 |
+|------|------|--------|
+| 缺少 Service 层的模块 | 不符合DDD，事务管理困难 | P0 |
+| 缺少 Mapper 的模块 | 无法访问数据库 | P0 |
+| 业务逻辑在 Controller | 代码耦合，难以测试 | P1 |
 
-### 4.2 业务逻辑完善差距
+### 4.2 数据接入差距
 
-| 模块 | 当前状态 | 目标状态 | 优先级 |
-|------|----------|----------|--------|
-| 需求合并 | 简化 | 完整 | P0 |
-| 净需求计算 | 简化 | 完整 | P0 |
-| 影响分析 | 简化 | 完整 | P1 |
-| 风险模型 | 简化 | 完整 | P1 |
+| 模块 | Mapper | 数据源 | 状态 |
+|------|--------|--------|------|
+| demand | ✅ | 数据库 | 可用 |
+| item | ✅ | 数据库 | 可用 |
+| supplier | ✅ | 数据库 | 可用 |
+| bom | ❌ | 无 | 需开发 |
+| inventory | ❌ | 无 | 需开发 |
+| purchase | ❌ | 无 | 需开发 |
+| production | ❌ | 无 | 需开发 |
+| mrp | ❌ | 模拟 | 需接入 |
 
-### 4.3 集成差距
+### 4.3 业务流程差距
 
-| 模块 | 当前状态 | 目标状态 | 优先级 |
-|------|----------|----------|--------|
-| MRP → 采购建议 | 内存 | 完整流程 | P0 |
-| MRP → 生产建议 | 内存 | 完整流程 | P0 |
-| 风险 → 预警通知 | 日志 | 消息服务 | P1 |
-| What-if → 应用 | 无 | 完整流程 | P1 |
+| 流程 | 当前状态 | 问题 |
+|------|----------|------|
+| MRP → 采购建议 | 模拟数据 | 未贯通 |
+| 采购建议 → 采购订单 | 无 | 未实现 |
+| MRP → 生产建议 | 模拟数据 | 未贯通 |
+| 生产建议 → 生产工单 | 无 | 未实现 |
+| 风险检测 → 预警通知 | 日志 | 未接入消息 |
+| What-if → 应用 | 无 | 未实现 |
 
 ---
 
-## 五、待完善任务清单
+## 五、完善任务清单（更新版）
 
 ### 5.1 P0 - 必须完善
 
-| # | 功能 | 模块 | 当前差距 |
-|---|------|------|----------|
-| 1 | 订单 CRUD 接入数据库 | demand | 无 DAO |
-| 2 | 物料 CRUD 接入数据库 | item | 无 DAO |
-| 3 | 库存 CRUD 接入数据库 | inventory | 无 DAO |
-| 4 | BOM CRUD 接入数据库 | bom | 无 DAO |
-| 5 | MRP 接入真实数据 | mrp | 仍在用模拟 |
-| 6 | 采购建议转采购订单 | purchase | 无集成 |
-| 7 | 生产建议转生产工单 | production | 无集成 |
+| # | 模块 | 任务 | 当前状态 | 工作量 |
+|---|------|------|----------|--------|
+| 1 | bom | 添加 Mapper | 无 | 1d |
+| 2 | bom | 添加 Service 层 | 无 | 1d |
+| 3 | inventory | 添加 Mapper | 无 | 1d |
+| 4 | inventory | 添加 Service 层 | 无 | 1d |
+| 5 | purchase | 添加 Mapper | 无 | 1d |
+| 6 | purchase | 添加 Service 层 | 无 | 1d |
+| 7 | production | 添加 Mapper | 无 | 2d |
+| 8 | production | 添加 Service 层 | 无 | 2d |
+| 9 | mrp | 接入物料数据 | 模拟 | 1d |
+| 10 | mrp | 接入 BOM 数据 | 模拟 | 1d |
+| 11 | mrp | 接入库存数据 | 模拟 | 1d |
+| 12 | mrp | 接入订单数据 | 模拟 | 1d |
+| 13 | mrp | 保存建议到数据库 | TODO | 1d |
 
 ### 5.2 P1 - 应该完善
 
-| # | 功能 | 模块 | 当前差距 |
-|---|------|------|----------|
-| 8 | 供应商 CRUD | supplier | 无 DAO |
-| 9 | 工艺路线 CRUD | production | 无 |
-| 10 | 风险预警接入消息 | risk | 日志打印 |
-| 11 | 影响分析完善 | mrp | 简化逻辑 |
+| # | 模块 | 任务 | 当前状态 | 工作量 |
+|---|------|------|----------|--------|
+| 14 | production | 完善工艺路线 CRUD | 简化 | 2d |
+| 15 | mrp | 完善影响分析逻辑 | 简化 | 2d |
+| 16 | risk | 接入真实数据 | 模拟 | 2d |
+| 17 | risk | 接入消息服务预警 | 日志 | 2d |
+| 18 | forecast | 接入历史订单数据 | 模拟 | 2d |
 
 ### 5.3 P2 - 可以完善
 
-| # | 功能 | 模块 | 当前差距 |
-|---|------|------|----------|
-| 12 | 需求预测接入历史 | forecast | 模拟数据 |
-| 13 | 排程接入工单 | production | 模拟数据 |
-| 14 | 执行路由处理器 | conversation | 未注册 |
+| # | 模块 | 任务 | 当前状态 | 工作量 |
+|---|------|------|----------|--------|
+| 19 | conversation | 注册业务处理器 | 未注册 | 1d |
+| 20 | whatif | 场景持久化 | 内存 | 2d |
 
 ---
 
-## 六、后续完善顺序建议
+## 六、总结
 
-```
-第一阶段：数据接入（P0）
-├── 1. 完善 DAO 层
-├── 2. 接入物料数据
-├── 3. 接入订单数据
-├── 4. 接入库存数据
-└── 5. 接入 BOM 数据
+| 维度 | 统计 |
+|------|------|
+| 完整模块 | 3 (demand, item, supplier) |
+| 中等模块 | 5 (production, mrp, forecast, risk, whatif) |
+| 差模块 | 3 (bom, inventory, purchase) |
+| Mapper 缺失 | 6/10 |
+| Service 层缺失 | 6/10 |
+| 使用模拟数据 | 7/10 |
 
-第二阶段：流程贯通（P0）
-├── 6. MRP → 采购建议 → 采购订单
-├── 7. MRP → 生产建议 → 生产工单
-└── 8. 库存出入库联动
-
-第三阶段：智能增强（P1）
-├── 9. 风险预警通知
-├── 10. 供应商数据接入
-├── 11. 影响分析完善
-└── 12. 排程数据接入
-```
+**核心任务**：补充缺失的 Mapper + Service 层，接入真实数据
 
 ---
 
-## 七、总结
-
-| 状态 | 数量 | 说明 |
-|------|------|------|
-| ✅ 完整实现 | 6 | 可直接使用 |
-| ⚠️ 框架完整 | 12 | 需接入数据 |
-| ⚠️ 简化实现 | 4 | 需完善逻辑 |
-| ⏳ 未开发 | 2 | 需从头开发 |
-
-**核心差距**：数据未接入数据库，业务流程未贯通
-
----
-
-*备忘录创建完成*
+*备忘录更新完成 - 2026-03-09*
