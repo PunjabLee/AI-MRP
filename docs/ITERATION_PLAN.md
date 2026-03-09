@@ -124,6 +124,17 @@ AIGC:
 | `feature/report-export` | 报表导出（Excel/PDF） | 2d | - |
 | `feature/enterprise-integration` | Enterprise 集成测试 | 3d | - |
 
+### 微服务架构（Enterprise 阶段）
+
+| 分支 | 功能 | 预估 | 负责人 | 状态 |
+|------|------|------|--------|------|
+| `feature/nacos-deploy` | Nacos 注册/配置中心 | 3d | - | ⏳ |
+| `feature/gateway` | Spring Cloud Gateway | 3d | - | ⏳ |
+| `feature/feign-migration` | Feign 调用改造 | 5d | - | ⏳ |
+| `feature/skywalking` | SkyWalking 链路追踪 | 2d | - | ⏳ |
+| `feature/sentinel` | Sentinel 熔断降级 | 2d | - | ⏳ |
+| `feature/elk` | ELK 日志接入 | 3d | - | ⏳ |
+
 **Enterprise 里程碑**：第 12 周末交付企业级 MRP
 
 ---
