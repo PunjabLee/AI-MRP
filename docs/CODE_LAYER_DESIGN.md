@@ -1,8 +1,8 @@
 # AI MRP 代码分层设计
 
-> **版本**：1.1  
+> **版本**：1.2  
 > **日期**：2026-03-09  
-> **说明**：基于 DDD + 模块化架构的代码分层设计 v1.1（增强 DDD 建模）
+> **说明**：基于 DDD + 模块化架构的代码分层设计 v1.2（新增编码规范）
 
 ---
 
@@ -1230,12 +1230,265 @@ chore: 构建/工具
 
 ---
 
-## 十四、版本历史
+## 十四、编码规范
+
+### 14.1 分层结构规范
+
+```
+aimrp-xxx/                          # 模块名
+├── src/main/java/com/aimrp/xxx/
+│   ├── domain/                     # 领域层
+│   │   ├── entity/                 # 实体（必须）
+│   │   │   └── Xxx.java
+│   │   ├── valueobject/            # 值对象（建议）
+│   │   │   └── XxxVO.java
+│   │   ├── repository/             # 仓储接口（建议）
+│   │   │   └── XxxRepository.java
+│   │   └── service/               # 领域服务（建议）
+│   │       └── XxxDomainService.java
+│   │
+│   ├── application/               # 应用层
+│   │   ├── dto/                  # 数据传输对象（建议）
+│   │   │   ├── XxxDTO.java
+│   │   │   ├── XxxRequest.java
+│   │   │   └── XxxResponse.java
+│   │   ├── command/               # 命令对象（建议）
+│   │   │   └── CreateXxxCommand.java
+│   │   ├── query/                 # 查询对象（建议）
+│   │   │   └── XxxQuery.java
+│   │   └── service/               # 应用服务（建议）
+│   │       └── XxxApplicationService.java
+│   │
+│   ├── infrastructure/             # 基础设施层
+│   │   ├── persistence/
+│   │   │   ├── mapper/            # MyBatis Mapper（必须）
+│   │   │   │   └── XxxMapper.java
+│   │   │   └── repository/       # 仓储实现（建议）
+│   │   │       └── XxxRepositoryImpl.java
+│   │   ├── config/               # 配置（建议）
+│   │   └── mq/                   # 消息队列（可选）
+│   │
+│   └── api/                      # 接口层
+│       ├── controller/            # REST控制器（必须）
+│       │   └── XxxController.java
+│       ├── assembler/              # 对象转换器（建议）
+│       │   └── XxxAssembler.java
+│       └── dto/                  # API响应对象
+│
+└── src/test/                     # 测试
+```
+
+### 14.2 命名规范
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| **Entity** | 业务名 + Entity，或直接业务名 | `SalesOrder`, `Item` |
+| **ValueObject** | 业务名 + VO | `Money`, `AddressVO` |
+| **Repository** | 业务名 + Repository | `OrderRepository` |
+| **DomainService** | 业务名 + DomainService | `PricingDomainService` |
+| **ApplicationService** | 业务名 + ApplicationService | `OrderApplicationService` |
+| **DTO** | 业务名 + DTO/Request/Response | `OrderDTO`, `CreateOrderRequest` |
+| **Command** | 操作 + Xxx + Command | `CreateOrderCommand`, `UpdateOrderCommand` |
+| **Query** | 业务名 + Query | `OrderQuery`, `InventoryQuery` |
+| **Mapper** | 表名 + Mapper | `SalesOrderMapper` |
+| **Controller** | 业务名 + Controller | `SalesOrderController` |
+| **Assembler** | 业务名 + Assembler | `OrderAssembler` |
+
+### 14.3 Service 层规范
+
+#### 14.3.1 何时需要 Service
+
+| 场景 | 使用 Service | 说明 |
+|------|-------------|------|
+| 单一实体 CRUD | 不需要 | Controller 直接调用 Mapper |
+| 多实体业务逻辑 | DomainService | 跨多个实体/聚合 |
+| 事务编排 | ApplicationService | 多步骤操作/事务管理 |
+| 对外服务 | ApplicationService | API 接口实现 |
+
+#### 14.3.2 DomainService vs ApplicationService
+
+```
+DomainService（领域服务）：
+- 处理纯业务逻辑
+- 无事务
+- 无状态
+- 可被 ApplicationService 调用
+
+ApplicationService（应用服务）：
+- 处理业务流程
+- 管理事务
+- 编排领域服务
+- 实现 API 接口逻辑
+```
+
+#### 14.3.3 Service 命名
+
+```java
+// 领域服务
+@Slf4j
+@Service
+public class OrderDomainService {
+    
+    /**
+     * 计算订单总价
+     */
+    public BigDecimal calculateTotal(Order order, List<OrderLine> lines) {
+        // 纯业务逻辑
+    }
+}
+
+// 应用服务
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class OrderApplicationService {
+    
+    private final OrderDomainService orderDomainService;
+    private final OrderMapper orderMapper;
+    
+    /**
+     * 创建订单
+     */
+    @Transactional
+    public Order createOrder(CreateOrderCommand command) {
+        // 1. 校验
+        // 2. 调用领域服务
+        // 3. 保存
+    }
+}
+```
+
+### 14.4 DAO/Mapper 层规范
+
+#### 14.4.1 何时需要 Mapper
+
+| 场景 | 使用 Mapper | 说明 |
+|------|-------------|------|
+| 单表 CRUD | 必须 | MyBatis-Plus BaseMapper |
+| 简单多表查询 | 必须 | 自定义方法 |
+| 复杂查询 | 建议 | 使用 XML |
+
+#### 14.4.2 Mapper 命名
+
+```java
+// 表名 + Mapper
+public interface SalesOrderMapper extends BaseMapper<SalesOrder> {
+    
+    // 自定义方法
+    List<SalesOrder> selectWithLines(@Param("orderNo") String orderNo);
+    
+    @Select("SELECT * FROM t_sales_order WHERE status = #{status}")
+    List<SalesOrder> selectByStatus(@Param("status") String status);
+}
+```
+
+### 14.5 Controller 层规范
+
+```java
+/**
+ * 销售订单接口
+ */
+@Slf4j
+@RestController
+@RequestMapping("/api/orders")
+@RequiredArgsConstructor
+public class SalesOrderController {
+    
+    private final SalesOrderApplicationService orderService;
+    
+    /**
+     * 创建订单
+     */
+    @PostMapping
+    public ApiResponse<Order> create(@RequestBody @Valid CreateOrderRequest request) {
+        Order order = orderService.createOrder(request);
+        return ApiResponse.ok(order);
+    }
+    
+    /**
+     * 查询订单列表
+     */
+    @GetMapping
+    public ApiResponse<Page<Order>> list(OrderQuery query) {
+        return ApiResponse.ok(orderService.list(query));
+    }
+}
+```
+
+### 14.6 DTO/VO 规范
+
+```java
+// 请求对象
+@Data
+public class CreateOrderRequest {
+    @NotBlank
+    private String customerCode;
+    
+    @NotNull
+    private List<CreateOrderLineRequest> lines;
+}
+
+// 行对象
+@Data
+public class CreateOrderLineRequest {
+    @NotBlank
+    private String itemCode;
+    
+    @NotNull
+    private BigDecimal qty;
+}
+
+// 响应对象
+@Data
+public class OrderResponse {
+    private Long id;
+    private String orderNo;
+    private String customerName;
+    private List<OrderLineResponse> lines;
+    private BigDecimal totalAmount;
+}
+```
+
+### 14.7 注释规范
+
+```java
+/**
+ * 销售订单
+ * 
+ * 订单是客户购买产品的凭证，包含订单头和订单行
+ * 订单状态：草稿 -> 已确认 -> 生产中 -> 已完成 -> 已取消
+ */
+@Data
+@Entity
+@TableName("t_sales_order")
+public class SalesOrder {
+    
+    /** 订单编号（系统生成） */
+    @TableId(type = IdType.ASSIGN_ID)
+    private Long id;
+    
+    /**
+     * 订单编号
+     * 格式：SO + 年月日 + 6位序号
+     * 示例：SO202403090001
+     */
+    private String orderNo;
+    
+    /** 客户编码 */
+    @NotBlank
+    private String customerCode;
+}
+```
+
+---
+
+## 十五、版本历史
 
 | 版本 | 日期 | 变更内容 |
 |------|------|----------|
 | 1.0 | 2026-03-09 | 初始版本 |
 | 1.1 | 2026-03-09 | 新增：MyBatis-Plus 集成设计 + AI 服务插件化设计 |
+| 1.2 | 2026-03-09 | 新增：编码规范（分层结构/命名/注释） |
 
 ---
 
