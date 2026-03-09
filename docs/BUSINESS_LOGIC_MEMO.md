@@ -1,14 +1,30 @@
 
 
-# 业务逻辑实现备忘录（增量更新 - P0任务完成）
+# 业务逻辑实现备忘录（增量更新 - P1任务完成）
 
 > **日期**：2026-03-09  
-> **版本**：2.2  
-> **更新类型**：P0任务完成更新
+> **版本**：2.3  
+> **更新类型**：P1任务完成更新
 
 ---
 
-## 本次更新：P0 任务完成
+## 本次更新：P1 任务完成（第一部分）
+
+### 架构补充（已完成）
+
+| 模块 | domain/service | application | mapper | 状态 |
+|------|----------------|-------------|--------|------|
+| demand | ✅ DemandDomainService | ✅ DemandApplicationService | ✅ | ✅ |
+| item | ✅ ItemDomainService | ✅ ItemApplicationService | ✅ | ✅ |
+| supplier | ✅ SupplierDomainService | ✅ SupplierApplicationService | ✅ | ✅ |
+| production | ✅ SchedulerService | ✅ ProductionApplicationService | ✅ | ✅ |
+| forecast | ✅ | ✅ ForecastApplicationService | ❌ | ✅ |
+| risk | ✅ | ✅ RiskApplicationService | ❌ | ✅ |
+| whatif | ✅ | ✅ WhatIfApplicationService | ❌ | ✅ |
+
+> **注**：forecast/risk/whatif 的 mapper 待后续补充
+
+---
 
 ### 架构补充（已完成）
 
