@@ -107,24 +107,44 @@ AIGC:
 
 ---
 
-### Enterprise 阶段（第 9-12 周）
+### Enterprise 阶段（第 9-20 周）
 
-| 分支 | 功能 | 预估 | 负责人 |
-|------|------|------|--------|
-| `feature/org-structure` | 组织架构管理 | 3d | - |
-| `feature/org-api` | 组织 API | 2d | - |
-| `feature/multi-warehouse` | 多仓库支持 | 3d | - |
-| `feature/mps-mrp-drp` | MPS+MRP+DRP 联动 | 4d | - |
-| `feature/supplier-portal` | 供应商门户 | 4d | - |
-| `feature/supplier-api` | 供应商 API | 2d | - |
-| `feature/erp-integration` | ERP 对接 | 3d | - |
-| `feature/open-api` | 开放平台 | 3d | - |
-| `feature/web-dashboard` | 运营仪表盘 | 3d | - |
-| `feature/web-report` | 报表页面 | 3d | - |
-| `feature/report-export` | 报表导出（Excel/PDF） | 2d | - |
-| `feature/enterprise-integration` | Enterprise 集成测试 | 3d | - |
+#### 第一批次：基础架构（9-12周）
 
-### 微服务架构（Enterprise 阶段）
+| 分支 | 功能 | 预估 | 负责人 | 状态 |
+|------|------|------|--------|------|
+| `feature/org-structure` | 组织架构管理 | 3d | - | ⏳ |
+| `feature/org-api` | 组织 API | 2d | - | ⏳ |
+| `feature/multi-warehouse` | 多仓库支持 | 3d | - | ⏳ |
+| `feature/multi-factory` | 多工厂/基地 | 3d | - | ⏳ |
+| `feature/mps-master` | MPS 主生产计划 | 4d | - | ⏳ |
+| `feature/supplier-portal` | 供应商门户 | 4d | - | ⏳ |
+
+#### 第二批次：生产增强（13-16周）
+
+| 分支 | 功能 | 预估 | 负责人 | 状态 |
+|------|------|------|--------|------|
+| `feature/multi-production-line` | 多产线管理 | 3d | - | ⏳ |
+| `feature/outsourcing` | 委外加工 | 3d | - | ⏳ |
+| `feature/equipment-mgmt` | 设备管理 | 3d | - | ⏳ |
+| `feature/quality-mgmt` | 质量管理 | 3d | - | ⏳ |
+| `feature/cost-mgmt` | 成本管理 | 4d | - | ⏳ |
+
+#### 第三批次：运营支撑（17-20周）
+
+| 分支 | 功能 | 预估 | 负责人 | 状态 |
+|------|------|------|--------|------|
+| `feature/drp` | DRP 配送需求计划 | 3d | - | ⏳ |
+| `feature/budget-mgmt` | 预算管理 | 3d | - | ⏳ |
+| `feature/approval-flow` | 审批流 | 3d | - | ⏳ |
+| `feature/web-dashboard` | 运营仪表盘 | 3d | - | ⏳ |
+| `feature/web-report` | 报表页面 | 3d | - | ⏳ |
+| `feature/report-export` | 报表导出（Excel/PDF） | 2d | - | ⏳ |
+| `feature/erp-integration` | ERP 对接 | 3d | - | ⏳ |
+| `feature/open-api` | 开放平台 | 3d | - | ⏳ |
+| `feature/enterprise-integration` | Enterprise 集成测试 | 3d | - | ⏳ |
+
+### 微服务架构（贯穿Enterprise阶段）
 
 | 分支 | 功能 | 预估 | 负责人 | 状态 |
 |------|------|------|--------|------|
@@ -135,7 +155,7 @@ AIGC:
 | `feature/sentinel` | Sentinel 熔断降级 | 2d | - | ⏳ |
 | `feature/elk` | ELK 日志接入 | 3d | - | ⏳ |
 
-**Enterprise 里程碑**：第 12 周末交付企业级 MRP
+**Enterprise 里程碑**：第 20 周末交付企业级 MRP
 
 ---
 

@@ -1,8 +1,8 @@
 # AI MRP Git 分支管理规范
 
-> **版本**：1.1  
+> **版本**：1.2  
 > **日期**：2026-03-09  
-> **说明**：已更新分支状态，MVP 已发布
+> **说明**：已更新Enterprise阶段规划（12周），Pro已发布
 
 ---
 
@@ -99,17 +99,52 @@ feature/<模块>-<功能简述>
 | `feature/ai-whatif` | What-if 模拟 | P0 | W7-8 |
 | `feature/ai-risk-warning` | 风险预警 | P0 | W8 |
 
-#### Enterprise 阶段（4 周）
+#### Enterprise 阶段（12 周）
+
+##### 第一批次：基础架构（9-12周）
 
 | 分支 | 功能 | 优先级 | 周次 |
 |------|------|--------|------|
 | `feature/org-structure` | 组织架构管理 | P0 | W9 |
+| `feature/org-api` | 组织 API | P0 | W9 |
 | `feature/multi-warehouse` | 多仓库支持 | P0 | W9-10 |
-| `feature/mps-mrp-drp` | MPS+MRP+DRP 联动 | P1 | W10 |
-| `feature/supplier-portal` | 供应商门户 | P1 | W10-11 |
-| `feature/erp-integration` | ERP 对接 | P1 | W11 |
-| `feature/dashboard` | 运营仪表盘 | P1 | W11-12 |
-| `feature/report-export` | 报表导出 | P2 | W12 |
+| `feature/multi-factory` | 多工厂/基地 | P0 | W10 |
+| `feature/mps-master` | MPS 主生产计划 | P0 | W10-11 |
+| `feature/supplier-portal` | 供应商门户 | P1 | W11-12 |
+
+##### 第二批次：生产增强（13-16周）
+
+| 分支 | 功能 | 优先级 | 周次 |
+|------|------|--------|------|
+| `feature/multi-production-line` | 多产线管理 | P0 | W13 |
+| `feature/outsourcing` | 委外加工 | P0 | W13-14 |
+| `feature/equipment-mgmt` | 设备管理 | P1 | W14 |
+| `feature/quality-mgmt` | 质量管理 | P1 | W14-15 |
+| `feature/cost-mgmt` | 成本管理 | P1 | W15-16 |
+
+##### 第三批次：运营支撑（17-20周）
+
+| 分支 | 功能 | 优先级 | 周次 |
+|------|------|--------|------|
+| `feature/drp` | DRP 配送需求计划 | P1 | W17 |
+| `feature/budget-mgmt` | 预算管理 | P1 | W17-18 |
+| `feature/approval-flow` | 审批流 | P1 | W18 |
+| `feature/web-dashboard` | 运营仪表盘 | P1 | W18-19 |
+| `feature/web-report` | 报表页面 | P1 | W19 |
+| `feature/report-export` | 报表导出 | P1 | W19 |
+| `feature/erp-integration` | ERP 对接 | P2 | W19-20 |
+| `feature/open-api` | 开放平台 | P2 | W20 |
+
+##### 微服务架构（贯穿）
+
+| 分支 | 功能 | 优先级 | 周次 |
+|------|------|--------|------|
+| `feature/nacos-deploy` | Nacos 注册/配置中心 | P0 | W9-11 |
+| `feature/gateway` | Spring Cloud Gateway | P0 | W11-12 |
+| `feature/feign-migration` | Feign 调用改造 | P1 | W13-15 |
+| `feature/skywalking` | SkyWalking 链路追踪 | P2 | W15-16 |
+| `feature/sentinel` | Sentinel 熔断降级 | P2 | W16-17 |
+| `feature/elk` | ELK 日志接入 | P2 | W17-18 |
 
 ---
 
