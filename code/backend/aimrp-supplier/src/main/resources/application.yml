@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/aimrp
+    username: postgres
+    password: postgres
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.aimrp.supplier.infrastructure.persistence.po
+  configuration:
+    map-underscore-to-camel-case: true
