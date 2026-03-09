@@ -61,7 +61,7 @@ AIGC:
 | `feature/ai-entity` | 实体提取 | 2d | - | ✅ |
 | `feature/ai-router` | 执行路由 | 2d | - | ✅ |
 | `feature/ai-response` | 对话结果展示 | 2d | - | ✅ |
-| `feature/mvp-integration` | MVP 集成测试 | 2d | - | ⏳ |
+| `feature/mvp-integration` | MVP 集成测试 | 2d | - | ✅ |
 
 **MVP 里程碑**：第 4 周末交付可运行的对话式 MRP 原型
 
@@ -90,7 +90,7 @@ AIGC:
 | `feature/ai-risk-monitor` | 风险监控 | 2d | - | ✅ |
 | `feature/ai-risk-warning` | 风险预警 | 2d | - | ✅ |
 | `feature/web-risk-page` | 风险预警页面 | 2d | - | ✅ |
-| `feature/pro-integration` | Pro 集成测试 | 2d | - | ⏳ |
+| `feature/pro-integration` | Pro 集成测试 | 2d | - | ✅ |
 
 ### 补充实现（额外完成）
 
