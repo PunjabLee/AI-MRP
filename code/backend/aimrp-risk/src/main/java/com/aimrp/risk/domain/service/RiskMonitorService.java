@@ -332,4 +332,24 @@ public class RiskMonitorService {
         
         return data;
     }
+    
+    /**
+     * 发送风险预警
+     * 
+     * TODO: 集成通知模块发送消息
+     */
+    public void sendWarning(Long riskId) {
+        log.warn("发送风险预警 - riskId: {}", riskId);
+        log.error("【风险预警】风险ID: {} 需要及时处理！", riskId);
+    }
+    
+    /**
+     * 批量发送风险预警
+     */
+    public void sendWarnings(List<Long> riskIds) {
+        for (Long riskId : riskIds) {
+            sendWarning(riskId);
+        }
+        log.info("批量发送风险预警完成，共 {} 条", riskIds.size());
+    }
 }

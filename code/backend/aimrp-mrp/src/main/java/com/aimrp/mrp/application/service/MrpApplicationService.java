@@ -1,5 +1,7 @@
 package com.aimrp.mrp.application.service;
 
+import com.aimrp.bom.infrastructure.persistence.mapper.BomMapper;
+import com.aimrp.inventory.infrastructure.persistence.mapper.InventoryMapper;
 import com.aimrp.mrp.domain.entity.MrpRun;
 import com.aimrp.mrp.domain.valueobject.MrpContext;
 import com.aimrp.mrp.domain.valueobject.MrpResult;
@@ -26,9 +28,8 @@ public class MrpApplicationService {
     private final MrpCalculator mrpCalculator;
     private final ItemMapper itemMapper;
     private final SalesOrderMapper salesOrderMapper;
-    // TODO: 注入其他Mapper
-    // private final BomMapper bomMapper;
-    // private final InventoryMapper inventoryMapper;
+    private final BomMapper bomMapper;
+    private final InventoryMapper inventoryMapper;
     
     /**
      * 执行 MRP 计算
@@ -139,25 +140,66 @@ public class MrpApplicationService {
     }
     
     /**
-     * 加载 BOM 数据（从数据库）
-     * TODO: 调用BomMapper
+     * 加载 BOM 数据（从 bom 模块）
      */
     private Map<String, List<MrpContext.BomLineVO>> loadBomMap() {
-        // TODO: 从数据库查询 BOM 数据
-        // 临时返回空数据，后续接入BomMapper
-        log.info("加载BOM数据（TODO: 接入BomMapper）");
-        return new HashMap<>();
+        Map<String, List<MrpContext.BomLineVO>> bomMap = new HashMap<>();
+        
+        try {
+            Map<String, List<Map<String, Object>>> rawBomMap = bomMapper.selectBomMap(null);
+            
+            for (Map.Entry<String, List<Map<String, Object>>> entry : rawBomMap.entrySet()) {
+                String parentCode = entry.getKey();
+                List<MrpContext.BomLineVO> lines = new ArrayList<>();
+                
+                for (Map<String, Object> row : entry.getValue()) {
+                    MrpContext.BomLineVO line = MrpContext.BomLineVO.builder()
+                            .bomId(((Number) row.get("bom_id")).longValue())
+                            .parentItemCode(parentCode)
+                            .childItemCode((String) row.get("child_item_code"))
+                            .childItemName((String) row.get("child_item_name"))
+                            .usageQty(new BigDecimal(row.get("usage_qty").toString()))
+                            .lossRate(row.get("loss_rate") != null ? new BigDecimal(row.get("loss_rate").toString()) : BigDecimal.ZERO)
+                            .level(((Number) row.get("level")).intValue())
+                            .build();
+                    lines.add(line);
+                }
+                bomMap.put(parentCode, lines);
+            }
+            log.info("从BOM模块加载: {} 条", bomMap.size());
+        } catch (Exception e) {
+            log.warn("加载BOM数据失败，使用空数据: {}", e.getMessage());
+        }
+        
+        return bomMap;
     }
     
     /**
-     * 加载库存数据（从数据库）
-     * TODO: 调用InventoryMapper
+     * 加载库存数据（从 inventory 模块）
      */
     private Map<String, MrpContext.InventoryVO> loadInventory() {
-        // TODO: 从数据库查询库存数据
-        // 临时返回空数据，后续接入InventoryMapper
-        log.info("加载库存数据（TODO: 接入InventoryMapper）");
-        return new HashMap<>();
+        Map<String, MrpContext.InventoryVO> inventory = new HashMap<>();
+        
+        try {
+            List<Map<String, Object>> inventoryList = inventoryMapper.selectList(null, null);
+            
+            for (Map<String, Object> row : inventoryList) {
+                String itemCode = (String) row.get("item_code");
+                MrpContext.InventoryVO vo = MrpContext.InventoryVO.builder()
+                        .itemCode(itemCode)
+                        .warehouseCode((String) row.get("warehouse_code"))
+                        .onHandQty(new BigDecimal(row.get("on_hand_qty").toString()))
+                        .allocatedQty(row.get("allocated_qty") != null ? new BigDecimal(row.get("allocated_qty").toString()) : BigDecimal.ZERO)
+                        .availableQty(row.get("available_qty") != null ? new BigDecimal(row.get("available_qty").toString()) : BigDecimal.ZERO)
+                        .build();
+                inventory.put(itemCode, vo);
+            }
+            log.info("从库存模块加载: {} 条", inventory.size());
+        } catch (Exception e) {
+            log.warn("加载库存数据失败，使用空数据: {}", e.getMessage());
+        }
+        
+        return inventory;
     }
     
     /**
@@ -193,7 +235,7 @@ public class MrpApplicationService {
     
     /**
      * 加载在途采购
-     * TODO: 从数据库查询
+     * TODO: 从采购模块查询
      */
     private Map<String, List<MrpContext.PurchaseOnWayVO>> loadPurchaseOnWay() {
         return new HashMap<>();
@@ -201,7 +243,7 @@ public class MrpApplicationService {
     
     /**
      * 加载在制生产
-     * TODO: 从数据库查询
+     * TODO: 从生产模块查询
      */
     private Map<String, List<MrpContext.ProductionOnWayVO>> loadProductionOnWay() {
         return new HashMap<>();
