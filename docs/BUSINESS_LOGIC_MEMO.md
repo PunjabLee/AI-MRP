@@ -22,9 +22,9 @@
 | purchase | ✅ | ✅ | ✅ | ✅ |
 | production | ✅ | ✅ | ✅ | ✅ |
 | mrp | ✅ | ✅ | ✅ | ✅ 完成 |
-| forecast | ✅ | ✅ | ❌ | ⏳ |
-| risk | ✅ | ✅ | ❌ | ⏳ |
-| whatif | ✅ | ✅ | ❌ | ⏳ |
+| forecast | ✅ | ✅ | ✅ | ✅ 完成 |
+| risk | ✅ | ✅ | ✅ | ✅ 完成 |
+| whatif | ✅ | ✅ | ✅ | ✅ 完成 |
 
 ### MRP 数据接入完成度
 
