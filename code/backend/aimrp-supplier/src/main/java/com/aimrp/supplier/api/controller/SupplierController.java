@@ -1,6 +1,6 @@
 package com.aimrp.supplier.api.controller;
 
-import com.aimrp.common.result.R;
+import com.aimrp.common.result.ApiResponse;
 import com.aimrp.supplier.domain.entity.Supplier;
 import com.aimrp.supplier.infrastructure.persistence.mapper.SupplierMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -16,7 +16,7 @@ public class SupplierController {
     private final SupplierMapper supplierMapper;
     
     @GetMapping
-    public R<Page<Supplier>> list(
+    public ApiResponse<Page<Supplier>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String supplierCode,
@@ -28,30 +28,30 @@ public class SupplierController {
         if (supplierName != null) wrapper.like(Supplier::getSupplierName, supplierName);
         wrapper.orderByDesc(Supplier::getId);
         
-        return R.ok(supplierMapper.selectPage(page, wrapper));
+        return ApiResponse.ok(supplierMapper.selectPage(page, wrapper));
     }
     
     @GetMapping("/{id}")
-    public R<Supplier> getById(@PathVariable Long id) {
-        return R.ok(supplierMapper.selectById(id));
+    public ApiResponse<Supplier> getById(@PathVariable Long id) {
+        return ApiResponse.ok(supplierMapper.selectById(id));
     }
     
     @PostMapping
-    public R<Supplier> create(@RequestBody Supplier supplier) {
+    public ApiResponse<Supplier> create(@RequestBody Supplier supplier) {
         supplierMapper.insert(supplier);
-        return R.ok(supplier);
+        return ApiResponse.ok(supplier);
     }
     
     @PutMapping("/{id}")
-    public R<Supplier> update(@PathVariable Long id, @RequestBody Supplier supplier) {
+    public ApiResponse<Supplier> update(@PathVariable Long id, @RequestBody Supplier supplier) {
         supplier.setId(id);
         supplierMapper.updateById(supplier);
-        return R.ok(supplier);
+        return ApiResponse.ok(supplier);
     }
     
     @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable Long id) {
         supplierMapper.deleteById(id);
-        return R.ok();
+        return ApiResponse.ok();
     }
 }

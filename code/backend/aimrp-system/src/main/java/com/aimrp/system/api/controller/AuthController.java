@@ -1,6 +1,6 @@
 package com.aimrp.system.api.controller;
 
-import com.aimrp.common.result.R;
+import com.aimrp.common.result.ApiResponse;
 import com.aimrp.system.application.dto.LoginRequest;
 import com.aimrp.system.application.dto.LoginResponse;
 import com.aimrp.system.infrastructure.security.JwtUtils;
@@ -26,7 +26,7 @@ public class AuthController {
      * 登录
      */
     @PostMapping("/login")
-    public R<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 request.getUsername(),
@@ -50,29 +50,29 @@ public class AuthController {
         userInfo.setUsername(username);
         response.setUser(userInfo);
         
-        return R.ok(response);
+        return ApiResponse.ok(response);
     }
     
     /**
      * 获取当前用户信息
      */
     @GetMapping("/me")
-    public R<LoginResponse.UserInfo> getCurrentUser() {
+    public ApiResponse<LoginResponse.UserInfo> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
         userInfo.setUsername(username);
         
-        return R.ok(userInfo);
+        return ApiResponse.ok(userInfo);
     }
     
     /**
      * 登出
      */
     @PostMapping("/logout")
-    public R<Void> logout() {
+    public ApiResponse<Void> logout() {
         SecurityContextHolder.clearContext();
-        return R.ok();
+        return ApiResponse.ok();
     }
 }

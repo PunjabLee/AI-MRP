@@ -1101,23 +1101,23 @@ frontend/
 
 ### 6.2 统一 API 返回类型
 
-所有 Controller 必须使用统一响应结构 `R<T>`：
+所有 Controller 必须使用统一响应结构 `ApiResponse<T>`：
 
 ```java
-// 响应类定义
-public class R<T> implements Serializable {
+// 响应类定义 (com.aimrp.common.result.ApiResponse)
+public class ApiResponse<T> implements Serializable {
     private int code;          // 状态码
     private String msg;       // 消息
     private T data;          // 数据
     private long timestamp;   // 时间戳
     
     // 成功响应
-    public static <T> R<T> ok()
-    public static <T> R<T> ok(T data)
+    public static <T> ApiResponse<T> ok()
+    public static <T> ApiResponse<T> ok(T data)
     
     // 失败响应
-    public static <T> R<T> fail()
-    public static <T> R<T> fail(String msg)
+    public static <T> ApiResponse<T> fail()
+    public static <T> ApiResponse<T> fail(String msg)
 }
 ```
 

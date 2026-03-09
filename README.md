@@ -329,5 +329,33 @@ AI-MRP/
 
 ---
 
+## 十、开发状态
+
+### 已完成模块（M1 + M2）
+
+| 模块 | 功能 | API |
+|------|------|-----|
+| `aimrp-system` | 用户权限认证 | `/api/auth/login` |
+| `aimrp-item` | 物料主数据 | `/api/items` |
+| `aimrp-supplier` | 供应商管理 | `/api/suppliers` |
+| `aimrp-demand` | 销售订单 | `/api/orders` |
+| `aimrp-bom` | BOM管理 | `/api/boms` |
+| `aimrp-inventory` | 库存管理 | `/api/inventory` |
+
+### API 响应规范
+
+统一使用 `ApiResponse<T>` 结构：
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {...},
+  "timestamp": 1709875200000
+}
+```
+
+---
+
 *由 小jeep 🚙（天蓝色）整理*
 *AI MRP Team © 2026*

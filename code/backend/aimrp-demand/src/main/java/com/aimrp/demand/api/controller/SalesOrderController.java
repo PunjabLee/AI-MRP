@@ -1,6 +1,6 @@
 package com.aimrp.demand.api.controller;
 
-import com.aimrp.common.result.R;
+import com.aimrp.common.result.ApiResponse;
 import com.aimrp.demand.domain.entity.SalesOrder;
 import com.aimrp.demand.infrastructure.persistence.mapper.SalesOrderMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -24,7 +24,7 @@ public class SalesOrderController {
      * 分页查询订单
      */
     @GetMapping
-    public R<Page<SalesOrder>> list(
+    public ApiResponse<Page<SalesOrder>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String orderNo,
@@ -44,68 +44,68 @@ public class SalesOrderController {
         
         wrapper.orderByDesc(SalesOrder::getId);
         
-        return R.ok(salesOrderMapper.selectPage(page, wrapper));
+        return ApiResponse.ok(salesOrderMapper.selectPage(page, wrapper));
     }
     
     /**
      * 根据 ID 查询
      */
     @GetMapping("/{id}")
-    public R<SalesOrder> getById(@PathVariable Long id) {
-        return R.ok(salesOrderMapper.selectById(id));
+    public ApiResponse<SalesOrder> getById(@PathVariable Long id) {
+        return ApiResponse.ok(salesOrderMapper.selectById(id));
     }
     
     /**
      * 创建订单
      */
     @PostMapping
-    public R<SalesOrder> create(@RequestBody SalesOrder order) {
+    public ApiResponse<SalesOrder> create(@RequestBody SalesOrder order) {
         // 生成订单编号
         String orderNo = "SO" + System.currentTimeMillis();
         order.setOrderNo(orderNo);
         order.setStatus("PENDING");
         salesOrderMapper.insert(order);
-        return R.ok(order);
+        return ApiResponse.ok(order);
     }
     
     /**
      * 更新订单
      */
     @PutMapping("/{id}")
-    public R<SalesOrder> update(@PathVariable Long id, @RequestBody SalesOrder order) {
+    public ApiResponse<SalesOrder> update(@PathVariable Long id, @RequestBody SalesOrder order) {
         order.setId(id);
         salesOrderMapper.updateById(order);
-        return R.ok(order);
+        return ApiResponse.ok(order);
     }
     
     /**
      * 删除订单
      */
     @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable Long id) {
         salesOrderMapper.deleteById(id);
-        return R.ok();
+        return ApiResponse.ok();
     }
     
     /**
      * 确认订单
      */
     @PostMapping("/{id}/confirm")
-    public R<SalesOrder> confirm(@PathVariable Long id) {
+    public ApiResponse<SalesOrder> confirm(@PathVariable Long id) {
         SalesOrder order = salesOrderMapper.selectById(id);
         order.setStatus("CONFIRMED");
         salesOrderMapper.updateById(order);
-        return R.ok(order);
+        return ApiResponse.ok(order);
     }
     
     /**
      * 取消订单
      */
     @PostMapping("/{id}/cancel")
-    public R<SalesOrder> cancel(@PathVariable Long id) {
+    public ApiResponse<SalesOrder> cancel(@PathVariable Long id) {
         SalesOrder order = salesOrderMapper.selectById(id);
         order.setStatus("CANCELLED");
         salesOrderMapper.updateById(order);
-        return R.ok(order);
+        return ApiResponse.ok(order);
     }
 }

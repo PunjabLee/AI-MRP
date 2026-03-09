@@ -1,6 +1,6 @@
 package com.aimrp.item.api.controller;
 
-import com.aimrp.common.result.R;
+import com.aimrp.common.result.ApiResponse;
 import com.aimrp.item.domain.entity.Item;
 import com.aimrp.item.infrastructure.persistence.mapper.ItemMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -19,7 +19,7 @@ public class ItemController {
     private final ItemMapper itemMapper;
     
     @GetMapping
-    public R<Page<Item>> list(
+    public ApiResponse<Page<Item>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String itemCode,
@@ -31,30 +31,30 @@ public class ItemController {
         if (itemName != null) wrapper.like(Item::getItemName, itemName);
         wrapper.orderByDesc(Item::getId);
         
-        return R.ok(itemMapper.selectPage(page, wrapper));
+        return ApiResponse.ok(itemMapper.selectPage(page, wrapper));
     }
     
     @GetMapping("/{id}")
-    public R<Item> getById(@PathVariable Long id) {
-        return R.ok(itemMapper.selectById(id));
+    public ApiResponse<Item> getById(@PathVariable Long id) {
+        return ApiResponse.ok(itemMapper.selectById(id));
     }
     
     @PostMapping
-    public R<Item> create(@RequestBody Item item) {
+    public ApiResponse<Item> create(@RequestBody Item item) {
         itemMapper.insert(item);
-        return R.ok(item);
+        return ApiResponse.ok(item);
     }
     
     @PutMapping("/{id}")
-    public R<Item> update(@PathVariable Long id, @RequestBody Item item) {
+    public ApiResponse<Item> update(@PathVariable Long id, @RequestBody Item item) {
         item.setId(id);
         itemMapper.updateById(item);
-        return R.ok(item);
+        return ApiResponse.ok(item);
     }
     
     @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable Long id) {
         itemMapper.deleteById(id);
-        return R.ok();
+        return ApiResponse.ok();
     }
 }
