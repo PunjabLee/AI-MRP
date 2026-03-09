@@ -17,7 +17,7 @@
 | bom | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | inventory | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | purchase | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| production | ✅ | ✅ | ❌ | ✅ | ✅ | 缺application |
+| production | ✅ | ✅ | ❌ | ✅ | ✅ | 缺application/service |
 | mrp | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | forecast | ✅ | ✅ | ❌ | ❌ | ✅ | 缺application, mapper |
 | risk | ✅ | ✅ | ❌ | ❌ | ✅ | 缺application, mapper |
