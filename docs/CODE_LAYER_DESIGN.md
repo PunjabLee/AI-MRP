@@ -1099,7 +1099,71 @@ frontend/
 | **前端组件** | PascalCase | `OrderList.tsx` |
 | **前端方法** | camelCase | `handleSubmit()` |
 
-### 6.2 分层调用规则
+### 6.2 统一 API 返回类型
+
+所有 Controller 必须使用统一响应结构 `R<T>`：
+
+```java
+// 响应类定义
+public class R<T> implements Serializable {
+    private int code;          // 状态码
+    private String msg;       // 消息
+    private T data;          // 数据
+    private long timestamp;   // 时间戳
+    
+    // 成功响应
+    public static <T> R<T> ok()
+    public static <T> R<T> ok(T data)
+    
+    // 失败响应
+    public static <T> R<T> fail()
+    public static <T> R<T> fail(String msg)
+}
+```
+
+**使用示例**：
+
+```java
+@RestController
+@RequestMapping("/api/items")
+public class ItemController {
+    
+    @GetMapping
+    public R<Page<Item>> list(...) {
+        return R.ok(itemMapper.selectPage(page, wrapper));
+    }
+    
+    @GetMapping("/{id}")
+    public R<Item> getById(@PathVariable Long id) {
+        return R.ok(itemMapper.selectById(id));
+    }
+    
+    @PostMapping
+    public R<Item> create(@RequestBody Item item) {
+        itemMapper.insert(item);
+        return R.ok(item);
+    }
+    
+    @DeleteMapping("/{id}")
+    public R<Void> delete(@PathVariable Long id) {
+        itemMapper.deleteById(id);
+        return R.ok();
+    }
+}
+```
+
+**状态码规范**：
+
+| 状态码 | 说明 |
+|--------|------|
+| 200 | 操作成功 |
+| 400 | 请求参数错误 |
+| 401 | 未授权 |
+| 403 | 禁止访问 |
+| 404 | 资源不存在 |
+| 500 | 服务器内部错误 |
+
+### 6.3 分层调用规则
 
 ```
 API Layer ──▶ Application Layer ──▶ Domain Layer ──▶ Infrastructure
