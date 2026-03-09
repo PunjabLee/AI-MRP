@@ -1,7 +1,7 @@
 # AI MRP 项目文档清单
 
-> **版本**：1.0  
-> **日期**：2026-03-08  
+> **版本**：1.1  
+> **日期**：2026-03-09  
 > **状态**：已完成
 
 ---
@@ -15,12 +15,17 @@
 | 3 | `docs/MARKET_RESEARCH.md` | ✅ | 市场调研报告 |
 | 4 | `docs/TECHNICAL_ARCHITECTURE.md` | ✅ | 技术架构设计 |
 | 5 | `docs/CODE_FRAMEWORK.md` | ✅ | 代码框架设计 |
-| 6 | `docs/GIT_WORKFLOW.md` | ✅ | Git 分支管理 |
-| 7 | `docs/ITERATION_PLAN.md` | ✅ | 迭代规划 |
-| 8 | `docs/BRANCH_LIST.md` | ✅ | 功能分支清单 |
-| 9 | `docs/TEST_BRANCH_LIST.md` | ✅ | 测试分支清单 |
-| 10 | `docs/DEVELOPMENT_PLAN.md` | ✅ | 开发计划 |
-| **11** | **`docs/data-architecture/`** | ✅ | **数据架构（新增）** |
+| 6 | `docs/CODE_LAYER_DESIGN.md` | ✅ | 代码分层设计（DDD） |
+| 7 | `docs/GIT_WORKFLOW.md` | ✅ | Git 分支管理 |
+| 8 | `docs/ITERATION_PLAN.md` | ✅ | 迭代规划 |
+| 9 | `docs/BRANCH_LIST.md` | ✅ | 功能分支清单 |
+| 10 | `docs/TEST_BRANCH_LIST.md` | ✅ | 测试分支清单 |
+| 11 | `docs/DEVELOPMENT_PLAN.md` | ✅ | 开发计划 |
+| 12 | `docs/OR_SCHEDULER_PLAN.md` | ✅ | OR排程规划 |
+| 13 | `docs/MVP_REVIEW.md` | ✅ | MVP Review报告 |
+| 14 | `docs/MVP_FULL_REVIEW.md` | ✅ | MVP全面Review报告 |
+| 15 | `docs/NEXT_STEPS.md` | ✅ | 下一步工作清单 |
+| **16** | **`docs/data-architecture/`** | ✅ | **数据架构（DDL）** |
 
 ---
 
@@ -70,21 +75,21 @@
 
 ### 3.1 阶段划分
 
-| 阶段 | 时间 | 交付 | 分支数 |
-|------|------|------|--------|
-| MVP | W1-4 | 对话式 MRP 原型 | 23 |
-| Pro | W5-8 | 智能化 MRP | 16 |
-| Enterprise | W9-12 | 企业级 MRP | 12 |
-| **总计** | **12 周** | | **51** |
+| 阶段 | 时间 | 交付 | 规划数 | 已完成 |
+|------|------|------|--------|--------|
+| MVP | W1-4 | 对话式 MRP 原型 | 22 | 21 |
+| Pro | W5-8 | 智能化 MRP | 20 | 11 |
+| Enterprise | W9-12 | 企业级 MRP | 12 | 0 |
+| **总计** | **12 周** | | **54** | **32** |
 
 ### 3.2 里程碑
 
-| 里程碑 | 时间 | 交付 |
-|--------|------|------|
-| M1 | W2 末 | 项目骨架 + 基础 CRUD |
-| M2 | W4 末 | 对话式 MRP 原型 |
-| M3 | W8 末 | 智能化 MRP |
-| M4 | W12 末 | 企业级 MRP |
+| 里程碑 | 时间 | 交付 | 状态 |
+|--------|------|------|------|
+| M1 | W2 末 | 项目骨架 + 基础 CRUD | ✅ |
+| M2 | W4 末 | 对话式 MRP 原型 | ✅ |
+| M3 | W8 末 | 智能化 MRP | ⏳ 进行中 |
+| M4 | W12 末 | 企业级 MRP | ⏳ |
 
 ---
 
@@ -119,6 +124,7 @@
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | 1.0 | 2026-03-08 | 初始版本 |
+| 1.1 | 2026-03-09 | 添加OR排程规划，更新MVP/Pro状态 |
 
 ---
 
