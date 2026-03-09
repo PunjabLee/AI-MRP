@@ -1,7 +1,8 @@
 # AI MRP 测试分支清单
 
-> **版本**：1.0  
-> **日期**：2026-03-08
+> **版本**：1.1  
+> **日期**：2026-03-09  
+> **说明**：已更新测试状态
 
 ---
 
@@ -23,52 +24,52 @@ test/<模块>-<类型>
 
 ### 2.1 MVP 阶段测试（10 个）
 
-| 分支 | 类型 | 覆盖范围 |
-|------|------|----------|
-| `test/project-setup` | unit | 项目配置测试 |
-| `test/common-module` | unit | 公共模块测试 |
-| `test/demand-unit` | unit | 需求领域单元测试 |
-| `test/demand-integration` | integration | 订单 CRUD 集成测试 |
-| `test/bom-unit` | unit | BOM 领域单元测试 |
-| `test/inventory-unit` | unit | 库存领域单元测试 |
-| `test/mrp-unit` | unit | MRP 核心算法测试 |
-| `test/mrp-integration` | integration | MRP 集成测试 |
-| `test/ai-unit` | unit | AI 对话单元测试 |
-| `test/mvp-e2e` | e2e | MVP 冒烟测试 |
+| 分支 | 类型 | 覆盖范围 | 状态 |
+|------|------|----------|------|
+| `test/project-setup` | unit | 项目配置测试 | ✅ |
+| `test/common-module` | unit | 公共模块测试 | ✅ |
+| `test/demand-unit` | unit | 需求领域单元测试 | ✅ |
+| `test/demand-integration` | integration | 订单 CRUD 集成测试 | ✅ |
+| `test/bom-unit` | unit | BOM 领域单元测试 | ✅ |
+| `test/inventory-unit` | unit | 库存领域单元测试 | ✅ |
+| `test/mrp-unit` | unit | MRP 核心算法测试 | ✅ |
+| `test/mrp-integration` | integration | MRP 集成测试 | ✅ |
+| `test/ai-unit` | unit | AI 对话单元测试 | ✅ |
+| `test/mvp-e2e` | e2e | MVP 冒烟测试 | ⏳ |
 
 ### 2.2 Pro 阶段测试（8 个）
 
-| 分支 | 类型 | 覆盖范围 |
-|------|------|----------|
-| `test/ai-predict-unit` | unit | 预测算法单元测试 |
-| `test/ai-predict-integration` | integration | 预测集成测试 |
-| `test/ai-safety-stock-unit` | unit | 安全库存算法测试 |
-| `test/ai-or-unit` | unit | OR 求解器测试 |
-| `test/ai-or-integration` | integration | 排程集成测试 |
-| `test/ai-impact-unit` | unit | 影响分析算法测试 |
-| `test/ai-risk-unit` | unit | 风险预警测试 |
-| `test/pro-e2e` | e2e | Pro 端到端测试 |
+| 分支 | 类型 | 覆盖范围 | 状态 |
+|------|------|----------|------|
+| `test/ai-predict-unit` | unit | 预测算法单元测试 | ✅ |
+| `test/ai-predict-integration` | integration | 预测集成测试 | ✅ |
+| `test/ai-safety-stock-unit` | unit | 安全库存算法测试 | ✅ |
+| `test/ai-or-unit` | unit | OR 求解器测试 | ✅ |
+| `test/ai-or-integration` | integration | 排程集成测试 | ✅ |
+| `test/ai-impact-unit` | unit | 影响分析算法测试 | ⏳ |
+| `test/ai-risk-unit` | unit | 风险预警测试 | ⏳ |
+| `test/pro-e2e` | e2e | Pro 端到端测试 | ⏳ |
 
 ### 2.3 Enterprise 阶段测试（5 个）
 
-| 分支 | 类型 | 覆盖范围 |
-|------|------|----------|
-| `test/org-unit` | unit | 组织架构测试 |
-| `test/supplier-unit` | unit | 供应商模块测试 |
-| `test/report-unit` | unit | 报表测试 |
-| `test/enterprise-integration` | integration | 企业级集成测试 |
-| `test/enterprise-e2e` | e2e | Enterprise E2E 测试 |
+| 分支 | 类型 | 覆盖范围 | 状态 |
+|------|------|----------|------|
+| `test/org-unit` | unit | 组织架构测试 | ⏳ |
+| `test/supplier-unit` | unit | 供应商模块测试 | ⏳ |
+| `test/report-unit` | unit | 报表测试 | ⏳ |
+| `test/enterprise-integration` | integration | 企业级集成测试 | ⏳ |
+| `test/enterprise-e2e` | e2e | Enterprise E2E 测试 | ⏳ |
 
 ---
 
 ## 三、测试分支统计
 
-| 阶段 | 单元测试 | 集成测试 | E2E | 总计 |
-|------|----------|----------|-----|------|
-| MVP | 6 | 3 | 1 | 10 |
-| Pro | 5 | 2 | 1 | 8 |
-| Enterprise | 3 | 1 | 1 | 5 |
-| **总计** | **14** | **6** | **3** | **23** |
+| 阶段 | 单元测试 | 集成测试 | E2E | 已完成 |
+|------|----------|----------|-----|--------|
+| MVP | 6 | 3 | 1 | 9 |
+| Pro | 5 | 2 | 1 | 5 |
+| Enterprise | 3 | 1 | 1 | 0 |
+| **总计** | **14** | **6** | **3** | **14** |
 
 ---
 
