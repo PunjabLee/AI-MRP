@@ -86,3 +86,4 @@ export { purchaseApi } from './purchase';
 export { productionApi } from './production';
 export { riskApi } from './risk';
 export { whatIfApi } from './whatif';
+export { forecastApi } from './forecast';
