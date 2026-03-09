@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: aimrp-mrp
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/aimrp
+    username: postgres
+    password: postgres
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.aimrp.mrp.infrastructure.persistence.po
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# MRP 计算配置
+mrp:
+  planning:
+    horizon: 90  # 计划展望期（天）
+    start-date: today  # 计划起点
+    time-bucket: DAY   # 时间段精度
+    allow-negative: false  # 是否允许负库存
+  calculation:
+    batch-size: 1000  # 批处理大小
+    timeout: 300000   # 计算超时（毫秒）
+  suggestion:
+    auto-convert: false  # 是否自动转换建议
+
+logging:
+  level:
+    com.aimrp: debug
