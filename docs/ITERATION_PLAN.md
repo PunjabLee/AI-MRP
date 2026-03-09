@@ -38,30 +38,30 @@ AIGC:
 
 ### MVP 阶段（第 1-4 周）
 
-| 分支 | 功能 | 预估 | 负责人 |
-|------|------|------|--------|
-| `feature/project-init` | 项目初始化（骨架 + Docker） | 2d | - |
-| `feature/database-design` | PostgreSQL 数据库设计 | 2d | - |
-| `feature/common-module` | 公共模块（Response/Exception） | 2d | - |
-| `feature/demand-order-crud` | 销售订单 CRUD | 3d | - |
-| `feature/demand-order-api` | 订单列表/详情 API | 2d | - |
-| `feature/bom-management` | BOM 管理 CRUD | 3d | - |
-| `feature/bom-expand-api` | BOM 展开 API | 2d | - |
-| `feature/inventory-stock` | 库存管理 CRUD | 3d | - |
-| `feature/inventory-api` | 库存查询 API | 2d | - |
-| `feature/mrp-calculate` | MRP 计算引擎 | 4d | - |
-| `feature/mrp-suggestion` | 采购/生产建议生成 | 2d | - |
-| `feature/web-layout` | 前端页面布局 | 2d | - |
-| `feature/web-order-page` | 订单页面 | 2d | - |
-| `feature/web-bom-page` | BOM 页面 | 2d | - |
-| `feature/web-inventory-page` | 库存页面 | 2d | - |
-| `feature/web-mrp-page` | MRP 页面 | 2d | - |
-| `feature/ai-chat-ui` | 对话窗 UI | 2d | - |
-| `feature/ai-intent` | 意图识别 | 2d | - |
-| `feature/ai-entity` | 实体提取 | 2d | - |
-| `feature/ai-router` | 执行路由 | 2d | - |
-| `feature/ai-response` | 对话结果展示 | 2d | - |
-| `feature/mvp-integration` | MVP 集成测试 | 2d | - |
+| 分支 | 功能 | 预估 | 负责人 | 状态 |
+|------|------|------|--------|------|
+| `feature/project-init` | 项目初始化（骨架 + Docker） | 2d | - | ✅ |
+| `feature/database-design` | PostgreSQL 数据库设计 | 2d | - | ✅ |
+| `feature/common-module` | 公共模块（Response/Exception） | 2d | - | ✅ |
+| `feature/demand-order-crud` | 销售订单 CRUD | 3d | - | ✅ |
+| `feature/demand-order-api` | 订单列表/详情 API | 2d | - | ✅ |
+| `feature/bom-management` | BOM 管理 CRUD | 3d | - | ✅ |
+| `feature/bom-expand-api` | BOM 展开 API | 2d | - | ✅ |
+| `feature/inventory-stock` | 库存管理 CRUD | 3d | - | ✅ |
+| `feature/inventory-api` | 库存查询 API | 2d | - | ✅ |
+| `feature/mrp-calculate` | MRP 计算引擎 | 4d | - | ✅ |
+| `feature/mrp-suggestion` | 采购/生产建议生成 | 2d | - | ✅ |
+| `feature/web-layout` | 前端页面布局 | 2d | - | ✅ |
+| `feature/web-order-page` | 订单页面 | 2d | - | ✅ |
+| `feature/web-bom-page` | BOM 页面 | 2d | - | ✅ |
+| `feature/web-inventory-page` | 库存页面 | 2d | - | ✅ |
+| `feature/web-mrp-page` | MRP 页面 | 2d | - | ✅ |
+| `feature/ai-chat-ui` | 对话窗 UI | 2d | - | ✅ |
+| `feature/ai-intent` | 意图识别 | 2d | - | ✅ |
+| `feature/ai-entity` | 实体提取 | 2d | - | ✅ |
+| `feature/ai-router` | 执行路由 | 2d | - | ✅ |
+| `feature/ai-response` | 对话结果展示 | 2d | - | ✅ |
+| `feature/mvp-integration` | MVP 集成测试 | 2d | - | ⏳ |
 
 **MVP 里程碑**：第 4 周末交付可运行的对话式 MRP 原型
 
@@ -69,24 +69,39 @@ AIGC:
 
 ### Pro 阶段（第 5-8 周）
 
-| 分支 | 功能 | 预估 | 负责人 |
-|------|------|------|--------|
-| `feature/ai-demand-predict` | AI 需求预测（Prophet） | 4d | - |
-| `feature/ai-predict-api` | 预测 API + 页面 | 2d | - |
-| `feature/ai-safety-stock` | AI 安全库存推荐 | 3d | - |
-| `feature/ai-safety-stock-api` | 安全库存页面 | 2d | - |
-| `feature/ai-or-scheduler` | OR 排程优化（OR-Tools） | 4d | - |
-| `feature/ai-or-model` | 排程数学模型 | 2d | - |
-| `feature/web-gantt` | 甘特图展示 | 3d | - |
-| `feature/ai-impact-analysis` | 插单影响分析引擎 | 3d | - |
-| `feature/ai-conflict-detect` | 冲突检测 | 2d | - |
-| `feature/ai-cost-analysis` | 成本影响分析 | 2d | - |
-| `feature/ai-whatif` | What-if 模拟 | 3d | - |
-| `feature/ai-plan-compare` | 方案对比 | 2d | - |
-| `feature/ai-risk-monitor` | 风险监控 | 2d | - |
-| `feature/ai-risk-warning` | 风险预警 | 2d | - |
-| `feature/web-risk-page` | 风险预警页面 | 2d | - |
-| `feature/pro-integration` | Pro 集成测试 | 2d | - |
+| 分支 | 功能 | 预估 | 负责人 | 状态 |
+|------|------|------|--------|------|
+| `feature/ai-demand-predict` | AI 需求预测（Prophet） | 4d | - | ✅ |
+| `feature/ai-predict-api` | 预测 API + 页面 | 2d | - | ✅ |
+| `feature/ai-safety-stock` | AI 安全库存推荐 | 3d | - | ✅ |
+| `feature/ai-safety-stock-api` | 安全库存页面 | 2d | - | ✅ |
+| `feature/process-route` | 工艺路线管理 | 3d | - | ✅ |
+| `feature/work-center` | 工作中心管理 | 2d | - | ✅ |
+| `feature/resource` | 资源管理 | 2d | - | ✅ |
+| `feature/mo-operation` | 工单工序明细 | 2d | - | ✅ |
+| `feature/ai-or-scheduler` | OR 排程优化（OR-Tools） | 4d | - | ✅ |
+| `feature/ai-or-model` | 排程数学模型 | 2d | - | ✅ |
+| `feature/web-gantt` | 甘特图展示 | 3d | - | ✅ |
+| `feature/ai-impact-analysis` | 插单影响分析引擎 | 3d | - | ⏳ |
+| `feature/ai-conflict-detect` | 冲突检测 | 2d | - | ⏳ |
+| `feature/ai-cost-analysis` | 成本影响分析 | 2d | - | ⏳ |
+| `feature/ai-whatif` | What-if 模拟 | 3d | - | ⏳ |
+| `feature/ai-plan-compare` | 方案对比 | 2d | - | ⏳ |
+| `feature/ai-risk-monitor` | 风险监控 | 2d | - | ⏳ |
+| `feature/ai-risk-warning` | 风险预警 | 2d | - | ⏳ |
+| `feature/web-risk-page` | 风险预警页面 | 2d | - | ⏳ |
+| `feature/pro-integration` | Pro 集成测试 | 2d | - | ⏳ |
+
+### 补充实现（额外完成）
+
+| 分支 | 功能 | 预估 | 状态 |
+|------|------|------|------|
+| `feature/user-auth` | 用户权限认证（JWT） | 2d | ✅ |
+| `feature/item-management` | 物料主数据管理 | 2d | ✅ |
+| `feature/supplier-management` | 供应商管理 | 2d | ✅ |
+| `feature/purchase-management` | 采购管理（订单+入库） | 3d | ✅ |
+| `feature/production-management` | 生产管理（工单+报工） | 3d | ✅ |
+| `feature/purchase-suggestion` | 采购建议生成 | 2d | ✅ |
 
 **Pro 里程碑**：第 8 周末交付智能化 MRP 系统
 
@@ -343,9 +358,9 @@ AIGC:
 
 | 里程碑 | 时间 | 交付 | 状态 |
 |--------|------|------|------|
-| **M1: 骨架** | 第 2 周末 | 项目骨架 + 基础 CRUD | ⏳ |
-| **M2: MVP** | 第 4 周末 | 对话式 MRP 原型 | ⏳ |
-| **M3: Pro** | 第 8 周末 | 智能化 MRP | ⏳ |
+| **M1: 骨架** | 第 2 周末 | 项目骨架 + 基础 CRUD | ✅ |
+| **M2: MVP** | 第 4 周末 | 对话式 MRP 原型 | ✅ |
+| **M3: Pro** | 第 8 周末 | 智能化 MRP | ⏳ 进行中 |
 | **M4: GA** | 第 12 周末 | 企业级 MRP | ⏳ |
 
 ---
