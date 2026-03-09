@@ -331,16 +331,30 @@ AI-MRP/
 
 ## 十、开发状态
 
-### 已完成模块（M1 + M2）
+### 已完成模块
 
 | 模块 | 功能 | API |
 |------|------|-----|
-| `aimrp-system` | 用户权限认证 | `/api/auth/login` |
+| `aimrp-system` | 用户权限认证 | `/api/auth/*` |
 | `aimrp-item` | 物料主数据 | `/api/items` |
 | `aimrp-supplier` | 供应商管理 | `/api/suppliers` |
 | `aimrp-demand` | 销售订单 | `/api/orders` |
 | `aimrp-bom` | BOM管理 | `/api/boms` |
 | `aimrp-inventory` | 库存管理 | `/api/inventory` |
+| `aimrp-mrp` | MRP计算引擎 | `/api/mrp/*` |
+| `aimrp-purchase` | 采购管理 | `/api/purchase-orders/*` |
+| `aimrp-production` | 生产管理 | `/api/production-orders/*` |
+
+### 待开发模块
+
+| 模块 | 功能 |
+|------|------|
+| `aimrp-forecast` | AI需求预测 |
+| `aimrp-risk` | 风险预警 |
+| `aimrp-conversation` | AI对话 |
+| `aimrp-sandbox` | 沙箱机制 |
+| `aimrp-whatif` | What-if模拟 |
+| `aimrp-notification` | 通知模块 |
 
 ### API 响应规范
 
