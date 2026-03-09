@@ -1,14 +1,15 @@
+<!--
 ---
 AIGC:
     ContentProducer: Minimax Agent AI
     ContentPropagator: Minimax Agent AI
     Label: AIGC
-    ProduceID: d140e63dd3ea815ff80f8c5f911299a1
-    PropagateID: d140e63dd3ea815ff80f8c5f911299a1
-    ReservedCode1: 3046022100a7d946bb3ceecc220a59a6e5b168b680711fed62af2dcc06011bb4ae4d0e61e0022100caeb11202d5ada50bb189dcb99cb92b9716e8a2810fcfd6bb6e12407cd207db6
-    ReservedCode2: 3046022100c82f7e5a3e90bdae307ec6acd5778898713416d85663c642942f58dc2d429721022100d023bd9ef9adab07ef99b20fb59c9cb09c8b8f13862a13fabf59c3daa44f19e3
+    ProduceID: 5c8b84e774480e55f2ff127de8f8d526
+    PropagateID: 5c8b84e774480e55f2ff127de8f8d526
+    ReservedCode1: 304402203cb4e09cbd23045a64d1aeda3e10ecfacd3cf5734b8fbf51b2aaa68f18028717022017d5d2bbe18e8380f907a38f50e6111c76675682fcddfb13faaf274724cd9e90
+    ReservedCode2: 3046022100b9f1a1ca5f810f8ccc94437472e56745ea797b8d42a1b861f6f1eb72dda59e65022100e6561b14336cc6b85bf407659753388525c3e31af7421b8f42b369dab349c973
 ---
-
+-->
 # AI MRP 智能物料需求计划系统
 
 > **项目代号**：AI-MRP  
@@ -259,18 +260,60 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 
 ```
 AI-MRP/
-├── packages/                      # 前端 Monorepo
-│   ├── core-engine/               # 领域核心（TS）
-│   ├── ai-engine/                 # AI 推理引擎
-│   ├── or-solver/                 # OR 求解器
-│   ├── web-admin/                 # Web 管理后台
-│   └── desktop/                   # 桌面客户端
-├── services/
-│   └── backend/                   # Spring Boot 后端
-├── infra/
-│   ├── docker-compose.yml
-│   └── sql/
-└── docs/
+├── docs/                           # 项目文档
+│   ├── PRD.md                     # 产品需求文档
+│   ├── TECHNICAL_ARCHITECTURE.md  # 技术架构设计
+│   ├── CODE_LAYER_DESIGN.md      # 代码分层设计
+│   ├── DATA_ARCHITECTURE.md      # 数据架构设计
+│   ├── DEVELOPMENT_ENVIRONMENT.md # 开发环境配置
+│   ├── GIT_WORKFLOW.md          # Git 分支规范
+│   └── data-architecture/        # DDL 脚本
+│       ├── DATABASE_DDL.sql
+│       └── DATABASE_DDL_SUPPLEMENT.sql
+│
+├── code/                           # 项目代码
+│   ├── backend/                   # Java 后端（Maven 多模块）
+│   │   ├── pom.xml              # 主 POM
+│   │   ├── aimrp-common/        # 公共模块
+│   │   ├── aimrp-core/          # 核心域模块
+│   │   ├── aimrp-demand/        # 需求管理
+│   │   ├── aimrp-forecast/      # 预测模块
+│   │   ├── aimrp-bom/           # BOM 管理
+│   │   ├── aimrp-inventory/     # 库存管理
+│   │   ├── aimrp-mrp/           # MRP 计算
+│   │   ├── aimrp-purchase/      # 采购管理
+│   │   ├── aimrp-production/    # 生产管理
+│   │   ├── aimrp-risk/          # 风险预警
+│   │   ├── aimrp-sandbox/       # 沙箱机制
+│   │   ├── aimrp-whatif/        # What-if 模拟
+│   │   ├── aimrp-conversation/  # 对话服务
+│   │   ├── aimrp-system/        # 用户权限
+│   │   ├── aimrp-notification/  # 通知模块
+│   │   └── aimrp-api/           # API 入口
+│   │
+│   ├── ai-service/               # Python AI 微服务
+│   │   ├── requirements.txt     # 依赖
+│   │   └── app/
+│   │       ├── main.py          # FastAPI 入口
+│   │       ├── config/          # 配置
+│   │       ├── router/          # 路由
+│   │       ├── agents/          # Agent 编排
+│   │       ├── llm/             # LLM 调用
+│   │       ├── or_solver/       # OR 求解器
+│   │       ├── predictor/       # 预测引擎
+│   │       └── knowledge/       # RAG 知识库
+│   │
+│   └── frontend/                 # React 前端
+│       └── aimrp-admin/         # 管理后台
+│           ├── src/
+│           │   ├── pages/       # 页面
+│           │   ├── components/  # 组件
+│           │   ├── hooks/      # Hooks
+│           │   ├── services/   # API 服务
+│           │   └── stores/    # 状态管理
+│           └── package.json
+│
+└── .gitignore                    # Git 忽略配置
 ```
 
 ---
@@ -286,5 +329,5 @@ AI-MRP/
 
 ---
 
-*由 小jeep 🚙 整理*
+*由 小jeep 🚙（天蓝色）整理*
 *AI MRP Team © 2026*
