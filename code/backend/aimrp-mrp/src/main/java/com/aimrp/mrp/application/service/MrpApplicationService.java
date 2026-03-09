@@ -1,12 +1,11 @@
 package com.aimrp.mrp.application.service;
 
 import com.aimrp.mrp.domain.entity.MrpRun;
-import com.aimrp.mrp.domain.entity.MrpSuggestion;
 import com.aimrp.mrp.domain.valueobject.MrpContext;
 import com.aimrp.mrp.domain.valueobject.MrpResult;
 import com.aimrp.mrp.domain.service.MrpCalculator;
-import com.aimrp.mrp.domain.service.BomExpander;
-import com.aimrp.mrp.domain.service.DemandMerger;
+import com.aimrp.mrp.infrastructure.persistence.mapper.ItemMapper;
+import com.aimrp.mrp.infrastructure.persistence.mapper.SalesOrderMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,11 @@ import java.util.*;
 public class MrpApplicationService {
     
     private final MrpCalculator mrpCalculator;
-    private final BomExpander bomExpander;
-    private final DemandMerger demandMerger;
+    private final ItemMapper itemMapper;
+    private final SalesOrderMapper salesOrderMapper;
+    // TODO: 注入其他Mapper
+    // private final BomMapper bomMapper;
+    // private final InventoryMapper inventoryMapper;
     
     /**
      * 执行 MRP 计算
@@ -106,164 +108,102 @@ public class MrpApplicationService {
     }
     
     /**
-     * 加载物料主数据
+     * 加载物料主数据（从数据库）
      */
     private Map<String, MrpContext.ItemVO> loadItems() {
-        // TODO: 从数据库查询
         Map<String, MrpContext.ItemVO> items = new HashMap<>();
         
-        // 示例数据
-        MrpContext.ItemVO itemA = MrpContext.ItemVO.builder()
-                .itemCode("A001")
-                .itemName("产品A")
-                .itemType("FINISHED")
-                .source("MAKE")
-                .leadTime(7)
-                .lotSizeRule("LOT_FOR_LOT")
-                .minLotSize(BigDecimal.ONE)
-                .maxLotSize(new BigDecimal("10000"))
-                .safetyStock(new BigDecimal("100"))
-                .yieldRate(new BigDecimal("0.98"))
-                .build();
-        items.put("A001", itemA);
-        
-        MrpContext.ItemVO itemB = MrpContext.ItemVO.builder()
-                .itemCode("B001")
-                .itemName("部件B")
-                .itemType("SEMI")
-                .source("MAKE")
-                .leadTime(3)
-                .lotSizeRule("LOT_FOR_LOT")
-                .safetyStock(new BigDecimal("50"))
-                .build();
-        items.put("B001", itemB);
-        
-        MrpContext.ItemVO itemC = MrpContext.ItemVO.builder()
-                .itemCode("C001")
-                .itemName("物料C")
-                .itemType("RAW")
-                .source("BUY")
-                .leadTime(5)
-                .lotSizeRule("FIXED")
-                .minLotSize(new BigDecimal("100"))
-                .safetyStock(new BigDecimal("200"))
-                .build();
-        items.put("C001", itemC);
+        try {
+            List<Map<String, Object>> itemList = itemMapper.selectAll();
+            for (Map<String, Object> row : itemList) {
+                MrpContext.ItemVO item = MrpContext.ItemVO.builder()
+                        .itemCode((String) row.get("item_code"))
+                        .itemName((String) row.get("item_name"))
+                        .itemType((String) row.get("item_type"))
+                        .source((String) row.get("source"))
+                        .leadTime(row.get("lead_time") != null ? ((Number) row.get("lead_time")).intValue() : 0)
+                        .lotSizeRule((String) row.get("lot_size_rule"))
+                        .minLotSize(row.get("min_lot_size") != null ? new BigDecimal(row.get("min_lot_size").toString()) : BigDecimal.ONE)
+                        .maxLotSize(row.get("max_lot_size") != null ? new BigDecimal(row.get("max_lot_size").toString()) : new BigDecimal("999999"))
+                        .safetyStock(row.get("safety_stock") != null ? new BigDecimal(row.get("safety_stock").toString()) : BigDecimal.ZERO)
+                        .yieldRate(row.get("yield_rate") != null ? new BigDecimal(row.get("yield_rate").toString()) : new BigDecimal("1.0"))
+                        .build();
+                items.put(item.getItemCode(), item);
+            }
+            log.info("从数据库加载物料: {} 条", items.size());
+        } catch (Exception e) {
+            log.warn("加载物料数据失败，使用空数据: {}", e.getMessage());
+        }
         
         return items;
     }
     
     /**
-     * 加载 BOM 数据
+     * 加载 BOM 数据（从数据库）
+     * TODO: 调用BomMapper
      */
     private Map<String, List<MrpContext.BomLineVO>> loadBomMap() {
-        Map<String, List<MrpContext.BomLineVO>> bomMap = new HashMap<>();
-        
-        // A001 的 BOM
-        List<MrpContext.BomLineVO> a001Lines = new ArrayList<>();
-        a001Lines.add(MrpContext.BomLineVO.builder()
-                .bomId(1L)
-                .parentItemCode("A001")
-                .childItemCode("B001")
-                .childItemName("部件B")
-                .usageQty(new BigDecimal("2"))
-                .lossRate(BigDecimal.ZERO)
-                .level(1)
-                .build());
-        a001Lines.add(MrpContext.BomLineVO.builder()
-                .bomId(1L)
-                .parentItemCode("A001")
-                .childItemCode("C001")
-                .childItemName("物料C")
-                .usageQty(new BigDecimal("5"))
-                .lossRate(new BigDecimal("0.05"))
-                .level(1)
-                .build());
-        bomMap.put("A001", a001Lines);
-        
-        // B001 的 BOM
-        List<MrpContext.BomLineVO> b001Lines = new ArrayList<>();
-        b001Lines.add(MrpContext.BomLineVO.builder()
-                .bomId(2L)
-                .parentItemCode("B001")
-                .childItemCode("C001")
-                .childItemName("物料C")
-                .usageQty(new BigDecimal("3"))
-                .lossRate(BigDecimal.ZERO)
-                .level(1)
-                .build());
-        bomMap.put("B001", b001Lines);
-        
-        return bomMap;
+        // TODO: 从数据库查询 BOM 数据
+        // 临时返回空数据，后续接入BomMapper
+        log.info("加载BOM数据（TODO: 接入BomMapper）");
+        return new HashMap<>();
     }
     
     /**
-     * 加载库存数据
+     * 加载库存数据（从数据库）
+     * TODO: 调用InventoryMapper
      */
     private Map<String, MrpContext.InventoryVO> loadInventory() {
-        Map<String, MrpContext.InventoryVO> inventory = new HashMap<>();
-        
-        inventory.put("A001", MrpContext.InventoryVO.builder()
-                .itemCode("A001")
-                .warehouseCode("WH01")
-                .onHandQty(new BigDecimal("500"))
-                .allocatedQty(new BigDecimal("100"))
-                .availableQty(new BigDecimal("400"))
-                .build());
-        
-        inventory.put("B001", MrpContext.InventoryVO.builder()
-                .itemCode("B001")
-                .warehouseCode("WH01")
-                .onHandQty(new BigDecimal("200"))
-                .allocatedQty(BigDecimal.ZERO)
-                .availableQty(new BigDecimal("200"))
-                .build());
-        
-        inventory.put("C001", MrpContext.InventoryVO.builder()
-                .itemCode("C001")
-                .warehouseCode("WH01")
-                .onHandQty(new BigDecimal("1000"))
-                .allocatedQty(new BigDecimal("50"))
-                .availableQty(new BigDecimal("950"))
-                .build());
-        
-        return inventory;
+        // TODO: 从数据库查询库存数据
+        // 临时返回空数据，后续接入InventoryMapper
+        log.info("加载库存数据（TODO: 接入InventoryMapper）");
+        return new HashMap<>();
     }
     
     /**
-     * 加载需求数据
+     * 加载需求数据（从数据库）
      */
     private Map<String, List<MrpContext.DemandVO>> loadDemands(MrpRun runRecord) {
-        Map<String, List<MrpContext.DemandVO>> demands = new HashList<>();
+        Map<String, List<MrpContext.DemandVO>> demands = new HashMap<>();
         
-        // 销售订单需求
-        MrpContext.DemandVO demand1 = MrpContext.DemandVO.builder()
-                .demandId(1L)
-                .demandType("ORDER")
-                .itemCode("A001")
-                .qty(new BigDecimal("1000"))
-                .dueDate(LocalDate.now().plusDays(30))
-                .priority(5)
-                .build();
-        
-        demands.computeIfAbsent("A001", k -> new ArrayList<>()).add(demand1);
+        try {
+            List<Map<String, Object>> orderList = salesOrderMapper.selectForMrp(
+                    runRecord.getPlanStartDate(),
+                    runRecord.getPlanEndDate());
+            
+            for (Map<String, Object> row : orderList) {
+                MrpContext.DemandVO demand = MrpContext.DemandVO.builder()
+                        .demandId(((Number) row.get("id")).longValue())
+                        .demandType("ORDER")
+                        .itemCode((String) row.get("item_code"))
+                        .qty(new BigDecimal(row.get("qty").toString()))
+                        .dueDate((LocalDate) row.get("due_date"))
+                        .priority(row.get("priority") != null ? ((Number) row.get("priority")).intValue() : 5)
+                        .build();
+                
+                demands.computeIfAbsent(demand.getItemCode(), k -> new ArrayList<>()).add(demand);
+            }
+            log.info("从数据库加载需求: {} 条", orderList.size());
+        } catch (Exception e) {
+            log.warn("加载需求数据失败，使用空数据: {}", e.getMessage());
+        }
         
         return demands;
     }
     
     /**
      * 加载在途采购
+     * TODO: 从数据库查询
      */
     private Map<String, List<MrpContext.PurchaseOnWayVO>> loadPurchaseOnWay() {
-        // TODO: 从数据库查询
         return new HashMap<>();
     }
     
     /**
      * 加载在制生产
+     * TODO: 从数据库查询
      */
     private Map<String, List<MrpContext.ProductionOnWayVO>> loadProductionOnWay() {
-        // TODO: 从数据库查询
         return new HashMap<>();
     }
     
