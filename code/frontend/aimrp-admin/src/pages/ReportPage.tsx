@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Row, Col, Statistic, Button, Space, Tag, Modal, message, Select, DatePicker } from 'antd';
-import { FileExcelOutlined, FilePdfOutlined, ScheduleOutlined } from '@ant-design/icons';
 
 interface Report {
   id: number;
+  reportCode: string;
   reportName: string;
   reportType: string;
-  description: string;
+  status: string;
 }
 
-const ReportPage: React.FC = () => {
+export function ReportPage() {
   const [data, setData] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [currentReport, setCurrentReport] = useState<Report | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -22,74 +19,89 @@ const ReportPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const mockData: Report[] = [
-        { id: 1, reportName: '库存台账', reportType: 'INVENTORY', description: '库存余额表' },
-        { id: 2, reportName: '生产日报', reportType: 'PRODUCTION', description: '每日生产情况' },
-        { id: 3, reportName: '采购分析', reportType: 'PURCHASE', description: '采购执行分析' },
-        { id: 4, reportName: '质量统计', reportType: 'QUALITY', description: '质量检验统计' },
-        { id: 5, reportName: '成本分析', reportType: 'COST', description: '成本分析报表' },
-      ];
-      setData(mockData);
+      const response = await fetch('/api/reports/configs');
+      const result = await response.json();
+      
+      if (result.code === 200) {
+        setData(result.data?.list || []);
+      }
+    } catch (error) {
+      console.error('获取报表失败', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleExecute = (report: Report) => {
-    setCurrentReport(report);
-    setModalVisible(true);
-    setTimeout(() => {
-      setModalVisible(false);
-      message.success('报表生成完成');
-    }, 2000);
-  };
-
-  const getTypeTag = (type: string) => {
-    const config: any = { 
-      INVENTORY: { color: 'blue', text: '库存' }, 
-      PRODUCTION: { color: 'green', text: '生产' }, 
-      PURCHASE: { color: 'orange', text: '采购' },
-      QUALITY: { color: 'purple', text: '质量' },
-      COST: { color: 'red', text: '成本' }
+  const getTypeBadge = (type: string) => {
+    const types: Record<string, { color: string; text: string }> = {
+      'INVENTORY': { color: 'blue', text: '库存' },
+      'SALES': { color: 'green', text: '销售' },
+      'PRODUCTION': { color: 'orange', text: '生产' },
+      'PURCHASE': { color: 'purple', text: '采购' },
+      'MRP': { color: 'cyan', text: 'MRP' }
     };
-    return <Tag color={config[type]?.color}>{config[type]?.text || type}</Tag>;
+    return types[type] || { color: 'gray', text: type };
   };
 
-  const columns = [
-    { title: '报表名称', dataIndex: 'reportName', key: 'reportName' },
-    { title: '报表类型', dataIndex: 'reportType', key: 'reportType', render: (t: string) => getTypeTag(t) },
-    { title: '描述', dataIndex: 'description', key: 'description' },
-    { 
-      title: '操作', 
-      key: 'action',
-      render: (_: any, record: Report) => (
-        <Space>
-          <Button type="link" onClick={() => handleExecute(record)}>执行</Button>
-          <Button type="link" icon={<FileExcelOutlined />}>Excel</Button>
-          <Button type="link" icon={<FilePdfOutlined />}>PDF</Button>
-        </Space>
-      )
-    },
-  ];
+  const executeReport = async (id: number) => {
+    try {
+      const response = await fetch(`/api/reports/execute/${id}`, { method: 'POST' });
+      const result = await response.json();
+      
+      if (result.code === 200) {
+        alert('报表执行成功');
+      }
+    } catch (error) {
+      console.error('执行报表失败', error);
+    }
+  };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>报表中心</h1>
-      
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}><Card><Statistic title="报表总数" value={data.length} /></Card></Col>
-        <Col span={6}><Card><Statistic title="今日执行" value={3} /></Card></Col>
-        <Col span={6}><Card><Statistic title="定时报表" value={2} /></Card></Col>
-        <Col span={6}><Card><Statistic title="导出次数" value={15} /></Card></Col>
-      </Row>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">报表中心</h1>
+      </div>
 
-      <Table columns={columns} dataSource={data} rowKey="id" loading={loading} />
-
-      <Modal title={`执行报表 - ${currentReport?.reportName}`} open={modalVisible} footer={null} closable={false}>
-        <div style={{ textAlign: 'center', padding: 20 }}>报表执行中...</div>
-      </Modal>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">报表编码</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">报表名称</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item) => {
+              const typeBadge = getTypeBadge(item.reportType);
+              return (
+                <tr key={item.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.reportCode}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.reportName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded text-xs text-white bg-${typeBadge.color}-500`}>
+                      {typeBadge.text}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded text-xs ${item.status === 'ENABLED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {item.status === 'ENABLED' ? '启用' : '停用'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button onClick={() => executeReport(item.id)} className="text-blue-600 hover:underline mr-2">
+                      执行
+                    </button>
+                    <button className="text-green-600 hover:underline">查看</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
-
-export default ReportPage;
+}
