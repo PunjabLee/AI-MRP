@@ -1,9 +1,11 @@
 package com.aimrp.org.api.controller;
 
 import com.aimrp.common.result.ApiResponse;
+import com.aimrp.org.api.dto.OrganizationCreateRequest;
 import com.aimrp.org.domain.entity.Organization;
 import com.aimrp.org.infrastructure.persistence.mapper.OrganizationMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -58,15 +60,22 @@ public class OrganizationController {
      * 创建组织
      */
     @PostMapping
-    public ApiResponse<Organization> create(@RequestBody Organization org) {
-        Organization exist = orgMapper.selectByCode(org.getOrgCode());
+    public ApiResponse<Organization> create(@Validated @RequestBody OrganizationCreateRequest request) {
+        Organization exist = orgMapper.selectByCode(request.getOrgCode());
         if (exist != null) {
             return ApiResponse.fail("组织编码已存在");
         }
         
-        // 设置层级
-        if (org.getParentId() != null) {
-            Organization parent = orgMapper.selectById(org.getParentId());
+        Organization org = new Organization();
+        org.setOrgCode(request.getOrgCode());
+        org.setOrgName(request.getOrgName());
+        org.setParentId(request.getParentId());
+        org.setOrgType(request.getOrgType());
+        org.setManager(request.getManager());
+        org.setRemark(request.getRemark());
+        
+        if (request.getParentId() != null) {
+            Organization parent = orgMapper.selectById(request.getParentId());
             if (parent != null) {
                 org.setLevel(parent.getLevel() + 1);
             }
@@ -84,8 +93,15 @@ public class OrganizationController {
      * 更新组织
      */
     @PutMapping("/{id}")
-    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody Organization org) {
+    public ApiResponse<Void> update(@PathVariable Long id, @Validated @RequestBody OrganizationCreateRequest request) {
+        Organization org = new Organization();
         org.setId(id);
+        org.setOrgCode(request.getOrgCode());
+        org.setOrgName(request.getOrgName());
+        org.setOrgType(request.getOrgType());
+        org.setManager(request.getManager());
+        org.setRemark(request.getRemark());
+        
         orgMapper.updateById(org);
         return ApiResponse.ok();
     }
@@ -95,7 +111,6 @@ public class OrganizationController {
      */
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id) {
-        // 检查是否有子组织
         List<Organization> children = orgMapper.selectList(id, null, null);
         if (!children.isEmpty()) {
             return ApiResponse.fail("请先删除子组织");
@@ -135,8 +150,6 @@ public class OrganizationController {
                 node.put("orgName", org.getOrgName());
                 node.put("orgType", org.getOrgType());
                 node.put("level", org.getLevel());
-                
-                // 递归获取子节点
                 node.put("children", buildTree(all, org.getId()));
                 
                 tree.add(node);
