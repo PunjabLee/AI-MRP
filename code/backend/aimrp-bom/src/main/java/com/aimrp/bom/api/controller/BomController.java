@@ -1,15 +1,16 @@
 package com.aimrp.bom.api.controller;
 
 import com.aimrp.common.result.ApiResponse;
+import com.aimrp.bom.api.dto.BomCreateRequest;
 import com.aimrp.bom.domain.entity.Bom;
 import com.aimrp.bom.infrastructure.persistence.mapper.BomMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,9 +67,15 @@ public class BomController {
      * 创建BOM
      */
     @PostMapping
-    public ApiResponse<Bom> create(@RequestBody Bom bom) {
-        bom.setBomNo("BOM" + System.currentTimeMillis());
+    public ApiResponse<Bom> create(@Validated @RequestBody BomCreateRequest request) {
+        Bom bom = new Bom();
+        bom.setItemCode(request.getItemCode());
+        bom.setChildItemCode(request.getChildItemCode());
+        bom.setUsageQty(request.getUsageQty());
+        bom.setLossRate(request.getLossRate());
+        bom.setLevel(request.getLevel());
         bom.setStatus("DRAFT");
+        
         bomMapper.insert(bom);
         return ApiResponse.ok(bom);
     }
@@ -77,8 +84,13 @@ public class BomController {
      * 更新BOM
      */
     @PutMapping("/{id}")
-    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody Bom bom) {
-        bom.setId(id);
+    public ApiResponse<Void> update(@PathVariable Long id, @Validated @RequestBody BomCreateRequest request) {
+        Bom bom = bomMapper.selectById(id);
+        bom.setChildItemCode(request.getChildItemCode());
+        bom.setUsageQty(request.getUsageQty());
+        bom.setLossRate(request.getLossRate());
+        bom.setLevel(request.getLevel());
+        
         bomMapper.updateById(bom);
         return ApiResponse.ok();
     }
@@ -96,12 +108,11 @@ public class BomController {
      * BOM展开
      */
     @PostMapping("/expand")
-    public ApiResponse<List<Map<String, Object>>> expand(@RequestBody Map<String, Object> params) {
+    public ApiResponse<Object> expand(@RequestBody Map<String, Object> params) {
         String itemCode = (String) params.get("itemCode");
         Integer level = (Integer) params.get("level");
         
-        // 调用BOM展开服务
-        List<Map<String, Object>> result = bomMapper.selectExpand(itemCode, level != null ? level : 3);
+        var result = bomMapper.selectExpand(itemCode, level != null ? level : 3);
         
         return ApiResponse.ok(result);
     }
@@ -110,12 +121,8 @@ public class BomController {
      * 获取物料的BOM
      */
     @GetMapping("/parent/{parentItemCode}")
-    public ApiResponse<List<Bom>> getByParent(@PathVariable String parentItemCode) {
-        LambdaQueryWrapper<Bom> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Bom::getItemCode, parentItemCode);
-        
-        List<Bom> list = bomMapper.selectList(wrapper);
-        
+    public ApiResponse<Object> getByParent(@PathVariable String parentItemCode) {
+        var list = bomMapper.selectBomMap(parentItemCode);
         return ApiResponse.ok(list);
     }
 }
