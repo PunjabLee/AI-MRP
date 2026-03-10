@@ -1,9 +1,12 @@
 package com.aimrp.inventory.api.controller;
 
 import com.aimrp.common.result.ApiResponse;
+import com.aimrp.inventory.api.dto.InventoryCreateRequest;
+import com.aimrp.inventory.api.dto.InventoryTransRequest;
 import com.aimrp.inventory.domain.entity.Inventory;
 import com.aimrp.inventory.infrastructure.persistence.mapper.InventoryMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,14 +31,11 @@ public class InventoryController {
     public ApiResponse<Map<String, Object>> list(
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String warehouseCode,
-            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         
-        // 从数据库查询
         List<Map<String, Object>> list = inventoryMapper.selectList(itemCode, warehouseCode);
         
-        // 分页
         int total = list.size();
         int fromIndex = (pageNum - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, total);
@@ -55,12 +55,19 @@ public class InventoryController {
      */
     @GetMapping("/{id}")
     public ApiResponse<Map<String, Object>> getById(@PathVariable Long id) {
-        // TODO: 根据ID查询
-        return ApiResponse.ok(new HashMap<>());
+        Inventory inventory = inventoryMapper.selectById(id);
+        Map<String, Object> result = new HashMap<>();
+        if (inventory != null) {
+            result.put("id", inventory.getId());
+            result.put("itemCode", inventory.getItemCode());
+            result.put("warehouseCode", inventory.getWarehouseCode());
+            result.put("onHandQty", inventory.getOnHandQty());
+        }
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 根据物料查询库存
+     * 按物料查询
      */
     @GetMapping("/item/{itemCode}")
     public ApiResponse<List<Map<String, Object>>> getByItemCode(@PathVariable String itemCode) {
@@ -72,22 +79,17 @@ public class InventoryController {
      * 入库
      */
     @PostMapping("/in")
-    public ApiResponse<Map<String, Object>> inStock(@RequestBody Map<String, Object> params) {
-        String itemCode = (String) params.get("itemCode");
-        String warehouseCode = (String) params.get("warehouseCode");
-        BigDecimal qty = new BigDecimal(params.get("qty").toString());
-        String type = (String) params.get("type");
-        
+    public ApiResponse<Map<String, Object>> inStock(@Validated @RequestBody InventoryTransRequest request) {
         // 查询现有库存
-        Map<String, Object> existing = inventoryMapper.selectByItemAndWarehouse(itemCode, warehouseCode);
+        Map<String, Object> existing = inventoryMapper.selectByItemAndWarehouse(
+            request.getItemCode(), request.getWarehouseCode());
         
         if (existing != null) {
-            // 更新数量
             Long id = ((Number) existing.get("id")).longValue();
-            inventoryMapper.increaseQty(id, qty);
+            inventoryMapper.increaseQty(id, request.getQty());
         } else {
-            // 创建新库存记录
-            inventoryMapper.insert(itemCode, warehouseCode, qty);
+            inventoryMapper.insert(request.getItemCode(), request.getWarehouseCode(), 
+                request.getQty() != null ? request.getQty() : BigDecimal.ZERO);
         }
         
         Map<String, Object> result = new HashMap<>();
@@ -101,27 +103,21 @@ public class InventoryController {
      * 出库
      */
     @PostMapping("/out")
-    public ApiResponse<Map<String, Object>> outStock(@RequestBody Map<String, Object> params) {
-        String itemCode = (String) params.get("itemCode");
-        String warehouseCode = (String) params.get("warehouseCode");
-        BigDecimal qty = new BigDecimal(params.get("qty").toString());
-        
-        // 查询现有库存
-        Map<String, Object> existing = inventoryMapper.selectByItemAndWarehouse(itemCode, warehouseCode);
+    public ApiResponse<Map<String, Object>> outStock(@Validated @RequestBody InventoryTransRequest request) {
+        Map<String, Object> existing = inventoryMapper.selectByItemAndWarehouse(
+            request.getItemCode(), request.getWarehouseCode());
         
         if (existing == null) {
             return ApiResponse.fail("库存记录不存在");
         }
         
-        // 检查库存是否充足
         BigDecimal availableQty = new BigDecimal(existing.get("available_qty").toString());
-        if (availableQty.compareTo(qty) < 0) {
+        if (availableQty.compareTo(request.getQty()) < 0) {
             return ApiResponse.fail("库存不足");
         }
         
-        // 扣减库存
         Long id = ((Number) existing.get("id")).longValue();
-        inventoryMapper.decreaseQty(id, qty);
+        inventoryMapper.decreaseQty(id, request.getQty());
         
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
@@ -134,30 +130,16 @@ public class InventoryController {
      * 创建库存
      */
     @PostMapping
-    public ApiResponse<Inventory> create(@RequestBody Inventory inventory) {
-        inventoryMapper.insert(
-            inventory.getItemCode(),
-            inventory.getWarehouseCode(),
-            inventory.getOnHandQty() != null ? inventory.getOnHandQty() : BigDecimal.ZERO
-        );
+    public ApiResponse<Inventory> create(@Validated @RequestBody InventoryCreateRequest request) {
+        Inventory inventory = new Inventory();
+        inventory.setItemCode(request.getItemCode());
+        inventory.setWarehouseCode(request.getWarehouseCode());
+        inventory.setLocationCode(request.getLocationCode());
+        inventory.setOnHandQty(request.getOnHandQty() != null ? request.getOnHandQty() : BigDecimal.ZERO);
+        inventory.setAvailableQty(request.getOnHandQty() != null ? request.getOnHandQty() : BigDecimal.ZERO);
+        
+        inventoryMapper.insert(inventory.getItemCode(), inventory.getWarehouseCode(), inventory.getOnHandQty());
+        
         return ApiResponse.ok(inventory);
-    }
-    
-    /**
-     * 更新库存
-     */
-    @PutMapping("/{id}")
-    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody Inventory inventory) {
-        // TODO: 完整更新逻辑
-        return ApiResponse.ok();
-    }
-    
-    /**
-     * 删除库存
-     */
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
-        // TODO: 删除逻辑
-        return ApiResponse.ok();
     }
 }
