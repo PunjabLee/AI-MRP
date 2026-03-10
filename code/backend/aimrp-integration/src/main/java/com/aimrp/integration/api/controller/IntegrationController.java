@@ -1,5 +1,6 @@
 package com.aimrp.integration.api.controller;
 
+import com.aimrp.common.result.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 /**
- * 系统集成接口
+ * ERP集成 Controller
  */
 @Slf4j
 @RestController
@@ -16,96 +17,87 @@ import java.util.*;
 public class IntegrationController {
     
     /**
-     * 获取集成配置列表
+     * 同步销售订单
      */
-    @GetMapping("/configs")
-    public Map<String, Object> listConfigs() {
-        List<Map<String, Object>> list = new ArrayList<>();
+    @PostMapping("/sync/sales-order")
+    public ApiResponse<Map<String, Object>> syncSalesOrder(@RequestBody Map<String, Object> data) {
+        log.info("ERP同步销售订单: {}", data.get("orderNo"));
         
-        Map<String, Object> c1 = new HashMap<>();
-        c1.put("id", 1L);
-        c1.put("systemName", "ERP");
-        c1.put("systemType", "ERP");
-        c1.put("status", "CONNECTED");
-        list.add(c1);
-        
-        Map<String, Object> c2 = new HashMap<>();
-        c2.put("id", 2L);
-        c2.put("systemName", "WMS");
-        c2.put("systemType", "WMS");
-        c2.put("status", "CONNECTED");
-        list.add(c2);
-        
-        return Map.of("code", 200, "data", list);
-    }
-    
-    /**
-     * 创建集成配置
-     */
-    @PostMapping("/configs")
-    public Map<String, Object> createConfig(@RequestBody Map<String, Object> data) {
-        log.info("创建集成配置: {}", data);
-        data.put("id", System.currentTimeMillis());
-        return Map.of("code", 200, "data", data, "message", "创建成功");
-    }
-    
-    /**
-     * 测试连接
-     */
-    @PostMapping("/configs/{id}/test")
-    public Map<String, Object> testConnection(@PathVariable Long id) {
-        log.info("测试连接: {}", id);
-        return Map.of("code", 200, "message", "连接成功");
-    }
-    
-    /**
-     * 同步主数据
-     */
-    @PostMapping("/sync/{system}")
-    public Map<String, Object> sync(@PathVariable String system, @RequestBody Map<String, Object> params) {
-        log.info("同步数据: {} - {}", system, params);
+        // TODO: 调用ERP API同步
         
         Map<String, Object> result = new HashMap<>();
-        result.put("syncedCount", 100);
-        result.put("failedCount", 0);
-        result.put("startTime", new Date());
+        result.put("success", true);
+        result.put("erpOrderNo", "ERP" + System.currentTimeMillis());
         
-        return Map.of("code", 200, "data", result, "message", "同步完成");
+        return ApiResponse.ok(result);
     }
     
     /**
-     * Open API 密钥管理
+     * 同步库存
      */
-    @GetMapping("/api-keys")
-    public Map<String, Object> listApiKeys() {
-        return Map.of("code", 200, "data", new ArrayList<>());
+    @PostMapping("/sync/inventory")
+    public ApiResponse<Map<String, Object>> syncInventory(@RequestBody Map<String, Object> data) {
+        log.info("ERP同步库存: {}", data.get("itemCode"));
+        
+        // TODO: 调用ERP API
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 创建 API 密钥
+     * 同步物料主数据
      */
-    @PostMapping("/api-keys")
-    public Map<String, Object> createApiKey(@RequestBody Map<String, Object> data) {
-        log.info("创建API密钥: {}", data);
-        data.put("apiKey", "ak_" + System.currentTimeMillis());
-        data.put("apiSecret", "as_" + System.currentTimeMillis());
-        return Map.of("code", 200, "data", data, "message", "创建成功");
+    @PostMapping("/sync/item")
+    public ApiResponse<Map<String, Object>> syncItem(@RequestBody Map<String, Object> data) {
+        log.info("ERP同步物料: {}", data.get("itemCode"));
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        
+        return ApiResponse.ok(result);
     }
     
     /**
-     * Webhook 配置
+     * 推送采购入库
      */
-    @GetMapping("/webhooks")
-    public Map<String, Object> listWebhooks() {
-        return Map.of("code", 200, "data", new ArrayList<>());
+    @PostMapping("/push/purchase-receipt")
+    public ApiResponse<Map<String, Object>> pushPurchaseReceipt(@RequestBody Map<String, Object> data) {
+        log.info("推送采购入库到ERP: {}", data.get("receiptNo"));
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("erpReceiptNo", "ERP_RECEIPT" + System.currentTimeMillis());
+        
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 创建 Webhook
+     * 推送生产成本
      */
-    @PostMapping("/webhooks")
-    public Map<String, Object> createWebhook(@RequestBody Map<String, Object> data) {
-        log.info("创建Webhook: {}", data);
-        return Map.of("code", 200, "message", "创建成功");
+    @PostMapping("/push/production-cost")
+    public ApiResponse<Map<String, Object>> pushProductionCost(@RequestBody Map<String, Object> data) {
+        log.info("推送生产成本到ERP");
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        
+        return ApiResponse.ok(result);
+    }
+    
+    /**
+     * 获取同步状态
+     */
+    @GetMapping("/status")
+    public ApiResponse<Map<String, Object>> getSyncStatus() {
+        Map<String, Object> status = new HashMap<>();
+        status.put("lastSyncTime", "2026-03-10 15:00:00");
+        status.put("salesOrder", "SUCCESS");
+        status.put("inventory", "SUCCESS");
+        status.put("item", "SUCCESS");
+        
+        return ApiResponse.ok(status);
     }
 }

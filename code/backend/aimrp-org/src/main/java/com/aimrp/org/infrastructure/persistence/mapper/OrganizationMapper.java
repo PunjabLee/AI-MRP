@@ -1,28 +1,32 @@
 package com.aimrp.org.infrastructure.persistence.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.aimrp.org.domain.entity.Organization;
+import org.apache.ibatis.annotations.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 组织 Mapper
  */
 @Mapper
-public interface OrganizationMapper {
+public interface OrganizationMapper extends BaseMapper<Organization> {
     
-    List<Map<String, Object>> selectList(@Param("orgType") String orgType, @Param("status") String status);
+    @Select("<script>" +
+            "SELECT * FROM t_organization " +
+            "<where>" +
+            "  <if test='parentId != null'> AND parent_id = #{parentId} </if>" +
+            "  <if test='orgType != null'> AND org_type = #{orgType} </if>" +
+            "  <if test='status != null'> AND status = #{status} </if>" +
+            "</where>" +
+            " ORDER BY level, sort_order" +
+            "</script>")
+    List<Organization> selectList(@Param("parentId") Long parentId, 
+                                @Param("orgType") String orgType, 
+                                @Param("status") String status);
     
-    Map<String, Object> selectById(@Param("id") Long id);
+    @Select("SELECT * FROM t_organization WHERE parent_id IS NULL ORDER BY sort_order")
+    List<Organization> selectRoot();
     
-    Map<String, Object> selectByCode(@Param("orgCode") String orgCode);
-    
-    Long insert(Map<String, Object> data);
-    
-    void update(@Param("id") Long id, Map<String, Object> data);
-    
-    void delete(@Param("id") Long id);
-    
-    int countByParentId(@Param("parentId") Long parentId);
+    @Select("SELECT * FROM t_organization WHERE org_code = #{code}")
+    Organization selectByCode(@Param("code") String code);
 }

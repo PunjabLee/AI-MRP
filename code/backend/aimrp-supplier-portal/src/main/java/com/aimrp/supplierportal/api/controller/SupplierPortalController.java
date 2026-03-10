@@ -1,15 +1,14 @@
 package com.aimrp.supplierportal.api.controller;
 
+import com.aimrp.common.result.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 /**
- * 供应商门户接口
+ * 供应商门户 Controller
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/supplier-portal")
 @RequiredArgsConstructor
@@ -19,89 +18,86 @@ public class SupplierPortalController {
      * 供应商登录
      */
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> credentials) {
-        log.info("供应商登录: {}", credentials.get("supplierCode"));
+    public ApiResponse<Map<String, Object>> login(@RequestBody Map<String, String> params) {
+        String username = params.get("username");
+        String password = params.get("password");
+        
+        // TODO: 验证用户名密码
         
         Map<String, Object> result = new HashMap<>();
-        result.put("token", "mock-jwt-token");
+        result.put("token", "mock_token_" + System.currentTimeMillis());
         result.put("supplierId", 1L);
-        result.put("supplierCode", credentials.get("supplierCode"));
+        result.put("supplierName", "测试供应商");
         
-        return Map.of("code", 200, "data", result);
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 获取采购订单列表
+     * 获取供应商待确认订单
      */
-    @GetMapping("/orders")
-    public Map<String, Object> getOrders(
-            @RequestHeader(value = "Authorization", required = false) String token,
-            @RequestParam(required = false) String status) {
+    @GetMapping("/orders/pending")
+    public ApiResponse<Map<String, Object>> getPendingOrders(@RequestParam Long supplierId) {
+        List<Map<String, Object>> orders = new ArrayList<>();
         
-        List<Map<String, Object>> list = new ArrayList<>();
+        // 示例数据
+        Map<String, Object> order = new HashMap<>();
+        order.put("poNo", "PO001");
+        order.put("itemCode", "A001");
+        order.put("itemName", "物料A");
+        order.put("qty", 100);
+        order.put("deliveryDate", "2026-03-20");
+        order.put("status", "PENDING_CONFIRM");
+        orders.add(order);
         
-        Map<String, Object> order1 = new HashMap<>();
-        order1.put("id", 1L);
-        order1.put("orderNo", "PO20240309001");
-        order1.put("itemName", "物料A");
-        order1.put("qty", 1000);
-        order1.put("deliveryDate", "2024-03-20");
-        order1.put("status", "PENDING");
-        list.add(order1);
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", orders);
+        result.put("total", orders.size());
         
-        return Map.of("code", 200, "data", list);
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 确认订单
+     * 供应商确认订单
      */
     @PostMapping("/orders/{id}/confirm")
-    public Map<String, Object> confirmOrder(
-            @PathVariable Long id,
-            @RequestBody Map<String, Object> data) {
-        log.info("供应商确认订单: {}", id);
-        
-        return Map.of("code", 200, "message", "确认成功");
+    public ApiResponse<Void> confirmOrder(@PathVariable Long id) {
+        // TODO: 更新订单状态
+        return ApiResponse.ok();
     }
     
     /**
-     * 提交送货通知
+     * 供应商报价
      */
-    @PostMapping("/delivery-notices")
-    public Map<String, Object> submitDeliveryNotice(@RequestBody Map<String, Object> data) {
-        log.info("提交送货通知: {}", data);
+    @PostMapping("/quotes")
+    public ApiResponse<Map<String, Object>> submitQuote(@RequestBody Map<String, Object> params) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("quoteNo", "Q" + System.currentTimeMillis());
+        result.put("status", "SUBMITTED");
         
-        data.put("id", System.currentTimeMillis());
+        return ApiResponse.ok(result);
+    }
+    
+    /**
+     * 供应商发货通知
+     */
+    @PostMapping("/shipments")
+    public ApiResponse<Map<String, Object>> submitShipment(@RequestBody Map<String, Object> params) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("shipmentNo", "SH" + System.currentTimeMillis());
+        result.put("status", "SHIPPED");
         
-        return Map.of("code", 200, "data", data, "message", "提交成功");
+        return ApiResponse.ok(result);
     }
     
     /**
      * 获取对账单
      */
     @GetMapping("/statements")
-    public Map<String, Object> getStatements(
-            @RequestHeader(value = "Authorization", required = false) String token) {
+    public ApiResponse<Map<String, Object>> getStatements(@RequestParam Long supplierId) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", new ArrayList<>());
+        result.put("total", 0);
         
-        List<Map<String, Object>> list = new ArrayList<>();
-        
-        Map<String, Object> stmt = new HashMap<>();
-        stmt.put("id", 1L);
-        stmt.put("statementNo", "ST20240301");
-        stmt.put("amount", 50000);
-        stmt.put("status", "CONFIRMED");
-        list.add(stmt);
-        
-        return Map.of("code", 200, "data", list);
-    }
-    
-    /**
-     * 送货通知列表
-     */
-    @GetMapping("/delivery-notices")
-    public Map<String, Object> getDeliveryNotices(
-            @RequestHeader(value = "Authorization", required = false) String token) {
-        
-        return Map.of("code", 200, "data", new ArrayList<>());
+        return ApiResponse.ok(result);
     }
 }

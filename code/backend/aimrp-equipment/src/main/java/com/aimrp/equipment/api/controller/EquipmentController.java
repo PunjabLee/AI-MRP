@@ -1,95 +1,126 @@
 package com.aimrp.equipment.api.controller;
 
+import com.aimrp.common.result.ApiResponse;
+import com.aimrp.equipment.domain.entity.Equipment;
+import com.aimrp.equipment.infrastructure.persistence.mapper.EquipmentMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * 设备管理接口
+ * 设备管理 Controller
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/equipment")
 @RequiredArgsConstructor
 public class EquipmentController {
     
+    private final EquipmentMapper equipmentMapper;
+    
     /**
      * 获取设备列表
      */
     @GetMapping("/list")
-    public Map<String, Object> list(
+    public ApiResponse<Map<String, Object>> list(
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String equipmentType,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String workCenterCode,
+            @RequestParam(required = false) String keyword) {
         
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<Equipment> list = equipmentMapper.selectList(status, equipmentType, workCenterCode, keyword);
         
-        Map<String, Object> e1 = new HashMap<>();
-        e1.put("id", 1L);
-        e1.put("equipmentCode", "EQ001");
-        e1.put("equipmentName", "加工中心1");
-        e1.put("equipmentType", "CNC");
-        e1.put("status", "RUNNING");
-        e1.put("oee", 0.85);
-        list.add(e1);
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", list.size());
         
-        Map<String, Object> e2 = new HashMap<>();
-        e2.put("id", 2L);
-        e2.put("equipmentCode", "EQ002");
-        e2.put("equipmentName", "车床1");
-        e2.put("equipmentType", "LATHE");
-        e2.put("status", "RUNNING");
-        e2.put("oee", 0.92);
-        list.add(e2);
-        
-        return Map.of("code", 200, "data", list);
+        return ApiResponse.ok(result);
     }
     
     /**
      * 获取设备详情
      */
     @GetMapping("/{id}")
-    public Map<String, Object> get(@PathVariable Long id) {
-        Map<String, Object> equipment = new HashMap<>();
-        equipment.put("id", id);
-        equipment.put("equipmentCode", "EQ001");
-        equipment.put("equipmentName", "加工中心1");
-        equipment.put("equipmentType", "CNC");
-        equipment.put("status", "RUNNING");
-        equipment.put("oee", 0.85);
+    public ApiResponse<Equipment> getById(@PathVariable Long id) {
+        return ApiResponse.ok(equipmentMapper.selectById(id));
+    }
+    
+    /**
+     * 创建设备
+     */
+    @PostMapping
+    public ApiResponse<Equipment> create(@RequestBody Equipment equipment) {
+        Equipment exist = equipmentMapper.selectByCode(equipment.getEquipmentCode());
+        if (exist != null) {
+            return ApiResponse.fail("设备编码已存在");
+        }
         
-        return Map.of("code", 200, "data", equipment);
-    }
-    
-    /**
-     * 报修
-     */
-    @PostMapping("/{id}/repair")
-    public Map<String, Object> repair(@PathVariable Long id, @RequestBody Map<String, Object> data) {
-        log.info("设备报修: {}", id);
-        return Map.of("code", 200, "message", "报修成功");
-    }
-    
-    /**
-     * 保养计划
-     */
-    @GetMapping("/{id}/maintenance")
-    public Map<String, Object> getMaintenance(@PathVariable Long id) {
-        return Map.of("code", 200, "data", new ArrayList<>());
-    }
-    
-    /**
-     * OEE报表
-     */
-    @GetMapping("/oee-report")
-    public Map<String, Object> oeeReport() {
-        Map<String, Object> report = new HashMap<>();
-        report.put("averageOEE", 0.88);
-        report.put("availability", 0.95);
-        report.put("performance", 0.92);
-        report.put("quality", 0.98);
+        equipment.setStatus("IDLE");
+        equipmentMapper.insert(equipment);
         
-        return Map.of("code", 200, "data", report);
+        return ApiResponse.ok(equipment);
+    }
+    
+    /**
+     * 更新设备
+     */
+    @PutMapping("/{id}")
+    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody Equipment equipment) {
+        equipment.setId(id);
+        equipmentMapper.updateById(equipment);
+        
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 删除设备
+     */
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        equipmentMapper.deleteById(id);
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 设备报修
+     */
+    @PostMapping("/{id}/report-fault")
+    public ApiResponse<Void> reportFault(@PathVariable Long id, @RequestBody Map<String, String> params) {
+        Equipment equipment = new Equipment();
+        equipment.setId(id);
+        equipment.setStatus("BROKEN");
+        equipment.setRemark(params.get("remark"));
+        equipmentMapper.updateById(equipment);
+        
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 设备维修完成
+     */
+    @PostMapping("/{id}/repair-complete")
+    public ApiResponse<Void> repairComplete(@PathVariable Long id) {
+        Equipment equipment = new Equipment();
+        equipment.setId(id);
+        equipment.setStatus("IDLE");
+        equipmentMapper.updateById(equipment);
+        
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 设备维保计划
+     */
+    @GetMapping("/{id}/maintenance-plan")
+    public ApiResponse<Map<String, Object>> getMaintenancePlan(@PathVariable Long id) {
+        // TODO: 查询设备维保计划
+        Map<String, Object> plan = new HashMap<>();
+        plan.put("lastMaintenanceDate", "2026-01-01");
+        plan.put("nextMaintenanceDate", "2026-04-01");
+        plan.put("maintenanceCycle", 90); // 天
+        
+        return ApiResponse.ok(plan);
     }
 }
