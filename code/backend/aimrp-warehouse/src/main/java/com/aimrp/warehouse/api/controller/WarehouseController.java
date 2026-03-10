@@ -1,10 +1,12 @@
 package com.aimrp.warehouse.api.controller;
 
 import com.aimrp.common.result.ApiResponse;
+import com.aimrp.warehouse.api.dto.WarehouseCreateRequest;
 import com.aimrp.warehouse.domain.entity.Warehouse;
 import com.aimrp.warehouse.infrastructure.persistence.mapper.WarehouseMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -52,14 +54,23 @@ public class WarehouseController {
      * 创建仓库
      */
     @PostMapping
-    public ApiResponse<Warehouse> create(@RequestBody Warehouse warehouse) {
+    public ApiResponse<Warehouse> create(@Validated @RequestBody WarehouseCreateRequest request) {
         // 检查编码是否重复
-        Warehouse exist = warehouseMapper.selectByCode(warehouse.getWarehouseCode());
+        Warehouse exist = warehouseMapper.selectByCode(request.getWarehouseCode());
         if (exist != null) {
             return ApiResponse.fail("仓库编码已存在");
         }
         
+        Warehouse warehouse = new Warehouse();
+        warehouse.setWarehouseCode(request.getWarehouseCode());
+        warehouse.setWarehouseName(request.getWarehouseName());
+        warehouse.setWarehouseType(request.getWarehouseType());
+        warehouse.setAddress(request.getAddress());
+        warehouse.setContact(request.getContact());
+        warehouse.setPhone(request.getPhone());
+        warehouse.setRemark(request.getRemark());
         warehouse.setStatus("ENABLED");
+        
         warehouseMapper.insert(warehouse);
         
         return ApiResponse.ok(warehouse);
@@ -69,8 +80,17 @@ public class WarehouseController {
      * 更新仓库
      */
     @PutMapping("/{id}")
-    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody Warehouse warehouse) {
+    public ApiResponse<Void> update(@PathVariable Long id, @Validated @RequestBody WarehouseCreateRequest request) {
+        Warehouse warehouse = new Warehouse();
         warehouse.setId(id);
+        warehouse.setWarehouseCode(request.getWarehouseCode());
+        warehouse.setWarehouseName(request.getWarehouseName());
+        warehouse.setWarehouseType(request.getWarehouseType());
+        warehouse.setAddress(request.getAddress());
+        warehouse.setContact(request.getContact());
+        warehouse.setPhone(request.getPhone());
+        warehouse.setRemark(request.getRemark());
+        
         warehouseMapper.updateById(warehouse);
         
         return ApiResponse.ok();
