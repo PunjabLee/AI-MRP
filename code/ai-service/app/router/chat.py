@@ -276,3 +276,88 @@ async def submit_feedback(session_id: str, message: str,
         "status": "success",
         "message": "感谢反馈，我们将持续优化识别准确率"
     }
+
+
+# ========== 意图推荐服务 ==========
+
+@router.get("/recommendations")
+async def get_intent_recommendations(session_id: str):
+    """
+    获取意图推荐
+    
+    根据用户历史行为和系统状态推荐可能需要的操作
+    """
+    # TODO: 从数据库查询用户历史行为
+    # history = get_user_history(session_id)
+    # current_state = get_system_state()
+    
+    # 基于规则的推荐
+    recommendations = _generate_recommendations(session_id)
+    
+    return {
+        "session_id": session_id,
+        "recommendations": recommendations,
+        "reason": "基于您的操作习惯和系统状态"
+    }
+
+
+def _generate_recommendations(session_id: str) -> List[Dict[str, Any]]:
+    """生成推荐列表"""
+    
+    recommendations = []
+    
+    # 检查库存风险
+    # if has_inventory_risk():
+    recommendations.append({
+        "intent": "query_risk",
+        "title": "查看风险预警",
+        "description": "您有新的风险预警待处理",
+        "priority": "HIGH",
+        "icon": "⚠️"
+    })
+    
+    # 检查MRP是否需要运行
+    # if needs_mrp_run():
+    recommendations.append({
+        "intent": "run_mrp",
+        "title": "运行MRP",
+        "description": "建议运行MRP计算更新采购建议",
+        "priority": "MEDIUM",
+        "icon": "🔢"
+    })
+    
+    # 检查订单情况
+    # if has_pending_orders():
+    recommendations.append({
+        "intent": "query_order",
+        "title": "查看订单",
+        "description": "您有待确认的订单",
+        "priority": "MEDIUM",
+        "icon": "📋"
+    })
+    
+    # 检查预测需求
+    # if needs_forecast():
+    recommendations.append({
+        "intent": "query_forecast",
+        "title": "需求预测",
+        "description": "查看近期需求预测",
+        "priority": "LOW",
+        "icon": "📈"
+    })
+    
+    return recommendations
+
+
+@router.post("/recommendations/feedback")
+async def recommendation_feedback(session_id: str, intent: str, action: str):
+    """
+    推荐反馈
+    
+    记录用户对推荐的反应，用于优化推荐算法
+    """
+    # TODO: 存储反馈
+    return {
+        "status": "success",
+        "message": "反馈已记录"
+    }
