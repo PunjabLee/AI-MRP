@@ -32,24 +32,20 @@ public class Organization {
     /** 负责人 */
     private String manager;
     
-    /** 状态：ENABLED-启用/DISABLED-停用 */
+    /** 状态：ENABLED-启用/DISABLED-禁用 */
     private String status;
-    
-    /** 排序 */
-    private Integer sortOrder;
     
     /** 备注 */
     private String remark;
     
-    @TableField(fill = FieldFill.INSERT)
-    private String createdBy;
+    /** 权限标识 */
+    private String permissionKey;
     
+    /** 创建时间 */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
     
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private String updatedBy;
-    
+    /** 更新时间 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 }
