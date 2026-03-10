@@ -1,24 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Input, Modal, Form, message } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { bomApi, BomItem } from '../api/bom';
+import { message } from 'antd';
 
-interface BomItem {
-  id: number;
-  parentItemCode: string;
-  parentItemName: string;
-  childItemCode: string;
-  childItemName: string;
-  usageQty: number;
-  level: number;
-  status: string;
-}
-
-const BomPage: React.FC = () => {
+export function BomPage() {
   const [data, setData] = useState<BomItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState('');
+  const [searchParams, setSearchParams] = useState({ parentItemCode: '' });
 
   useEffect(() => {
     fetchData();
@@ -27,121 +14,80 @@ const BomPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 模拟数据
-      const mockData: BomItem[] = [
-        { id: 1, parentItemCode: 'A001', parentItemName: '产品A', childItemCode: 'B001', childItemName: '部件B', usageQty: 2, level: 1, status: 'ACTIVE' },
-        { id: 2, parentItemCode: 'A001', parentItemName: '产品A', childItemCode: 'C001', childItemName: '物料C', usageQty: 5, level: 1, status: 'ACTIVE' },
-        { id: 3, parentItemCode: 'B001', parentItemName: '部件B', childItemCode: 'C001', childItemName: '物料C', usageQty: 3, level: 1, status: 'ACTIVE' },
-      ];
-      setData(mockData);
+      const result = await bomApi.list(searchParams);
+      setData(result.list || []);
     } catch (error) {
-      message.error('加载失败');
+      console.error('获取BOM失败', error);
+      message.error('获取BOM失败');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAdd = () => {
-    form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEdit = (record: BomItem) => {
-    form.setFieldsValue(record);
-    setModalVisible(true);
-  };
-
-  const handleDelete = (id: number) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这条BOM记录吗？',
-      onOk: () => {
-        setData(data.filter(item => item.id !== id));
-        message.success('删除成功');
-      },
-    });
-  };
-
-  const handleSubmit = async () => {
+  const handleExpand = async (itemCode: string) => {
     try {
-      const values = await form.validateFields();
-      const newItem = { ...values, id: data.length + 1, status: 'ACTIVE' };
-      setData([...data, newItem]);
-      setModalVisible(false);
-      message.success('保存成功');
+      const result = await bomApi.expand(itemCode, 3);
+      message.success(`展开成功，共${result.length}个子物料`);
     } catch (error) {
-      message.error('保存失败');
+      message.error('展开失败');
     }
   };
 
-  const filteredData = data.filter(item =>
-    item.parentItemCode.includes(searchText) ||
-    item.childItemCode.includes(searchText)
-  );
-
-  const columns = [
-    { title: '父件编码', dataIndex: 'parentItemCode', key: 'parentItemCode' },
-    { title: '父件名称', dataIndex: 'parentItemName', key: 'parentItemName' },
-    { title: '子件编码', dataIndex: 'childItemCode', key: 'childItemCode' },
-    { title: '子件名称', dataIndex: 'childItemName', key: 'childItemName' },
-    { title: '用量', dataIndex: 'usageQty', key: 'usageQty' },
-    { title: '层级', dataIndex: 'level', key: 'level' },
-    { title: '状态', dataIndex: 'status', key: 'status' },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: BomItem) => (
-        <Space>
-          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)}>删除</Button>
-        </Space>
-      ),
-    },
-  ];
-
   return (
-    <div style={{ padding: 24 }}>
-      <h1>BOM 管理</h1>
-      <Space style={{ marginBottom: 16 }}>
-        <Input.Search
-          placeholder="搜索父件/子件编码"
-          onSearch={setSearchText}
-          style={{ width: 300 }}
-        />
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增 BOM</Button>
-      </Space>
-      <Table columns={columns} dataSource={filteredData} rowKey="id" loading={loading} />
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">BOM管理</h1>
+      </div>
 
-      <Modal
-        title={form.getFieldValue('id') ? '编辑BOM' : '新增BOM'}
-        open={modalVisible}
-        onOk={handleSubmit}
-        onCancel={() => setModalVisible(false)}
-        width={600}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="parentItemCode" label="父件编码" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="parentItemName" label="父件名称" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="childItemCode" label="子件编码" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="childItemName" label="子件名称" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="usageQty" label="用量" rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item name="level" label="层级">
-            <Input type="number" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      {/* 搜索栏 */}
+      <div className="mb-4 bg-white p-4 rounded-lg shadow">
+        <div className="flex gap-4">
+          <input
+            placeholder="父物料编码"
+            value={searchParams.parentItemCode}
+            onChange={e => setSearchParams({...searchParams, parentItemCode: e.target.value})}
+            className="border rounded px-3 py-2 flex-1"
+          />
+          <button onClick={fetchData} className="px-4 py-2 bg-blue-600 text-white rounded">
+            查询
+          </button>
+        </div>
+      </div>
+
+      {/* BOM列表 */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">父物料</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">子物料</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">用量</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">损耗率</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">层级</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item, idx) => (
+              <tr key={idx}>
+                <td className="px-6 py-4 whitespace-nowrap">{item.parentItemCode}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.childItemCode}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.usageQty}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.lossRate}%</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.level}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <button 
+                    onClick={() => item.childItemCode && handleExpand(item.childItemCode)}
+                    className="text-blue-600 hover:underline"
+                  >
+                    展开
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
-
-export default BomPage;
+}

@@ -1,144 +1,149 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Input, Modal, Form, message, Select, Tag } from 'react';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { inventoryApi, InventoryItem } from '../api/inventory';
+import { message } from 'antd';
 
-interface InventoryItem {
-  id: number;
-  itemCode: string;
-  itemName: string;
-  warehouseCode: string;
-  warehouseName: string;
-  onHandQty: number;
-  allocatedQty: number;
-  availableQty: number;
-  unit: string;
-}
-
-const InventoryPage: React.FC = () => {
+export function InventoryPage() {
   const [data, setData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState('');
-  const [actionType, setActionType] = useState<'in' | 'out'>('in');
+  const [searchParams, setSearchParams] = useState({ itemCode: '', warehouseCode: '' });
+  const [pagination, setPagination] = useState({ pageNum: 1, pageSize: 10, total: 0 });
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [pagination.pageNum, searchParams]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const mockData: InventoryItem[] = [
-        { id: 1, itemCode: 'A001', itemName: '产品A', warehouseCode: 'WH01', warehouseName: '主仓库', onHandQty: 500, allocatedQty: 100, availableQty: 400, unit: 'PCS' },
-        { id: 2, itemCode: 'B001', itemName: '部件B', warehouseCode: 'WH01', warehouseName: '主仓库', onHandQty: 200, allocatedQty: 0, availableQty: 200, unit: 'PCS' },
-        { id: 3, itemCode: 'C001', itemName: '物料C', warehouseCode: 'WH01', warehouseName: '主仓库', onHandQty: 1000, allocatedQty: 50, availableQty: 950, unit: 'KG' },
-      ];
-      setData(mockData);
+      const result = await inventoryApi.list({
+        pageNum: pagination.pageNum,
+        pageSize: pagination.pageSize,
+        ...searchParams
+      });
+      setData(result.list || []);
+      setPagination(prev => ({ ...prev, total: result.total || 0 }));
     } catch (error) {
-      message.error('加载失败');
+      console.error('获取库存失败', error);
+      message.error('获取库存失败');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInStock = (record: InventoryItem) => {
-    setActionType('in');
-    form.setFieldsValue({ itemCode: record.itemCode, warehouseCode: record.warehouseCode });
-    setModalVisible(true);
-  };
-
-  const handleOutStock = (record: InventoryItem) => {
-    setActionType('out');
-    form.setFieldsValue({ itemCode: record.itemCode, warehouseCode: record.warehouseCode });
-    setModalVisible(true);
-  };
-
-  const handleSubmit = async () => {
+  // 入库
+  const handleInStock = async (record: InventoryItem, qty: number) => {
     try {
-      const values = await form.validateFields();
-      const { qty } = values;
-      
-      setData(data.map(item => {
-        if (item.itemCode === values.itemCode && item.warehouseCode === values.warehouseCode) {
-          const newOnHand = actionType === 'in' 
-            ? item.onHandQty + qty 
-            : item.onHandQty - qty;
-          return {
-            ...item,
-            onHandQty: newOnHand,
-            availableQty: newOnHand - item.allocatedQty
-          };
-        }
-        return item;
-      }));
-      
-      setModalVisible(false);
-      message.success(actionType === 'in' ? '入库成功' : '出库成功');
+      await inventoryApi.inStock({
+        itemCode: record.itemCode,
+        warehouseCode: record.warehouseCode,
+        qty: qty,
+        type: 'PURCHASE_IN'
+      });
+      message.success('入库成功');
+      fetchData();
     } catch (error) {
-      message.error('操作失败');
+      message.error('入库失败');
     }
   };
 
-  const filteredData = data.filter(item =>
-    item.itemCode.includes(searchText) ||
-    item.itemName.includes(searchText)
-  );
+  // 出库
+  const handleOutStock = async (record: InventoryItem, qty: number) => {
+    try {
+      await inventoryApi.outStock({
+        itemCode: record.itemCode,
+        warehouseCode: record.warehouseCode,
+        qty: qty,
+        type: 'PRODUCTION_OUT'
+      });
+      message.success('出库成功');
+      fetchData();
+    } catch (error) {
+      message.error('出库失败');
+    }
+  };
 
-  const columns = [
-    { title: '物料编码', dataIndex: 'itemCode', key: 'itemCode' },
-    { title: '物料名称', dataIndex: 'itemName', key: 'itemName' },
-    { title: '仓库编码', dataIndex: 'warehouseCode', key: 'warehouseCode' },
-    { title: '仓库名称', dataIndex: 'warehouseName', key: 'warehouseName' },
-    { title: '现有量', dataIndex: 'onHandQty', key: 'onHandQty' },
-    { title: '预留量', dataIndex: 'allocatedQty', key: 'allocatedQty' },
-    { title: '可用量', dataIndex: 'availableQty', key: 'availableQty', 
-      render: (qty: number) => qty < 100 ? <Tag color="red">{qty}</Tag> : qty },
-    { title: '单位', dataIndex: 'unit', key: 'unit' },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: InventoryItem) => (
-        <Space>
-          <Button type="primary" icon={<ArrowUpOutlined />} onClick={() => handleInStock(record)}>入库</Button>
-          <Button danger icon={<ArrowDownOutlined />} onClick={() => handleOutStock(record)}>出库</Button>
-        </Space>
-      ),
-    },
-  ];
+  const getStatusBadge = (qty: number, safetyStock: number) => {
+    if (qty === 0) return { color: 'red', text: '缺货' };
+    if (qty < safetyStock) return { color: 'orange', text: '偏低' };
+    return { color: 'green', text: '正常' };
+  };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>库存管理</h1>
-      <Space style={{ marginBottom: 16 }}>
-        <Input.Search
-          placeholder="搜索物料编码/名称"
-          onSearch={setSearchText}
-          style={{ width: 300 }}
-        />
-      </Space>
-      <Table columns={columns} dataSource={filteredData} rowKey="id" loading={loading} />
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">库存管理</h1>
+      </div>
 
-      <Modal
-        title={actionType === 'in' ? '入库' : '出库'}
-        open={modalVisible}
-        onOk={handleSubmit}
-        onCancel={() => setModalVisible(false)}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="itemCode" label="物料编码">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="warehouseCode" label="仓库">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="qty" label="数量" rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      {/* 搜索栏 */}
+      <div className="mb-4 bg-white p-4 rounded-lg shadow">
+        <div className="flex gap-4">
+          <input
+            placeholder="物料编码"
+            value={searchParams.itemCode}
+            onChange={e => setSearchParams({...searchParams, itemCode: e.target.value})}
+            className="border rounded px-3 py-2"
+          />
+          <input
+            placeholder="仓库编码"
+            value={searchParams.warehouseCode}
+            onChange={e => setSearchParams({...searchParams, warehouseCode: e.target.value})}
+            className="border rounded px-3 py-2"
+          />
+          <button onClick={fetchData} className="px-4 py-2 bg-blue-600 text-white rounded">
+            查询
+          </button>
+        </div>
+      </div>
+
+      {/* 库存列表 */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">物料编码</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">物料名称</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">仓库</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">库存数量</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">可用数量</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item) => {
+              const status = getStatusBadge(item.onHandQty || 0, item.safetyStock || 0);
+              return (
+                <tr key={item.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.itemCode}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.itemName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.warehouseName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.onHandQty}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.availableQty}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded text-xs text-white bg-${status.color}--500`}>
+                      {status.text}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button 
+                      onClick={() => handleInStock(item, 100)}
+                      className="text-blue-600 hover:underline mr-2"
+                    >
+                      入库
+                    </button>
+                    <button 
+                      onClick={() => handleOutStock(item, 10)}
+                      className="text-orange-600 hover:underline"
+                    >
+                      出库
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
-
-export default InventoryPage;
+}

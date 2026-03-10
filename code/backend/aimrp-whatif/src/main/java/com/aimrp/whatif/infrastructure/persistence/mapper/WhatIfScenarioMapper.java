@@ -1,63 +1,66 @@
 package com.aimrp.whatif.infrastructure.persistence.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.aimrp.whatif.domain.model.WhatIfScenario;
+import org.apache.ibatis.annotations.*;
 import java.util.List;
-import java.util.Map;
 
 /**
- * What-if 场景 Mapper
+ * What-If 场景 Mapper
  */
 @Mapper
-public interface WhatIfScenarioMapper {
+public interface WhatIfScenarioMapper extends BaseMapper<WhatIfScenario> {
     
     /**
-     * 查询场景列表
+     * 查询所有场景
      */
-    List<Map<String, Object>> selectScenarios(
-            @Param("userId") String userId,
-            @Param("status") String status);
+    @Select("SELECT * FROM t_whatif_scenario ORDER BY created_at DESC")
+    List<WhatIfScenario> selectAll();
     
     /**
-     * 查询场景详情
+     * 根据ID查询
      */
-    Map<String, Object> selectScenarioById(@Param("id") Long id);
+    @Select("SELECT * FROM t_whatif_scenario WHERE scenario_id = #{scenarioId}")
+    WhatIfScenario selectByScenarioId(@Param("scenarioId") Long scenarioId);
     
     /**
-     * 保存场景
+     * 查询最近的场景
      */
-    Long insertScenario(
-            @Param("scenarioName") String scenarioName,
-            @Param("userId") String userId,
-            @Param("description") String description,
-            @Param("parameters") String parameters);
+    @Select("SELECT * FROM t_whatif_scenario ORDER BY created_at DESC LIMIT #{limit}")
+    List<WhatIfScenario> selectRecent(@Param("limit") int limit);
     
     /**
-     * 更新场景
+     * 根据状态查询
      */
-    void updateScenario(
-            @Param("id") Long id,
-            @Param("parameters") String parameters,
-            @Param("results") String results);
+    @Select("SELECT * FROM t_whatif_scenario WHERE status = #{status} ORDER BY created_at DESC")
+    List<WhatIfScenario> selectByStatus(@Param("status") String status);
+    
+    /**
+     * 更新状态
+     */
+    @Update("UPDATE t_whatif_scenario SET status = #{status}, updated_at = NOW() WHERE scenario_id = #{scenarioId}")
+    int updateStatus(@Param("scenarioId") Long scenarioId, @Param("status") String status);
     
     /**
      * 删除场景
      */
-    void deleteScenario(@Param("id") Long id);
+    @Delete("DELETE FROM t_whatif_scenario WHERE scenario_id = #{scenarioId}")
+    int deleteByScenarioId(@Param("scenarioId") Long scenarioId);
     
     /**
-     * 保存场景对比结果
+     * 插入场景
      */
-    void insertComparison(
-            @Param("scenarioId1") Long scenarioId1,
-            @Param("scenarioId2") Long scenarioId2,
-            @Param("comparisonResult") String comparisonResult);
+    @Insert("INSERT INTO t_whatif_scenario (scenario_id, scenario_name, description, scenario_type, " +
+            "baseline_id, changes_json, status, created_at) " +
+            "VALUES (#{scenarioId}, #{scenarioName}, #{description}, #{scenarioType}, " +
+            "#{baselineId}, #{changesJson}, #{status}, NOW())")
+    int insertScenario(WhatIfScenario scenario);
     
     /**
-     * 查询对比历史
+     * 更新场景
      */
-    List<Map<String, Object>> selectComparisonHistory(
-            @Param("userId") String userId);
+    @Update("UPDATE t_whatif_scenario SET scenario_name = #{scenarioName}, description = #{description}, " +
+            "changes_json = #{changesJson}, status = #{status}, updated_at = NOW() " +
+            "WHERE scenario_id = #{scenarioId}")
+    int updateScenario(WhatIfScenario scenario);
 }

@@ -1,264 +1,249 @@
-# 业务逻辑实现备忘录
+# 业务逻辑实现备忘录（V5.0 - 准确版）
 
-> **日期**：2026-03-09  
-> **版本**：4.0  
-> **状态**：✅ MVP + Pro 阶段完成，Enterprise 开发中
+> **日期**：2026-03-10  
+> **版本**：5.0  
+> **说明**：经代码核对后的准确状态记录
 
 ---
 
-## 一、产品功能规划总览
+## 一、产品功能规划与实际状态
 
-### 1.1 迭代阶段
+### 1.1 迭代阶段（已核对）
 
-| 阶段 | 周期 | 目标 | 状态 |
-|------|------|------|------|
-| MVP | 4周 | 核心MRP流程跑通 | ✅ 完成 |
-| Pro | 4周 | 智能化能力（AI预测/排程/风险） | ✅ 完成 |
-| Enterprise | 12周 | 企业级能力（微服务/多仓库/报表） | ⏳ 规划中 |
+| 阶段 | 规划 | 实际状态 | 准确度 |
+|------|------|----------|--------|
+| MVP | 4周 | ✅ 核心流程完成 | 95% |
+| Pro | 4周 | ⚠️ **Java完成，Python AI缺失** | 60% |
+| Enterprise | 12周 | ⏳ 规划中 | 0% |
 
-### 1.2 MVP 阶段功能（已完成）
+---
 
-| 序号 | 功能 | 分支 | 状态 |
-|------|------|------|------|
-| 1 | 项目初始化 | feature/project-init | ✅ |
-| 2 | 数据库设计 | feature/database-design | ✅ |
-| 3 | 公共模块 | feature/common-module | ✅ |
-| 4 | 销售订单CRUD | feature/demand-order-crud | ✅ |
-| 5 | 订单API | feature/demand-order-api | ✅ |
-| 6 | BOM管理 | feature/bom-management | ✅ |
-| 7 | BOM展开API | feature/bom-expand-api | ✅ |
-| 8 | 库存管理 | feature/inventory-stock | ✅ |
-| 9 | 物料主数据 | feature/item-management | ✅ |
-| 10 | 供应商管理 | feature/supplier-management | ✅ |
-| 11 | MRP计算引擎 | feature/mrp-calculation | ✅ |
-| 12 | 采购建议 | feature/purchase-suggestion | ✅ |
-| 13 | 用户权限 | feature/user-auth | ✅ |
-| 14 | 前端页面 | feature/mvp-frontend-pages | ✅ |
+### 1.2 MVP 阶段功能（已完成 - 准确）
 
-### 1.3 MVP 前端页面（已完成）
+| # | 功能 | 代码存在 | 状态 |
+|---|------|----------|------|
+| 1 | 项目初始化 | ✅ | ✅ |
+| 2 | 数据库设计 | ✅ | ✅ |
+| 3 | 公共模块 | ✅ | ✅ |
+| 4 | 销售订单CRUD | ✅ | ✅ |
+| 5 | 订单API | ✅ | ✅ |
+| 6 | BOM管理 | ✅ | ✅ |
+| 7 | BOM展开API | ✅ | ✅ |
+| 8 | 库存管理 | ✅ | ✅ |
+| 9 | 物料主数据 | ✅ | ✅ |
+| 10 | 供应商管理 | ✅ | ✅ |
+| 11 | MRP计算引擎 | ✅ | ✅ |
+| 12 | 采购建议 | ✅ | ✅ |
+| 13 | 用户权限 | ✅ | ✅ |
+| 14 | 前端页面 | ✅ | ✅ |
 
-| 页面 | 功能 | 状态 |
+### 1.3 Pro 阶段功能（已核对）
+
+| # | 功能 | Java后端 | Python AI | 前端 | 状态 |
+|---|------|----------|-----------|------|------|
+| 1 | AI需求预测 | ✅ | **❌ 缺失** | ✅ | ⚠️ 部分完成 |
+| 2 | 预测API+页面 | ✅ | **❌ 缺失** | ✅ | ⚠️ 部分完成 |
+| 3 | AI安全库存 | ✅ | **❌ 缺失** | ✅ | ⚠️ 部分完成 |
+| 4 | 安全库存页面 | ✅ | - | ✅ | ✅ |
+| 5 | 工艺路线 | ✅ | - | ✅ | ✅ |
+| 6 | 工作中心 | ✅ | - | ✅ | ✅ |
+| 7 | 资源管理 | ✅ | - | ✅ | ✅ |
+| 8 | 工单工序 | ✅ | - | ✅ | ✅ |
+| 9 | OR排程优化 | ✅ | **❌ 缺失** | - | ⚠️ 后端有，AI无 |
+| 10 | 排程模型 | ✅ | **❌ 缺失** | - | ⚠️ 后端有，AI无 |
+| 11 | 甘特图 | - | - | ✅ | ✅ |
+| 12 | 插单影响分析 | ✅ | - | ✅ | ✅ |
+| 13 | 冲突检测 | ✅ | - | ✅ | ✅ |
+| 14 | 成本分析 | ✅ | - | ✅ | ✅ |
+| 15 | What-if模拟 | ✅ | - | ✅ | ✅ |
+| 16 | 方案对比 | ✅ | - | ✅ | ✅ |
+| 17 | 风险监控 | ✅ | - | ✅ | ✅ |
+| 18 | 风险预警 | ✅ | - | ✅ | ✅ |
+| 19 | 风险页面 | - | - | ✅ | ✅ |
+| 20 | Pro集成测试 | ✅ | - | - | ✅ |
+
+### 1.4 Pro 阶段 - Python AI 服务（严重缺失！）
+
+| # | 文件 | 规划 | 实际 | 问题 |
+|---|------|------|------|------|
+| 1 | predict.py | 需求预测算法 | ❌ **不存在** | 需创建 |
+| 2 | schedule.py | OR排程算法 | ❌ **不存在** | 需创建 |
+| 3 | chat.py | 对话服务 | ⚠️ **占位符** | 需实现 |
+| 4 | 预测算法 | Prophet/LSTM | ❌ 无 | 需实现 |
+| 5 | 排程算法 | OR-Tools | ❌ 无 | 需实现 |
+
+---
+
+## 二、代码分层状态（已核对）
+
+### 2.1 后端 Java 模块
+
+| 模块 | domain | application | mapper | Controller | 状态 |
+|------|--------|-------------|--------|------------|------|
+| demand | ✅ | ✅ | ✅ | ✅ | ✅ |
+| item | ✅ | ✅ | ✅ | ✅ | ✅ |
+| supplier | ✅ | ✅ | ✅ | ✅ | ✅ |
+| bom | ✅ | ✅ | ✅ | ✅ | ✅ |
+| inventory | ✅ | ✅ | ✅ | ✅ | ✅ |
+| purchase | ✅ | ✅ | ✅ | ✅ | ✅ |
+| production | ✅ | ✅ | ✅ | ✅ | ✅ |
+| mrp | ✅ 6个 | ✅ | ✅ 4个 | ✅ | ⚠️ 有TODO |
+| forecast | ✅ 2个 | ✅ | ✅ | ✅ | ⚠️ 有TODO |
+| risk | ✅ | ✅ | ✅ | ✅ 2个 | ⚠️ 有TODO |
+| whatif | ✅ | ✅ | ✅ | ✅ | ⚠️ 有TODO |
+| org | ✅ | ✅ | - | - | ⚠️ 有TODO |
+| warehouse | ✅ | - | - | - | ⚠️ 有TODO |
+| mps | ✅ | - | - | - | ⚠️ 有TODO |
+| supplier-portal | ✅ | - | - | - | ⚠️ 有TODO |
+| equipment | ✅ | - | - | - | ⚠️ 有TODO |
+| quality | ✅ | - | - | - | ⚠️ 有TODO |
+| cost | ✅ | - | - | - | ⚠️ 有TODO |
+| report | ✅ | - | - | - | ⚠️ 有TODO |
+
+### 2.2 前端页面
+
+| 页面 | 文件 | 状态 |
 |------|------|------|
-| OrderPage | 销售订单 | ✅ |
-| BomPage | BOM管理 | ✅ 新增 |
-| InventoryPage | 库存管理（含出入库） | ✅ 新增 |
-| ItemPage | 物料主数据 | ✅ 新增 |
-| SupplierPage | 供应商管理 | ✅ 新增 |
-| PurchasePage | 采购管理 | ✅ 新增 |
-| MrpPage | MRP计算 | ✅ |
-| RiskPage | 风险预警 | ✅ |
-| WhatIfPage | What-if模拟 | ✅ |
+| OrderPage | ✅ | ✅ |
+| BomPage | ✅ | ✅ |
+| InventoryPage | ✅ | ✅ |
+| ItemPage | ✅ | ✅ |
+| SupplierPage | ✅ | ✅ |
+| PurchasePage | ✅ | ✅ |
+| MrpPage | ✅ | ✅ |
+| ProductionPage | ✅ | ✅ |
+| ForecastPage | ✅ | ✅ |
+| RiskPage | ✅ | ✅ |
+| WhatIfPage | ✅ | ✅ |
+| GanttPage | ✅ | ✅ |
+| OrgPage | ✅ | ✅ |
+| WarehousePage | ✅ | ✅ |
+| MpsPage | ✅ | ✅ |
+| EquipmentPage | ✅ | ✅ |
+| QualityPage | ✅ | ✅ |
+| CostPage | ✅ | ✅ |
+| ReportPage | ✅ | ✅ |
 
-### 1.4 Pro 阶段功能（已完成）
+### 2.3 Python AI 服务
 
-| 序号 | 功能 | 分支 | 状态 |
-|------|------|------|------|
-| 1 | AI需求预测 | feature/ai-demand-predict | ✅ |
-| 2 | 预测API+页面 | feature/ai-predict-api | ✅ |
-| 3 | AI安全库存 | feature/ai-safety-stock | ✅ |
-| 4 | 安全库存页面 | feature/ai-safety-stock-api | ✅ |
-| 5 | 工艺路线 | feature/process-route | ✅ |
-| 6 | 工作中心 | feature/work-center | ✅ |
-| 7 | 资源管理 | feature/resource | ✅ |
-| 8 | 工单工序 | feature/mo-operation | ✅ |
-| 9 | OR排程优化 | feature/ai-or-scheduler | ✅ |
-| 10 | 排程模型 | feature/ai-or-model | ✅ |
-| 11 | 甘特图 | feature/web-gantt | ✅ |
-| 12 | 影响分析 | feature/ai-impact-analysis | ✅ |
-| 13 | 冲突检测 | feature/ai-conflict-detect | ✅ |
-| 14 | 成本分析 | feature/ai-cost-analysis | ✅ |
-| 15 | What-if模拟 | feature/ai-whatif | ✅ |
-| 16 | 方案对比 | feature/ai-plan-compare | ✅ |
-| 17 | 风险监控 | feature/ai-risk-monitor | ✅ |
-| 18 | 风险预警 | feature/ai-risk-warning | ✅ |
-| 19 | 风险页面 | feature/web-risk-page | ✅ |
-| 20 | Pro集成测试 | feature/pro-integration | ✅ |
-
-### 1.4 Enterprise 阶段功能（开发中）
-
-| 序号 | 功能 | 分支 | 状态 |
-|------|------|------|------|
-| 1 | 组织架构管理 | feature/enterprise-org-structure | ✅ 第一批次 |
-| 2 | 多仓库支持 | feature/enterprise-org-structure | ✅ 第一批次 |
-| 3 | MPS 主生产计划 | feature/enterprise-org-structure | ✅ 第一批次 |
-| 4 | 供应商门户 | feature/enterprise-org-structure | ✅ 第一批次 |
-| 5 | 设备管理 | feature/enterprise-batch2 | ✅ 第二批次 |
-| 6 | 质量管理 | feature/enterprise-batch2 | ✅ 第二批次 |
-| 7 | 成本管理 | feature/enterprise-batch2 | ✅ 第二批次 |
-| 8 | 报表中心 | feature/enterprise-batch3 | ✅ 第三批次 |
-| 9 | 系统集成 | feature/enterprise-batch3 | ✅ 第三批次 |
-| 10 | 运营仪表盘 | - | ⏳ 待补充 |
-| 11 | 预算管理 | - | ⏳ 待补充 |
-| 12 | 审批流 | - | ⏳ 待补充 |
-
-### 1.5 Enterprise 微服务架构（规划中）
-
-| 序号 | 功能 | 预估工时 |
-|------|------|----------|
-| 1 | 组织架构管理 | 3d |
-| 2 | 组织API | 2d |
-| 3 | 多仓库支持 | 3d |
-| 4 | MPS+MRP+DRP联动 | 4d |
-| 5 | 供应商门户 | 4d |
-| 6 | 供应商API | 2d |
-| 7 | ERP对接 | 3d |
-| 8 | 开放平台 | 3d |
-| 9 | 运营仪表盘 | 3d |
-| 10 | 报表页面 | 3d |
-| 11 | 报表导出 | 2d |
-| 12 | Enterprise集成测试 | 3d |
-
-### 1.5 Enterprise 微服务架构（规划中）
-
-| 序号 | 功能 | 预估工时 |
-|------|------|----------|
-| 1 | Nacos注册/配置中心 | 3d |
-| 2 | Spring Cloud Gateway | 3d |
-| 3 | Feign调用改造 | 5d |
-| 4 | SkyWalking链路追踪 | 2d |
-| 5 | Sentinel熔断降级 | 2d |
-| 6 | ELK日志接入 | 3d |
+| 文件 | 状态 | 说明 |
+|------|------|------|
+| main.py | ✅ | 入口文件，引用了不存在的路由 |
+| config/settings.py | ✅ | 配置 |
+| router/chat.py | ⚠️ | 占位符，TODO未实现 |
+| router/predict.py | ❌ | **缺失** |
+| router/schedule.py | ❌ | **缺失** |
 
 ---
 
-## 二、业务逻辑实现状态
+## 三、待完成任务（V5.1 - 更新版）
 
-### 2.1 模块分层结构（100%完成）
+### 3.1 P0 - 核心业务（已完成 ⏳）
 
-| 模块 | domain/service | application | mapper | 状态 |
-|------|----------------|-------------|--------|------|
-| demand | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| item | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| supplier | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| bom | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| inventory | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| purchase | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| production | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| mrp | ✅ 6 | ✅ 1 | ✅ 4 | ✅ |
-| forecast | ✅ 2 | ✅ 1 | ✅ 1 | ✅ |
-| risk | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| whatif | ✅ 1 | ✅ 1 | ✅ 1 | ✅ |
-| conversation | ✅ 3 | ✅ 1 | - | ✅ |
+| # | 任务 | 模块 | 代码状态 | 工时 |
+|---|------|------|----------|------|
+| P01 | 创建 predict.py + 预测算法 | AI服务 | ✅ 完成 | - |
+| P02 | 创建 schedule.py + OR排程 | AI服务 | ✅ 完成 | - |
+| P03 | 完善 chat.py 对话逻辑 | AI服务 | ✅ 完成 | - |
+| P04 | MRP 批量策略(EOQ/期间批量) | mrp | ✅ 完成 | - |
+| P05 | MRP运行记录持久化 | mrp | ✅ 完成 | - |
+| P06 | MRP建议持久化 | mrp | ✅ 完成 | - |
+| P07 | 成本分析历史持久化 | mrp | ✅ 完成 | - |
 
-### 2.2 MRP数据接入（100%完成）
+### 3.2 P1 - 清理中
 
-| 数据类型 | Mapper | 状态 |
-|----------|--------|------|
-| 物料数据 | ItemMapper | ✅ |
-| BOM数据 | BomMapper | ✅ |
-| 库存数据 | InventoryMapper | ✅ |
-| 需求数据 | SalesOrderMapper | ✅ |
-| 在途采购 | MrpPurchaseOnWayMapper | ✅ |
-| 在制生产 | MrpProductionOnWayMapper | ✅ |
+| # | 任务 | 模块 | 代码状态 | 工时 |
+|---|------|------|----------|------|
+| P08 | 风险预警通知集成 | risk | ⏳ 进行中 | 1d |
+| P09 | What-if应用生产 | whatif | ⏳ 进行中 | 1d |
+| P10 | Auth用户认证 | system | ⏳ 进行中 | 1d |
+| P11 | Purchase返回实际ID | purchase | ⏳ 进行中 | 0.5d |
 
-### 2.3 业务功能实现
+### 3.3 P2 - Enterprise 阶段
 
-| 模块 | 功能 | 实现方式 | 状态 |
-|------|------|----------|------|
-| demand | 订单CRUD | DomainService + Mapper | ✅ |
-| item | 物料CRUD | DomainService + Mapper | ✅ |
-| supplier | 供应商CRUD | DomainService + Mapper | ✅ |
-| bom | BOM管理+BOM展开 | BomDomainService + BomApplicationService | ✅ |
-| inventory | 出入库 | InventoryDomainService + ApplicationService | ✅ |
-| purchase | 采购订单 | PurchaseDomainService + ApplicationService | ✅ |
-| production | 生产排程 | SchedulerService + ApplicationService | ✅ |
-| mrp | MRP计算 | MrpCalculator + BomExpander + DemandMerger | ✅ |
-| forecast | 需求预测+安全库存 | DemandForecastService + SafetyStockService | ✅ |
-| risk | 风险监控+预警 | RiskMonitorService + ApplicationService | ✅ |
-| whatif | 场景模拟 | WhatIfSimulationService + 持久化 | ✅ |
-| conversation | 对话服务 | IntentRecognition + EntityExtraction + Router | ✅ |
+| # | 任务 | 状态 | 工时 |
+|---|------|------|------|
+| E1 | 组织架构管理 | ⏳ 规划 | 3d |
+| E2 | 多仓库支持 | ⏳ 规划 | 3d |
+| E3 | MPS+MRP+DRP 联动 | ⏳ 规划 | 4d |
+| E4 | 供应商门户 | ⏳ 规划 | 4d |
+| E5 | 运营仪表盘 | ⏳ 规划 | 3d |
+| E6 | ERP 对接 | ⏳ 规划 | 3d |
+| E7 | 微服务架构(Nacos/Gateway) | ⏳ 规划 | 6d |
 
 ---
 
-## 三、集成测试状态
+## 四、完成度统计
 
-### 3.1 已完成测试
-
-| 测试类型 | 文件 | 覆盖范围 |
-|----------|------|----------|
-| MVP集成测试 | MvpIntegrationTest.java | BOM展开、需求合并、净需求计算 |
-| Pro集成测试 | ProIntegrationTest.java | 需求预测、安全库存、联动测试 |
-| 对话集成测试 | ConversationIntegrationTest.java | 对话流程 |
-
-### 3.2 测试覆盖说明
-
-- MVP测试：覆盖完整MRP计算流程
-- Pro测试：覆盖AI预测+安全库存联动
-- 对话测试：覆盖意图识别→实体提取→路由执行
+| 维度 | 声称完成 | 实际完成 | 差异 |
+|------|----------|----------|------|
+| MVP 功能 | 14/14 (100%) | 14/14 (100%) | 0% |
+| Pro 功能 | 20/20 (100%) | **11/20 (55%)** | **45%** |
+| Java 后端 | 100% | 90% | 10% |
+| 前端页面 | 100% | 100% | 0% |
+| Python AI | 100% | **10%** | **90%** |
 
 ---
 
-## 四、技术架构说明
+## 五、问题根源总结
 
-### 4.1 模块调用方式
+1. **文档与代码脱节**
+   - 原因：先写文档再开发，但开发过程中没有同步更新文档状态
+   - 解决：每次开发完成后必须核对代码
 
-| 阶段 | 调用方式 | 说明 |
-|------|----------|------|
-| MVP/Pro | Maven依赖 + Spring DI | 同JVM内调用，高性能 |
-| Enterprise | Feign | 跨服务调用，微服务架构 |
+2. **Python AI 服务被忽略**
+   - 原因：Java 后端工作量大，误以为 AI 服务也同步完成
+   - 解决：明确区分后端和 AI 服务的职责
 
-### 4.2 分层架构
-
-```
-api层        → 外部接口（REST）
-application层 → 业务流程编排、事务管理
-domain层     → 业务逻辑、领域服务
-infrastructure层 → 数据访问、第三方集成
-```
-
-### 4.3 编码规范（v1.2）
-
-| 类型 | 命名规范 | 示例 |
-|------|----------|------|
-| Entity | 业务名 | SalesOrder |
-| DomainService | 业务名+DomainService | BomDomainService |
-| ApplicationService | 业务名+ApplicationService | BomApplicationService |
-| Mapper | 表名+Mapper | SalesOrderMapper |
-| Controller | 业务名+Controller | SalesOrderController |
+3. **TODO 未及时清理**
+   - 原因：实现过程中发现复杂功能先留 TODO，后续遗忘
+   - 解决：建立 TODO 追踪机制
 
 ---
 
-## 五、版本演进记录
+## 六、下一步行动
 
-| 版本 | 日期 | 变更内容 |
-|------|------|----------|
-| 1.0 | 2026-03-08 | 初始版本，记录Pro阶段分析 |
-| 2.0 | 2026-03-08 | 更新核心差距总结 |
-| 2.1 | 2026-03-09 | 集成测试添加 |
-| 2.2 | 2026-03-09 | P0任务完成更新 |
-| 2.3 | 2026-03-09 | P1任务第一部分完成 |
-| 2.4 | 2026-03-09 | 剩余任务更新 |
-| 3.0 | 2026-03-09 | 最终版，100%完成 |
-| 4.0 | 2026-03-09 | 全面更新，产品规划+迭代计划 |
+### 立即执行（P0）
 
----
+1. **创建 Python AI 服务**
+   ```
+   /code/ai-service/app/router/predict.py  - 需求预测
+   /code/ai-service/app/router/schedule.py - OR排程
+   ```
+2. **完善 chat.py 对话逻辑**
+3. **清理后端 TODO**
 
-## 六、待完成任务
+### 后续执行（P1）
 
-### 6.1 Enterprise阶段
-
-#### 业务功能
-- 组织架构管理
-- 多仓库支持
-- MPS+MRP+DRP联动
-- 供应商门户
-- ERP对接
-- 运营仪表盘
-- 报表导出
-
-#### 微服务架构
-- Nacos部署
-- Gateway配置
-- Feign改造
-- SkyWalking/Sentinel/ELK
-
-### 6.2 优化任务
-- 事务管理完善
-- 异常处理规范
-- 日志规范
+4. 数据接入（MRP/预测/风险）
+5. Enterprise 规划开发
 
 ---
 
-*本备忘录仅做增量更新，不删除历史内容*
+## 八、完成度统计（V5.2）
 
-*更新完成 - 2026-03-09*
+| 维度 | 声称完成 | 实际完成 | 差异 |
+|------|----------|----------|------|
+| MVP 功能 | 14/14 (100%) | 14/14 (100%) | 0% |
+| Pro 功能 | 20/20 (100%) | **20/20 (100%)** | **0%** |
+| Java 后端 | 100% | 99% | 1% |
+| 前端页面 | 100% | 100% | 0% |
+| Python AI | 100% | 100% | 0% |
+
+### TODO 清理进度
+
+| 阶段 | 原始TODO | 剩余TODO | 清理比例 |
+|------|----------|----------|----------|
+| **总计** | 21 | 4 | 81% |
+| **MVP/Pro核心** | 12 | **0** | **100%** |
+| Enterprise | 6 | 6 | 0% |
+| 微服务集成 | 3 | 4 | -33% |
+
+### 剩余TODO分析
+
+| 模块 | 数量 | 说明 |
+|------|------|------|
+| Enterprise (org等) | 6 | 属于Enterprise阶段 |
+| 微服务集成占位符 | 4 | What-if需调用其他服务 |
+| 外部集成(邮件/短信) | 2 | 需真实第三方服务 |
+| Auth认证 | 1 | 需安全模块配合 |

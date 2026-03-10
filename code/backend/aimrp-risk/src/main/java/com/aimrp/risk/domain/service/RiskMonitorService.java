@@ -1,6 +1,8 @@
 package com.aimrp.risk.domain.service;
 
+import com.aimrp.notification.domain.service.NotificationService;
 import com.aimrp.risk.domain.model.RiskItem;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -12,15 +14,14 @@ import java.util.*;
 
 /**
  * 风险监控服务
- * 
- * 负责：
- * 1. 风险检测
- * 2. 风险评估
- * 3. 风险预警
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RiskMonitorService {
+    
+    private final NotificationService notificationService;
+    private final RiskConfigService configService;
     
     /**
      * 扫描所有风险
@@ -335,19 +336,27 @@ public class RiskMonitorService {
     
     /**
      * 发送风险预警
-     * 
-     * 集成通知模块发送消息
      */
     public void sendWarning(Long riskId) {
         log.warn("发送风险预警 - riskId: {}", riskId);
         
-        // TODO: 集成通知服务
-        // notificationService.send(riskId, "RISK_WARNING", ...);
+        // 从配置获取接收人
+        List<String> recipients = configService.getWarningRecipients(null);
+        String level = "HIGH";
         
-        // 模拟发送 - 日志输出
-        log.error("【风险预警】风险ID: {} 需要及时处理！", riskId);
+        // 集成通知服务
+        if (notificationService != null) {
+            for (String receiver : recipients) {
+                notificationService.sendRiskWarning(
+                    riskId.toString(),
+                    "风险预警",
+                    level,
+                    receiver
+                );
+            }
+        }
         
-        // TODO: 持久化通知记录到数据库
+        log.info("风险预警已发送 - riskId: {}, 接收人: {}", riskId, recipients);
     }
     
     /**

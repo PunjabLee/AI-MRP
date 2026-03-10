@@ -1,17 +1,46 @@
-import { request } from './index';
+/**
+ * 供应商 API
+ */
+import api from './index';
+
+export interface Supplier {
+  id?: number;
+  supplierCode?: string;
+  supplierName?: string;
+  contact?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  leadTimeDays?: number;
+  paymentTerms?: string;
+  status?: string;
+  rating?: number;
+}
 
 export const supplierApi = {
-  list: (params?: any) => request.get('/api/suppliers', { params }),
+  // 供应商列表
+  list: (params: {
+    keyword?: string;
+    status?: string;
+    pageNum?: number;
+    pageSize?: number;
+  }) => api.get<{list: Supplier[]; total: number}>('/suppliers', { params }),
   
-  get: (id: number) => request.get(`/api/suppliers/${id}`),
+  // 供应商详情
+  get: (id: number) => api.get<Supplier>(`/suppliers/${id}`),
   
-  create: (data: any) => request.post('/api/suppliers', data),
+  // 创建供应商
+  create: (data: Supplier) => api.post<Supplier>('/suppliers', data),
   
-  update: (id: number, data: any) => request.put(`/api/suppliers/${id}`, data),
+  // 更新供应商
+  update: (id: number, data: Supplier) => api.put<void>(`/suppliers/${id}`, data),
   
-  delete: (id: number) => request.delete(`/api/suppliers/${id}`),
+  // 删除供应商
+  delete: (id: number) => api.delete<void>(`/suppliers/${id}`),
   
-  getByCode: (supplierCode: string) => request.get(`/api/suppliers/code/${supplierCode}`),
+  // 按编码查询
+  getByCode: (supplierCode: string) => api.get<Supplier>(`/suppliers/code/${supplierCode}`),
   
-  evaluate: (id: number) => request.post(`/api/suppliers/${id}/evaluate`),
+  // 供应商评估
+  evaluate: (id: number) => api.post<void>(`/suppliers/${id}/evaluate`),
 };

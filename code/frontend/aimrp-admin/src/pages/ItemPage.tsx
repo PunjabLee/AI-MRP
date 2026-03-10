@@ -1,195 +1,125 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Input, Modal, Form, message, Tag, Select } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { itemApi, Item } from '../api/item';
+import { message } from 'antd';
 
-interface Item {
-  id: number;
-  itemCode: string;
-  itemName: string;
-  itemType: string;
-  source: string;
-  unit: string;
-  leadTime: number;
-  safetyStock: number;
-  status: string;
-}
-
-const ItemPage: React.FC = () => {
+export function ItemPage() {
   const [data, setData] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState('');
+  const [searchParams, setSearchParams] = useState({ keyword: '', itemType: '' });
+  const [pagination, setPagination] = useState({ pageNum: 1, pageSize: 10, total: 0 });
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [pagination.pageNum]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const mockData: Item[] = [
-        { id: 1, itemCode: 'A001', itemName: '产品A', itemType: 'FINISHED', source: 'MAKE', unit: 'PCS', leadTime: 7, safetyStock: 100, status: 'ACTIVE' },
-        { id: 2, itemCode: 'B001', itemName: '部件B', itemType: 'SEMI', source: 'MAKE', unit: 'PCS', leadTime: 3, safetyStock: 50, status: 'ACTIVE' },
-        { id: 3, itemCode: 'C001', itemName: '物料C', itemType: 'RAW', source: 'BUY', unit: 'KG', leadTime: 5, safetyStock: 200, status: 'ACTIVE' },
-      ];
-      setData(mockData);
+      const result = await itemApi.list({
+        pageNum: pagination.pageNum,
+        pageSize: pagination.pageSize,
+        ...searchParams
+      });
+      setData(result.list || []);
+      setPagination(prev => ({ ...prev, total: result.total || 0 }));
     } catch (error) {
-      message.error('加载失败');
+      console.error('获取物料失败', error);
+      message.error('获取物料失败');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAdd = () => {
-    form.resetFields();
-    setModalVisible(true);
-  };
-
-  const handleEdit = (record: Item) => {
-    form.setFieldsValue(record);
-    setModalVisible(true);
-  };
-
-  const handleDelete = (id: number) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这个物料吗？',
-      onOk: () => {
-        setData(data.filter(item => item.id !== id));
-        message.success('删除成功');
-      },
-    });
-  };
-
-  const handleSubmit = async () => {
+  const handleDelete = async (id: number) => {
+    if (!confirm('确定要删除吗?')) return;
     try {
-      const values = await form.validateFields();
-      const exists = data.find(item => item.itemCode === values.itemCode && !values.id);
-      if (exists) {
-        message.error('物料编码已存在');
-        return;
-      }
-      
-      if (values.id) {
-        setData(data.map(item => item.id === values.id ? { ...item, ...values } : item));
-      } else {
-        setData([...data, { ...values, id: data.length + 1, status: 'ACTIVE' }]);
-      }
-      setModalVisible(false);
-      message.success('保存成功');
+      await itemApi.delete(id);
+      message.success('删除成功');
+      fetchData();
     } catch (error) {
-      message.error('保存失败');
+      message.error('删除失败');
     }
   };
 
-  const filteredData = data.filter(item =>
-    item.itemCode.includes(searchText) ||
-    item.itemName.includes(searchText)
-  );
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'FINISHED': return 'blue';
-      case 'SEMI': return 'orange';
-      case 'RAW': return 'green';
-      default: return 'default';
-    }
+  const getTypeBadge = (type?: string) => {
+    const types: Record<string, { color: string; text: string }> = {
+      'FINISHED': { color: 'blue', text: '成品' },
+      'SEMI': { color: 'orange', text: '半成品' },
+      'RAW': { color: 'green', text: '原材料' }
+    };
+    return types[type || ''] || { color: 'gray', text: type };
   };
-
-  const getSourceText = (source: string) => {
-    switch (source) {
-      case 'MAKE': return '自制';
-      case 'BUY': return '采购';
-      case 'CONTRACT': return '委外';
-      default: return source;
-    }
-  };
-
-  const columns = [
-    { title: '物料编码', dataIndex: 'itemCode', key: 'itemCode' },
-    { title: '物料名称', dataIndex: 'itemName', key: 'itemName' },
-    { 
-      title: '物料类型', 
-      dataIndex: 'itemType', 
-      key: 'itemType',
-      render: (type: string) => <Tag color={getTypeColor(type)}>{type}</Tag>
-    },
-    { 
-      title: '来源', 
-      dataIndex: 'source', 
-      key: 'source',
-      render: (source: string) => getSourceText(source)
-    },
-    { title: '单位', dataIndex: 'unit', key: 'unit' },
-    { title: '采购周期(天)', dataIndex: 'leadTime', key: 'leadTime' },
-    { title: '安全库存', dataIndex: 'safetyStock', key: 'safetyStock' },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: Item) => (
-        <Space>
-          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
-          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)}>删除</Button>
-        </Space>
-      ),
-    },
-  ];
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>物料主数据</h1>
-      <Space style={{ marginBottom: 16 }}>
-        <Input.Search
-          placeholder="搜索物料编码/名称"
-          onSearch={setSearchText}
-          style={{ width: 300 }}
-        />
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增物料</Button>
-      </Space>
-      <Table columns={columns} dataSource={filteredData} rowKey="id" loading={loading} />
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">物料主数据</h1>
+      </div>
 
-      <Modal
-        title={form.getFieldValue('id') ? '编辑物料' : '新增物料'}
-        open={modalVisible}
-        onOk={handleSubmit}
-        onCancel={() => setModalVisible(false)}
-        width={600}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="itemCode" label="物料编码" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="itemName" label="物料名称" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="itemType" label="物料类型" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="FINISHED">成品</Select.Option>
-              <Select.Option value="SEMI">半成品</Select.Option>
-              <Select.Option value="RAW">原材料</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="source" label="来源" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="MAKE">自制</Select.Option>
-              <Select.Option value="BUY">采购</Select.Option>
-              <Select.Option value="CONTRACT">委外</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="unit" label="单位" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="leadTime" label="采购周期(天)">
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item name="safetyStock" label="安全库存">
-            <Input type="number" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      {/* 搜索栏 */}
+      <div className="mb-4 bg-white p-4 rounded-lg shadow">
+        <div className="flex gap-4">
+          <input
+            placeholder="物料编码/名称"
+            value={searchParams.keyword}
+            onChange={e => setSearchParams({...searchParams, keyword: e.target.value})}
+            className="border rounded px-3 py-2 flex-1"
+          />
+          <select
+            value={searchParams.itemType}
+            onChange={e => setSearchParams({...searchParams, itemType: e.target.value})}
+            className="border rounded px-3 py-2"
+          >
+            <option value="">全部类型</option>
+            <option value="FINISHED">成品</option>
+            <option value="SEMI">半成品</option>
+            <option value="RAW">原材料</option>
+          </select>
+          <button onClick={fetchData} className="px-4 py-2 bg-blue-600 text-white rounded">
+            查询
+          </button>
+        </div>
+      </div>
+
+      {/* 列表 */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">物料编码</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">物料名称</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">单位</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">来源</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">提前期</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item) => {
+              const typeBadge = getTypeBadge(item.itemType);
+              return (
+                <tr key={item.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.itemCode}</td>
+                  <td className="px-6 py-4">{item.itemName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded text-xs text-white bg-${typeBadge.color}-500`}>
+                      {typeBadge.text}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.unit}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.source}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.leadTime}天</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button className="text-blue-600 hover:underline mr-2">编辑</button>
+                    <button onClick={() => item.id && handleDelete(item.id)} className="text-red-600 hover:underline">删除</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
-
-export default ItemPage;
+}

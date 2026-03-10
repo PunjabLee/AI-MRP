@@ -3,10 +3,13 @@ package com.aimrp.mrp.application.service;
 import com.aimrp.bom.infrastructure.persistence.mapper.BomMapper;
 import com.aimrp.inventory.infrastructure.persistence.mapper.InventoryMapper;
 import com.aimrp.mrp.domain.entity.MrpRun;
+import com.aimrp.mrp.domain.entity.MrpSuggestion;
 import com.aimrp.mrp.domain.valueobject.MrpContext;
 import com.aimrp.mrp.domain.valueobject.MrpResult;
 import com.aimrp.mrp.domain.service.MrpCalculator;
 import com.aimrp.mrp.infrastructure.persistence.mapper.ItemMapper;
+import com.aimrp.mrp.infrastructure.persistence.mapper.MrpRunMapper;
+import com.aimrp.mrp.infrastructure.persistence.mapper.MrpSuggestionMapper;
 import com.aimrp.mrp.infrastructure.persistence.mapper.SalesOrderMapper;
 import com.aimrp.mrp.infrastructure.persistence.mapper.MrpPurchaseOnWayMapper;
 import com.aimrp.mrp.infrastructure.persistence.mapper.MrpProductionOnWayMapper;
@@ -34,6 +37,8 @@ public class MrpApplicationService {
     private final InventoryMapper inventoryMapper;
     private final MrpPurchaseOnWayMapper purchaseOnWayMapper;
     private final MrpProductionOnWayMapper productionOnWayMapper;
+    private final MrpRunMapper mrpRunMapper;
+    private final MrpSuggestionMapper mrpSuggestionMapper;
     
     /**
      * 执行 MRP 计算
@@ -68,8 +73,8 @@ public class MrpApplicationService {
         run.setPlanStartDate(params.getPlanStartDate() != null ? params.getPlanStartDate() : LocalDate.now());
         run.setPlanEndDate(params.getPlanEndDate() != null ? params.getPlanEndDate() : LocalDate.now().plusDays(90));
         
-        // TODO: 保存到数据库
-        run.setId(1L);
+        // 保存到数据库
+        mrpRunMapper.insert(run);
         
         return run;
     }
@@ -302,17 +307,43 @@ public class MrpApplicationService {
      * 保存计算结果
      */
     private void saveResult(MrpRun runRecord, MrpResult result) {
-        // TODO: 保存到数据库
+        // 更新运行记录
         runRecord.setStatus(result.getStatus());
         runRecord.setRunTimeMs(result.getRunTimeMs());
         
         if (result.getStatistics() != null) {
             runRecord.setDemandCount(result.getStatistics().getTotalDemands());
+            runRecord.setItemCount(result.getStatistics().getTotalItems());
             runRecord.setSuggestionCount(result.getStatistics().getTotalSuggestions());
             runRecord.setPurchaseSuggestionCount(result.getStatistics().getPurchaseSuggestions());
             runRecord.setProductionSuggestionCount(result.getStatistics().getProductionSuggestions());
         }
         
-        log.info("MRP 计算结果已保存，runId: {}", runRecord.getId());
+        mrpRunMapper.updateById(runRecord);
+        
+        // 保存建议到数据库
+        if (result.getSuggestions() != null && !result.getSuggestions().isEmpty()) {
+            List<MrpSuggestion> suggestions = new ArrayList<>();
+            for (MrpResult.SuggestionVO sug : result.getSuggestions()) {
+                MrpSuggestion suggestion = new MrpSuggestion();
+                suggestion.setRunId(runRecord.getId());
+                suggestion.setSuggestionType(sug.getType());
+                suggestion.setItemCode(sug.getItemCode());
+                suggestion.setItemName(sug.getItemName());
+                suggestion.setSuggestQty(sug.getQty());
+                suggestion.setNeedDate(sug.getNeedDate());
+                suggestion.setSuggestOrderDate(sug.getOrderDate());
+                suggestion.setSuggestFinishDate(sug.getFinishDate());
+                suggestion.setPriority(sug.getPriority() != null ? sug.getPriority() : 5);
+                suggestion.setStatus("PENDING");
+                suggestion.setDemandSource(sug.getSource());
+                suggestion.setMemo(sug.getMemo());
+                suggestions.add(suggestion);
+            }
+            mrpSuggestionMapper.batchInsert(suggestions);
+        }
+        
+        log.info("MRP 计算结果已保存，runId: {}, 建议数: {}", runRecord.getId(), 
+                result.getSuggestions() != null ? result.getSuggestions().size() : 0);
     }
 }

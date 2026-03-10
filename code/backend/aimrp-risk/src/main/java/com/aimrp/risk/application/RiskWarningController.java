@@ -2,11 +2,14 @@ package com.aimrp.risk.application;
 
 import com.aimrp.risk.domain.model.RiskItem;
 import com.aimrp.risk.domain.service.RiskMonitorService;
+import com.aimrp.risk.infrastructure.persistence.mapper.RiskWarningHistoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 风险预警 API
@@ -18,6 +21,7 @@ import java.util.List;
 public class RiskWarningController {
     
     private final RiskMonitorService riskMonitorService;
+    private final RiskWarningHistoryMapper warningHistoryMapper;
     
     /**
      * 发送风险预警
@@ -107,9 +111,26 @@ public class RiskWarningController {
      * GET /api/risk-warning/history
      */
     @GetMapping("/history")
-    public List<WarningRecord> getWarningHistory() {
-        // TODO: 从数据库查询预警历史
-        return List.of();
+    public Map<String, Object> getWarningHistory(
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(required = false) Long riskId,
+            @RequestParam(required = false) String receiver) {
+        
+        List<Map<String, Object>> records;
+        
+        if (riskId != null) {
+            records = warningHistoryMapper.selectByRiskId(riskId);
+        } else if (receiver != null) {
+            records = warningHistoryMapper.selectByReceiver(receiver, limit);
+        } else {
+            records = warningHistoryMapper.selectRecent(limit);
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", records);
+        result.put("total", records.size());
+        
+        return result;
     }
     
     /**

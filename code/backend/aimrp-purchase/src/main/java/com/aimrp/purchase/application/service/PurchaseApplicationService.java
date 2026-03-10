@@ -31,11 +31,11 @@ public class PurchaseApplicationService {
         var amount = domainService.calculateAmount(request.getUnitPrice(), request.getQty());
         var totalWithTax = domainService.calculateTotalWithTax(amount, request.getTaxRate());
         
-        // 保存
-        mapper.insertPurchaseOrder(request.getSupplierCode(), request.getItemCode(), 
+        // 保存并返回实际ID
+        Long orderId = mapper.insertPurchaseOrder(request.getSupplierCode(), request.getItemCode(), 
                 request.getQty(), request.getUnitPrice(), totalWithTax);
         
-        return 1L; // TODO: 返回实际ID
+        return orderId;
     }
     
     /**

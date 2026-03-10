@@ -1,16 +1,43 @@
-import { request } from './index';
+/**
+ * BOM API
+ */
+import api from './index';
+
+export interface BomItem {
+  id?: number;
+  parentItemCode?: string;
+  parentItemName?: string;
+  childItemCode?: string;
+  childItemName?: string;
+  usageQty?: number;
+  lossRate?: number;
+  level?: number;
+  validDate?: string;
+  status?: string;
+}
 
 export const bomApi = {
-  list: (params?: any) => request.get('/api/boms', { params }),
+  // BOM列表
+  list: (params: { parentItemCode?: string; keyword?: string }) => 
+    api.get<{list: BomItem[]; total: number}>('/boms', { params }),
   
-  get: (id: number) => request.get(`/api/boms/${id}`),
+  // BOM详情
+  get: (id: number) => api.get<BomItem>(`/boms/${id}`),
   
-  create: (data: any) => request.post('/api/boms', data),
+  // 创建BOM
+  create: (data: BomItem) => api.post<BomItem>('/boms', data),
   
-  update: (id: number, data: any) => request.put(`/api/boms/${id}`, data),
+  // 更新BOM
+  update: (id: number, data: BomItem) => api.put<void>(`/boms/${id}`, data),
   
-  delete: (id: number) => request.delete(`/api/boms/${id}`),
+  // 删除BOM
+  delete: (id: number) => api.delete<void>(`/boms/${id}`),
   
+  // BOM展开
   expand: (itemCode: string, qty: number, level?: number) => 
-    request.post('/api/boms/expand', { itemCode, qty, level }),
+    api.post<BomItem[]>('/boms/expand', { itemCode, qty, level }),
+  
+  // 获取物料的BOM
+  getByParent: (parentItemCode: string) => 
+    api.get<BomItem[]>(`/boms/parent/${parentItemCode}`),
 };

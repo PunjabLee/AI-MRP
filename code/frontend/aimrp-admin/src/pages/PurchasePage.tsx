@@ -1,152 +1,144 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Input, Modal, Form, message, Tag, Steps } from 'antd';
-import { PlusOutlined, EyeOutlined } from '@ant-design/icons';
+import { purchaseApi, PurchaseOrder } from '../api/purchase';
+import { message } from 'antd';
 
-interface PurchaseOrder {
-  id: number;
-  orderNo: string;
-  supplierCode: string;
-  supplierName: string;
-  itemCode: string;
-  itemName: string;
-  qty: number;
-  unitPrice: number;
-  totalAmount: number;
-  status: string;
-  createDate: string;
-  expectedDate: string;
-}
-
-const PurchasePage: React.FC = () => {
+export function PurchasePage() {
   const [data, setData] = useState<PurchaseOrder[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [detailVisible, setDetailVisible] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState<PurchaseOrder | null>(null);
+  const [searchParams, setSearchParams] = useState({ supplierCode: '', status: '' });
+  const [pagination, setPagination] = useState({ pageNum: 1, pageSize: 10, total: 0 });
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [pagination.pageNum]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const mockData: PurchaseOrder[] = [
-        { id: 1, orderNo: 'PO202403090001', supplierCode: 'S001', supplierName: '供应商A', itemCode: 'C001', itemName: '物料C', qty: 1000, unitPrice: 10, totalAmount: 10000, status: 'PENDING', createDate: '2024-03-09', expectedDate: '2024-03-15' },
-        { id: 2, orderNo: 'PO202403090002', supplierCode: 'S002', supplierName: '供应商B', itemCode: 'C002', itemName: '物料D', qty: 500, unitPrice: 20, totalAmount: 10000, status: 'CONFIRMED', createDate: '2024-03-08', expectedDate: '2024-03-14' },
-        { id: 3, orderNo: 'PO202403090003', supplierCode: 'S001', supplierName: '供应商A', itemCode: 'C003', itemName: '物料E', qty: 2000, unitPrice: 5, totalAmount: 10000, status: 'RECEIVED', createDate: '2024-03-07', expectedDate: '2024-03-12' },
-      ];
-      setData(mockData);
+      const result = await purchaseApi.list({
+        pageNum: pagination.pageNum,
+        pageSize: pagination.pageSize,
+        ...searchParams
+      });
+      setData(result.list || []);
+      setPagination(prev => ({ ...prev, total: result.total || 0 }));
     } catch (error) {
-      message.error('加载失败');
+      console.error('获取采购订单失败', error);
+      message.error('获取采购订单失败');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleView = (record: PurchaseOrder) => {
-    setCurrentOrder(record);
-    setDetailVisible(true);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'orange';
-      case 'CONFIRMED': return 'blue';
-      case 'RECEIVED': return 'green';
-      case 'CANCELLED': return 'red';
-      default: return 'default';
+  const handleConfirm = async (id: number) => {
+    try {
+      await purchaseApi.confirm(id);
+      message.success('确认成功');
+      fetchData();
+    } catch (error) {
+      message.error('确认失败');
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'PENDING': return '待确认';
-      case 'CONFIRMED': return '已确认';
-      case 'RECEIVED': return '已入库';
-      case 'CANCELLED': return '已取消';
-      default: return status;
+  const handleReceive = async (id: number) => {
+    try {
+      await purchaseApi.receive(id, { qty: 100 });
+      message.success('入库成功');
+      fetchData();
+    } catch (error) {
+      message.error('入库失败');
     }
   };
 
-  const filteredData = data.filter(item =>
-    item.orderNo.includes(searchText) ||
-    item.supplierName.includes(searchText) ||
-    item.itemCode.includes(searchText)
-  );
-
-  const columns = [
-    { title: '采购单号', dataIndex: 'orderNo', key: 'orderNo' },
-    { title: '供应商编码', dataIndex: 'supplierCode', key: 'supplierCode' },
-    { title: '供应商名称', dataIndex: 'supplierName', key: 'supplierName' },
-    { title: '物料编码', dataIndex: 'itemCode', key: 'itemCode' },
-    { title: '物料名称', dataIndex: 'itemName', key: 'itemName' },
-    { title: '数量', dataIndex: 'qty', key: 'qty' },
-    { title: '单价', dataIndex: 'unitPrice', key: 'unitPrice' },
-    { title: '总金额', dataIndex: 'totalAmount', key: 'totalAmount' },
-    { 
-      title: '状态', 
-      dataIndex: 'status', 
-      key: 'status',
-      render: (status: string) => <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
-    },
-    { title: '创建日期', dataIndex: 'createDate', key: 'createDate' },
-    { title: '预计到货日期', dataIndex: 'expectedDate', key: 'expectedDate' },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: PurchaseOrder) => (
-        <Space>
-          <Button type="link" icon={<EyeOutlined />} onClick={() => handleView(record)}>查看</Button>
-        </Space>
-      ),
-    },
-  ];
+  const getStatusBadge = (status?: string) => {
+    const statuses: Record<string, { color: string; text: string }> = {
+      'DRAFT': { color: 'gray', text: '草稿' },
+      'CONFIRMED': { color: 'blue', text: '已确认' },
+      'PARTIAL_RECEIVED': { color: 'orange', text: '部分到货' },
+      'RECEIVED': { color: 'green', text: '已到货' },
+      'CANCELLED': { color: 'red', text: '已取消' }
+    };
+    return statuses[status || ''] || { color: 'gray', text: status };
+  };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>采购管理</h1>
-      <Space style={{ marginBottom: 16 }}>
-        <Input.Search
-          placeholder="搜索采购单号/供应商/物料"
-          onSearch={setSearchText}
-          style={{ width: 300 }}
-        />
-        <Button type="primary" icon={<PlusOutlined />}>新建采购</Button>
-      </Space>
-      <Table columns={columns} dataSource={filteredData} rowKey="id" loading={loading} />
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">采购订单</h1>
+      </div>
 
-      <Modal
-        title={`采购单详情 - ${currentOrder?.orderNo}`}
-        open={detailVisible}
-        onCancel={() => setDetailVisible(false)}
-        footer={null}
-        width={700}
-      >
-        {currentOrder && (
-          <>
-            <Steps
-              current={currentOrder.status === 'PENDING' ? 0 : currentOrder.status === 'CONFIRMED' ? 1 : 2}
-              items={[
-                { title: '创建' },
-                { title: '确认' },
-                { title: '入库' },
-              ]}
-              style={{ marginBottom: 24 }}
-            />
-            <p><strong>采购单号：</strong>{currentOrder.orderNo}</p>
-            <p><strong>供应商：</strong>{currentOrder.supplierName}</p>
-            <p><strong>物料：</strong>{currentOrder.itemName}</p>
-            <p><strong>数量：</strong>{currentOrder.qty}</p>
-            <p><strong>单价：</strong>{currentOrder.unitPrice}</p>
-            <p><strong>总金额：</strong>{currentOrder.totalAmount}</p>
-            <p><strong>创建日期：</strong>{currentOrder.createDate}</p>
-            <p><strong>预计到货：</strong>{currentOrder.expectedDate}</p>
-          </>
-        )}
-      </Modal>
+      {/* 搜索栏 */}
+      <div className="mb-4 bg-white p-4 rounded-lg shadow">
+        <div className="flex gap-4">
+          <input
+            placeholder="供应商编码"
+            value={searchParams.supplierCode}
+            onChange={e => setSearchParams({...searchParams, supplierCode: e.target.value})}
+            className="border rounded px-3 py-2"
+          />
+          <select
+            value={searchParams.status}
+            onChange={e => setSearchParams({...searchParams, status: e.target.value})}
+            className="border rounded px-3 py-2"
+          >
+            <option value="">全部状态</option>
+            <option value="DRAFT">草稿</option>
+            <option value="CONFIRMED">已确认</option>
+            <option value="RECEIVED">已到货</option>
+          </select>
+          <button onClick={fetchData} className="px-4 py-2 bg-blue-600 text-white rounded">
+            查询
+          </button>
+        </div>
+      </div>
+
+      {/* 列表 */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">订单号</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">供应商</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">订单日期</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">预计到货</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">金额</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item) => {
+              const statusBadge = getStatusBadge(item.status);
+              return (
+                <tr key={item.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.poNo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.supplierName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.orderDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.expectDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">¥{item.totalAmount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded text-xs text-white bg-${statusBadge.color}-500`}>
+                      {statusBadge.text}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {item.status === 'DRAFT' && (
+                      <button onClick={() => item.id && handleConfirm(item.id)} className="text-blue-600 hover:underline mr-2">
+                        确认
+                      </button>
+                    )}
+                    {item.status === 'CONFIRMED' && (
+                      <button onClick={() => item.id && handleReceive(item.id)} className="text-green-600 hover:underline">
+                        入库
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
-
-export default PurchasePage;
+}

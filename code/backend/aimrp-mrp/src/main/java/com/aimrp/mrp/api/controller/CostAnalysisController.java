@@ -3,12 +3,13 @@ package com.aimrp.mrp.api.controller;
 import com.aimrp.common.result.ApiResponse;
 import com.aimrp.mrp.domain.service.CostImpactAnalysisService;
 import com.aimrp.mrp.domain.service.CostImpactAnalysisService.*;
+import com.aimrp.mrp.infrastructure.persistence.mapper.CostAnalysisHistoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.*;
 
 /**
  * 成本影响分析 API
@@ -20,6 +21,7 @@ import java.util.List;
 public class CostAnalysisController {
     
     private final CostImpactAnalysisService costAnalysisService;
+    private final CostAnalysisHistoryMapper costAnalysisHistoryMapper;
     
     /**
      * 分析成本影响
@@ -41,6 +43,9 @@ public class CostAnalysisController {
         
         CostImpactResult result = costAnalysisService.analyze(request);
         
+        // 保存到历史记录
+        saveToHistory(request, result);
+        
         return ApiResponse.ok(result);
     }
     
@@ -54,7 +59,12 @@ public class CostAnalysisController {
         log.info("成本方案对比 - 场景数: {}", scenarios.size());
         
         List<CostImpactResult> results = scenarios.stream()
-                .map(costAnalysisService::analyze)
+                .map(scenario -> {
+                    CostImpactResult result = costAnalysisService.analyze(scenario);
+                    // 保存每个方案到历史
+                    saveToHistory(scenario, result);
+                    return result;
+                })
                 .sorted((r1, r2) -> r1.getTotalCostChange().compareTo(r2.getTotalCostChange()))
                 .toList();
         
@@ -67,8 +77,56 @@ public class CostAnalysisController {
      * GET /api/cost-analysis/history
      */
     @GetMapping("/history")
-    public ApiResponse<List<CostImpactResult>> getHistory() {
-        // TODO: 从数据库查询历史
-        return ApiResponse.ok(List.of());
+    public ApiResponse<List<Map<String, Object>>> getHistory(
+            @RequestParam(defaultValue = "20") int limit) {
+        List<Map<String, Object>> history = costAnalysisHistoryMapper.selectRecent(limit);
+        return ApiResponse.ok(history);
+    }
+    
+    /**
+     * 获取单条分析详情
+     * 
+     * GET /api/cost-analysis/{id}
+     */
+    @GetMapping("/{id}")
+    public ApiResponse<Map<String, Object>> getById(@PathVariable Long id) {
+        Map<String, Object> record = costAnalysisHistoryMapper.selectById(id);
+        if (record == null) {
+            return ApiResponse.fail("记录不存在");
+        }
+        return ApiResponse.ok(record);
+    }
+    
+    /**
+     * 删除历史记录
+     * 
+     * DELETE /api/cost-analysis/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        costAnalysisHistoryMapper.deleteById(id);
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 保存到历史记录
+     */
+    private void saveToHistory(CostAnalysisScenario scenario, CostImpactResult result) {
+        try {
+            Map<String, Object> record = new HashMap<>();
+            record.put("scenarioName", scenario.getScenarioName());
+            record.put("itemCostChange", result.getItemCostChange());
+            record.put("laborCostChange", result.getLaborCostChange());
+            record.put("emergencyCostChange", result.getEmergencyCostChange());
+            record.put("totalCostChange", result.getTotalCostChange());
+            record.put("costChangeRate", result.getCostChangeRate());
+            record.put("analysisDetails", result.getAnalysisDetails() != null ? 
+                    result.getAnalysisDetails().toString() : "");
+            record.put("createdBy", "system");
+            
+            costAnalysisHistoryMapper.insert(record);
+        } catch (Exception e) {
+            log.warn("保存成本分析历史失败: {}", e.getMessage());
+        }
     }
 }

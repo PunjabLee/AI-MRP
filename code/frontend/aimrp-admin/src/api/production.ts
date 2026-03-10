@@ -1,21 +1,56 @@
-import { request } from './index';
+/**
+ * 生产工单 API
+ */
+import api from './index';
+
+export interface ProductionOrder {
+  id?: number;
+  moNo?: string;
+  itemCode?: string;
+  itemName?: string;
+  planQty?: number;
+  completedQty?: number;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
 export const productionApi = {
-  list: (params?: any) => request.get('/api/production-orders', { params }),
+  // 工单列表
+  list: (params: {
+    pageNum?: number;
+    pageSize?: number;
+    itemCode?: string;
+    status?: string;
+  }) => api.get<{list: ProductionOrder[]; total: number}>('/production-orders', { params }),
   
-  get: (id: number) => request.get(`/api/production-orders/${id}`),
+  // 工单详情
+  get: (id: number) => api.get<ProductionOrder>(`/production-orders/${id}`),
   
-  create: (data: any) => request.post('/api/production-orders', data),
+  // 创建工单
+  create: (data: ProductionOrder) => api.post<ProductionOrder>('/production-orders', data),
   
-  update: (id: number, data: any) => request.put(`/api/production-orders/${id}`, data),
+  // 更新工单
+  update: (id: number, data: ProductionOrder) => api.put<void>(`/production-orders/${id}`, data),
   
-  delete: (id: number) => request.delete(`/api/production-orders/${id}`),
+  // 删除工单
+  delete: (id: number) => api.delete<void>(`/production-orders/${id}`),
   
-  start: (id: number) => request.post(`/api/production-orders/${id}/start`),
+  // 下达工单
+  release: (id: number) => api.post<void>(`/production-orders/${id}/release`),
   
-  complete: (id: number, data?: any) => request.post(`/api/production-orders/${id}/complete`, data),
+  // 开始生产
+  start: (id: number) => api.post<void>(`/production-orders/${id}/start`),
   
-  report: (id: number, data: any) => request.post(`/api/production-orders/${id}/report`, data),
+  // 完工
+  complete: (id: number, data: { completedQty: number }) => 
+    api.post<void>(`/production-orders/${id}/complete`, data),
   
-  schedule: (params?: any) => request.post('/api/production-orders/schedule', params),
+  // 报工
+  report: (id: number, data: { reportQty: number; remark?: string }) => 
+    api.post<void>(`/production-orders/${id}/report`, data),
+  
+  // 排程
+  schedule: (params: { orderIds?: number[] }) => 
+    api.post<ProductionOrder[]>('/production-orders/schedule', params),
 };

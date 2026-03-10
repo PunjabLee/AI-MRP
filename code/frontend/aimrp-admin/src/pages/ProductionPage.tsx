@@ -1,210 +1,160 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Input, Modal, Form, message, Tag, Timeline, Card, Row, Col } from 'antd';
-import { PlusOutlined, PlayCircleOutlined, CheckCircleOutlined, EyeOutlined } from '@ant-design/icons';
+import { productionApi, ProductionOrder } from '../api/production';
+import { message } from 'antd';
 
-interface ProductionOrder {
-  id: number;
-  moNo: string;
-  itemCode: string;
-  itemName: string;
-  qty: number;
-  completedQty: number;
-  status: string;
-  startDate: string;
-  endDate: string;
-  priority: number;
-}
-
-const ProductionPage: React.FC = () => {
+export function ProductionPage() {
   const [data, setData] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [detailVisible, setDetailVisible] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState<ProductionOrder | null>(null);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState('');
+  const [searchParams, setSearchParams] = useState({ itemCode: '', status: '' });
+  const [pagination, setPagination] = useState({ pageNum: 1, pageSize: 10, total: 0 });
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [pagination.pageNum]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const mockData: ProductionOrder[] = [
-        { id: 1, moNo: 'MO202403090001', itemCode: 'A001', itemName: '产品A', qty: 1000, completedQty: 600, status: 'IN_PRODUCTION', startDate: '2024-03-08', endDate: '2024-03-15', priority: 1 },
-        { id: 2, moNo: 'MO202403090002', itemCode: 'B001', itemName: '部件B', qty: 500, completedQty: 500, status: 'COMPLETED', startDate: '2024-03-05', endDate: '2024-03-10', priority: 2 },
-        { id: 3, moNo: 'MO202403090003', itemCode: 'A001', itemName: '产品A', qty: 800, completedQty: 0, status: 'PENDING', startDate: '2024-03-12', endDate: '2024-03-18', priority: 3 },
-      ];
-      setData(mockData);
+      const result = await productionApi.list({
+        pageNum: pagination.pageNum,
+        pageSize: pagination.pageSize,
+        ...searchParams
+      });
+      setData(result.list || []);
+      setPagination(prev => ({ ...prev, total: result.total || 0 }));
     } catch (error) {
-      message.error('加载失败');
+      console.error('获取生产工单失败', error);
+      message.error('获取生产工单失败');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleView = (record: ProductionOrder) => {
-    setCurrentOrder(record);
-    setDetailVisible(true);
-  };
-
-  const handleStart = (id: number) => {
-    setData(data.map(item => 
-      item.id === id, status: 'IN_PRODUCTION' ? { ...item } : item
-    ));
-    message.success('已开工');
-  };
-
-  const handleComplete = (id: number) => {
-    setData(data.map(item => 
-      item.id === id ? { ...item, status: 'COMPLETED', completedQty: item.qty } : item
-    ));
-    message.success('已完工');
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'orange';
-      case 'IN_PRODUCTION': return 'blue';
-      case 'COMPLETED': return 'green';
-      case 'CANCELLED': return 'red';
-      default: return 'default';
+  const handleRelease = async (id: number) => {
+    try {
+      await productionApi.release(id);
+      message.success('下达成功');
+      fetchData();
+    } catch (error) {
+      message.error('下达失败');
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'PENDING': return '待生产';
-      case 'IN_PRODUCTION': return '生产中';
-      case 'COMPLETED': return '已完成';
-      case 'CANCELLED': return '已取消';
-      default: return status;
+  const handleStart = async (id: number) => {
+    try {
+      await productionApi.start(id);
+      message.success('开始生产');
+      fetchData();
+    } catch (error) {
+      message.error('操作失败');
     }
   };
 
-  const filteredData = data.filter(item =>
-    item.moNo.includes(searchText) ||
-    item.itemCode.includes(searchText) ||
-    item.itemName.includes(searchText)
-  );
+  const handleComplete = async (id: number) => {
+    try {
+      await productionApi.complete(id, { completedQty: 100 });
+      message.success('完工成功');
+      fetchData();
+    } catch (error) {
+      message.error('完工失败');
+    }
+  };
 
-  const columns = [
-    { title: '工单号', dataIndex: 'moNo', key: 'moNo' },
-    { title: '物料编码', dataIndex: 'itemCode', key: 'itemCode' },
-    { title: '物料名称', dataIndex: 'itemName', key: 'itemName' },
-    { title: '计划数量', dataIndex: 'qty', key: 'qty' },
-    { title: '已完成', dataIndex: 'completedQty', key: 'completedQty' },
-    { 
-      title: '进度', 
-      key: 'progress',
-      render: (_: any, record: ProductionOrder) => 
-        `${Math.round((record.completedQty / record.qty) * 100)}%`
-    },
-    { title: '开始日期', dataIndex: 'startDate', key: 'startDate' },
-    { title: '结束日期', dataIndex: 'endDate', key: 'endDate' },
-    { 
-      title: '状态', 
-      dataIndex: 'status', 
-      key: 'status',
-      render: (status: string) => <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: ProductionOrder) => (
-        <Space>
-          <Button type="link" icon={<EyeOutlined />} onClick={() => handleView(record)}>查看</Button>
-          {record.status === 'PENDING' && (
-            <Button type="link" icon={<PlayCircleOutlined />} onClick={() => handleStart(record.id)}>开工</Button>
-          )}
-          {record.status === 'IN_PRODUCTION' && (
-            <Button type="link" icon={<CheckCircleOutlined />} onClick={() => handleComplete(record.id)}>完工</Button>
-          )}
-        </Space>
-      ),
-    },
-  ];
-
-  // 统计卡片数据
-  const statistics = {
-    total: data.length,
-    pending: data.filter(d => d.status === 'PENDING').length,
-    inProduction: data.filter(d => d.status === 'IN_PRODUCTION').length,
-    completed: data.filter(d => d.status === 'COMPLETED').length,
+  const getStatusBadge = (status?: string) => {
+    const statuses: Record<string, { color: string; text: string }> = {
+      'DRAFT': { color: 'gray', text: '草稿' },
+      'RELEASED': { color: 'blue', text: '已下达' },
+      'PROCESSING': { color: 'orange', text: '生产中' },
+      'COMPLETED': { color: 'green', text: '已完成' },
+      'CANCELLED': { color: 'red', text: '已取消' }
+    };
+    return statuses[status || ''] || { color: 'gray', text: status };
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>生产管理</h1>
-      
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <Card>
-            <Statistic title="总工单" value={statistics.total} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="待生产" value={statistics.pending} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="生产中" value={statistics.inProduction} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="已完成" value={statistics.completed} />
-          </Card>
-        </Col>
-      </Row>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">生产工单</h1>
+      </div>
 
-      <Space style={{ marginBottom: 16 }}>
-        <Input.Search
-          placeholder="搜索工单号/物料"
-          onSearch={setSearchText}
-          style={{ width: 300 }}
-        />
-        <Button type="primary" icon={<PlusOutlined />}>新建工单</Button>
-      </Space>
-      <Table columns={columns} dataSource={filteredData} rowKey="id" loading={loading} />
+      {/* 搜索栏 */}
+      <div className="mb-4 bg-white p-4 rounded-lg shadow">
+        <div className="flex gap-4">
+          <input
+            placeholder="物料编码"
+            value={searchParams.itemCode}
+            onChange={e => setSearchParams({...searchParams, itemCode: e.target.value})}
+            className="border rounded px-3 py-2"
+          />
+          <select
+            value={searchParams.status}
+            onChange={e => setSearchParams({...searchParams, status: e.target.value})}
+            className="border rounded px-3 py-2"
+          >
+            <option value="">全部状态</option>
+            <option value="DRAFT">草稿</option>
+            <option value="RELEASED">已下达</option>
+            <option value="PROCESSING">生产中</option>
+            <option value="COMPLETED">已完成</option>
+          </select>
+          <button onClick={fetchData} className="px-4 py-2 bg-blue-600 text-white rounded">
+            查询
+          </button>
+        </div>
+      </div>
 
-      <Modal
-        title={`工单详情 - ${currentOrder?.moNo}`}
-        open={detailVisible}
-        onCancel={() => setDetailVisible(false)}
-        footer={null}
-        width={600}
-      >
-        {currentOrder && (
-          <>
-            <Timeline
-              items={[
-                { color: 'green', children: `创建工单 ${currentOrder.moNo}` },
-                { color: currentOrder.status === 'PENDING' ? 'gray' : 'green', children: currentOrder.status !== 'PENDING' ? '开始生产' : '等待生产' },
-                { color: currentOrder.status === 'COMPLETED' ? 'green' : 'gray', children: currentOrder.status === 'COMPLETED' ? '生产完成' : '生产进行中' },
-              ]}
-            />
-            <p><strong>工单号：</strong>{currentOrder.moNo}</p>
-            <p><strong>物料：</strong>{currentOrder.itemName}</p>
-            <p><strong>计划数量：</strong>{currentOrder.qty}</p>
-            <p><strong>已完成：</strong>{currentOrder.completedQty}</p>
-            <p><strong>计划工期：</strong>{currentOrder.startDate} ~ {currentOrder.endDate}</p>
-          </>
-        )}
-      </Modal>
+      {/* 列表 */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">工单号</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">物料</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">计划数量</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">已完成</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">开始日期</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item) => {
+              const statusBadge = getStatusBadge(item.status);
+              return (
+                <tr key={item.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.moNo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.itemCode}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.planQty}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.completedQty || 0}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.startDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded text-xs text-white bg-${statusBadge.color}-500`}>
+                      {statusBadge.text}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {item.status === 'DRAFT' && (
+                      <button onClick={() => item.id && handleRelease(item.id)} className="text-blue-600 hover:underline mr-2">
+                        下达
+                      </button>
+                    )}
+                    {item.status === 'RELEASED' && (
+                      <button onClick={() => item.id && handleStart(item.id)} className="text-green-600 hover:underline mr-2">
+                        开始
+                      </button>
+                    )}
+                    {item.status === 'PROCESSING' && (
+                      <button onClick={() => item.id && handleComplete(item.id)} className="text-orange-600 hover:underline">
+                        完工
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
-
-// 简单的统计组件
-const Statistic: React.FC<{ title: string; value: number }> = ({ title, value }) => (
-  <div style={{ textAlign: 'center' }}>
-    <div style={{ fontSize: 24, fontWeight: 'bold' }}>{value}</div>
-    <div style={{ color: '#888' }}>{title}</div>
-  </div>
-);
-
-export default ProductionPage;
+}
