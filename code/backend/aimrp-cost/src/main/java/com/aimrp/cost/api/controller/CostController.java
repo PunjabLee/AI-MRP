@@ -1,101 +1,104 @@
 package com.aimrp.cost.api.controller;
 
+import com.aimrp.common.result.ApiResponse;
+import com.aimrp.cost.domain.entity.CostElement;
+import com.aimrp.cost.infrastructure.persistence.mapper.CostElementMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * 成本管理接口
+ * 成本管理 Controller
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/cost")
 @RequiredArgsConstructor
 public class CostController {
     
+    private final CostElementMapper costElementMapper;
+    
     /**
-     * 获取成本要素列表
+     * 查询成本要素列表
      */
     @GetMapping("/elements")
-    public Map<String, Object> listElements(
-            @RequestParam(required = false) String costType) {
-        List<Map<String, Object>> list = new ArrayList<>();
+    public ApiResponse<Map<String, Object>> list(
+            @RequestParam(required = false) String costType,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
         
-        Map<String, Object> e1 = new HashMap<>();
-        e1.put("id", 1L);
-        e1.put("elementCode", "MATERIAL");
-        e1.put("elementName", "材料成本");
-        e1.put("amount", 500000.00);
-        e1.put("ratio", 0.65);
-        list.add(e1);
+        List<CostElement> list = costElementMapper.selectList(costType, keyword);
         
-        Map<String, Object> e2 = new HashMap<>();
-        e2.put("id", 2L);
-        e2.put("elementCode", "LABOR");
-        e2.put("elementName", "人工成本");
-        e2.put("amount", 150000.00);
-        e2.put("ratio", 0.20);
-        list.add(e2);
+        // 分页
+        int total = list.size();
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
         
-        Map<String, Object> e3 = new HashMap<>();
-        e3.put("id", 3L);
-        e3.put("elementCode", "OVERHEAD");
-        e3.put("elementName", "制造费用");
-        e3.put("amount", 120000.00);
-        e3.put("ratio", 0.15);
-        list.add(e3);
+        List<CostElement> pageList = fromIndex < total ?
+                list.subList(fromIndex, toIndex) : List.of();
         
-        return Map.of("code", 200, "data", list);
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", pageList);
+        result.put("total", total);
+        
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 产品成本明细
+     * 查询成本要素详情
      */
-    @GetMapping("/product-cost")
-    public Map<String, Object> getProductCost(@RequestParam String itemCode) {
-        Map<String, Object> cost = new HashMap<>();
-        cost.put("itemCode", itemCode);
-        cost.put("materialCost", 80.00);
-        cost.put("laborCost", 25.00);
-        cost.put("overheadCost", 15.00);
-        cost.put("totalCost", 120.00);
-        
-        return Map.of("code", 200, "data", cost);
+    @GetMapping("/elements/{id}")
+    public ApiResponse<CostElement> getById(@PathVariable Long id) {
+        CostElement element = costElementMapper.selectById(id);
+        return ApiResponse.ok(element);
     }
     
     /**
-     * 成本分析
+     * 创建成本要素
      */
-    @GetMapping("/analysis")
-    public Map<String, Object> analyze(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-        
-        Map<String, Object> analysis = new HashMap<>();
-        analysis.put("totalCost", 770000.00);
-        analysis.put("materialCost", 500000.00);
-        analysis.put("laborCost", 150000.00);
-        analysis.put("overheadCost", 120000.00);
-        analysis.put("variance", -5000.00);
-        analysis.put("varianceRate", -0.65);
-        
-        return Map.of("code", 200, "data", analysis);
+    @PostMapping("/elements")
+    public ApiResponse<CostElement> create(@RequestBody CostElement element) {
+        costElementMapper.insert(element);
+        return ApiResponse.ok(element);
     }
     
     /**
-     * 订单成本
+     * 更新成本要素
      */
-    @GetMapping("/order-cost")
-    public Map<String, Object> getOrderCost(@RequestParam Long orderId) {
-        Map<String, Object> cost = new HashMap<>();
-        cost.put("orderId", orderId);
-        cost.put("orderNo", "SO20240309001");
-        cost.put("productQty", 1000);
-        cost.put("totalCost", 120000.00);
-        cost.put("unitCost", 120.00);
+    @PutMapping("/elements/{id}")
+    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody CostElement element) {
+        element.setId(id);
+        costElementMapper.updateById(element);
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 删除成本要素
+     */
+    @DeleteMapping("/elements/{id}")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        costElementMapper.deleteById(id);
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 计算产品成本
+     */
+    @PostMapping("/calculate")
+    public ApiResponse<Map<String, Object>> calculate(@RequestBody Map<String, Object> params) {
+        String itemCode = (String) params.get("itemCode");
         
-        return Map.of("code", 200, "data", cost);
+        // TODO: 根据BOM和成本要素计算产品成本
+        Map<String, Object> result = new HashMap<>();
+        result.put("itemCode", itemCode);
+        result.put("materialCost", 0);
+        result.put("laborCost", 0);
+        result.put("overheadCost", 0);
+        result.put("totalCost", 0);
+        
+        return ApiResponse.ok(result);
     }
 }

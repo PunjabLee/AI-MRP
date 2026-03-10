@@ -1,10 +1,15 @@
 package com.aimrp.warehouse.api.controller;
 
+import com.aimrp.common.result.ApiResponse;
+import com.aimrp.warehouse.domain.entity.Warehouse;
+import com.aimrp.warehouse.infrastructure.persistence.mapper.WarehouseMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 仓库管理接口
@@ -15,68 +20,81 @@ import java.util.*;
 @RequiredArgsConstructor
 public class WarehouseController {
     
+    private final WarehouseMapper warehouseMapper;
+    
     /**
      * 获取仓库列表
      */
     @GetMapping("/list")
-    public Map<String, Object> list(
+    public ApiResponse<Map<String, Object>> list(
             @RequestParam(required = false) String warehouseType,
             @RequestParam(required = false) String status) {
         
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<Warehouse> list = warehouseMapper.selectList(warehouseType, status);
         
-        // 模拟数据
-        list.add(Map.of("id", 1L, "warehouseCode", "WH01", "warehouseName", "主仓库", "warehouseType", "MAIN", "status", "ENABLED"));
-        list.add(Map.of("id", 2L, "warehouseCode", "WH02", "warehouseName", "原料仓", "warehouseType", "RAW", "status", "ENABLED"));
-        list.add(Map.of("id", 3L, "warehouseCode", "WH03", "warehouseName", "成品仓", "warehouseType", "FINISHED", "status", "ENABLED"));
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", list.size());
         
-        return Map.of("code", 200, "data", list);
+        return ApiResponse.ok(result);
     }
     
     /**
      * 获取仓库详情
      */
     @GetMapping("/{id}")
-    public Map<String, Object> get(@PathVariable Long id) {
-        Map<String, Object> warehouse = new HashMap<>();
-        warehouse.put("id", id);
-        warehouse.put("warehouseCode", "WH01");
-        warehouse.put("warehouseName", "主仓库");
-        warehouse.put("warehouseType", "MAIN");
-        warehouse.put("orgId", 1L);
-        warehouse.put("status", "ENABLED");
-        
-        return Map.of("code", 200, "data", warehouse);
+    public ApiResponse<Warehouse> get(@PathVariable Long id) {
+        Warehouse warehouse = warehouseMapper.selectById(id);
+        return ApiResponse.ok(warehouse);
     }
     
     /**
      * 创建仓库
      */
     @PostMapping
-    public Map<String, Object> create(@RequestBody Map<String, Object> data) {
-        log.info("创建仓库: {}", data);
-        data.put("id", System.currentTimeMillis());
+    public ApiResponse<Warehouse> create(@RequestBody Warehouse warehouse) {
+        // 检查编码是否重复
+        Warehouse exist = warehouseMapper.selectByCode(warehouse.getWarehouseCode());
+        if (exist != null) {
+            return ApiResponse.fail("仓库编码已存在");
+        }
         
-        return Map.of("code", 200, "data", data, "message", "创建成功");
+        warehouse.setStatus("ENABLED");
+        warehouseMapper.insert(warehouse);
+        
+        return ApiResponse.ok(warehouse);
     }
     
     /**
      * 更新仓库
      */
     @PutMapping("/{id}")
-    public Map<String, Object> update(@PathVariable Long id, @RequestBody Map<String, Object> data) {
-        log.info("更新仓库: {}", id);
+    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody Warehouse warehouse) {
+        warehouse.setId(id);
+        warehouseMapper.updateById(warehouse);
         
-        return Map.of("code", 200, "message", "更新成功");
+        return ApiResponse.ok();
     }
     
     /**
      * 删除仓库
      */
     @DeleteMapping("/{id}")
-    public Map<String, Object> delete(@PathVariable Long id) {
-        log.info("删除仓库: {}", id);
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        warehouseMapper.deleteById(id);
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 启用/禁用仓库
+     */
+    @PutMapping("/{id}/status")
+    public ApiResponse<Void> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        Warehouse warehouse = new Warehouse();
+        warehouse.setId(id);
+        warehouse.setStatus(status);
+        warehouseMapper.updateById(warehouse);
         
-        return Map.of("code", 200, "message", "删除成功");
+        return ApiResponse.ok();
     }
 }

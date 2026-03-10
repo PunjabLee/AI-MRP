@@ -1,109 +1,107 @@
 package com.aimrp.mps.api.controller;
 
+import com.aimrp.common.result.ApiResponse;
+import com.aimrp.mps.domain.entity.MpsPlan;
+import com.aimrp.mps.infrastructure.persistence.mapper.MpsPlanMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * MPS 主生产计划接口
+ * MPS主生产计划 Controller
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/mps")
 @RequiredArgsConstructor
 public class MpsController {
     
+    private final MpsPlanMapper mpsPlanMapper;
+    
     /**
-     * 获取MPS计划列表
+     * 查询MPS计划列表
      */
-    @GetMapping("/list")
-    public Map<String, Object> list(
-            @RequestParam(required = false) String planType,
+    @GetMapping("/plans")
+    public ApiResponse<Map<String, Object>> list(
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
+            @RequestParam(required = false) String itemCode,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
         
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<MpsPlan> list = mpsPlanMapper.selectList(status, itemCode);
         
-        // 模拟数据
-        Map<String, Object> mps1 = new HashMap<>();
-        mps1.put("id", 1L);
-        mps1.put("planNo", "MPS20240301");
-        mps1.put("planType", "MONTHLY");
-        mps1.put("status", "APPROVED");
-        mps1.put("startDate", "2024-03-01");
-        mps1.put("endDate", "2024-03-31");
-        list.add(mps1);
+        // 分页
+        int total = list.size();
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
         
-        return Map.of("code", 200, "data", list);
+        List<MpsPlan> pageList = fromIndex < total ?
+                list.subList(fromIndex, toIndex) : List.of();
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", pageList);
+        result.put("total", total);
+        
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 获取MPS详情
+     * 查询MPS计划详情
      */
-    @GetMapping("/{id}")
-    public Map<String, Object> get(@PathVariable Long id) {
-        Map<String, Object> mps = new HashMap<>();
-        mps.put("id", id);
-        mps.put("planNo", "MPS20240301");
-        mps.put("planType", "MONTHLY");
-        mps.put("status", "APPROVED");
-        
-        return Map.of("code", 200, "data", mps);
+    @GetMapping("/plans/{id}")
+    public ApiResponse<MpsPlan> getById(@PathVariable Long id) {
+        MpsPlan plan = mpsPlanMapper.selectById(id);
+        return ApiResponse.ok(plan);
     }
     
     /**
      * 创建MPS计划
      */
-    @PostMapping
-    public Map<String, Object> create(@RequestBody Map<String, Object> data) {
-        log.info("创建MPS计划: {}", data);
-        data.put("id", System.currentTimeMillis());
+    @PostMapping("/plans")
+    public ApiResponse<MpsPlan> create(@RequestBody MpsPlan plan) {
+        plan.setPlanNo("MPS" + System.currentTimeMillis());
+        plan.setStatus("DRAFT");
+        mpsPlanMapper.insert(plan);
         
-        return Map.of("code", 200, "data", data, "message", "创建成功");
+        return ApiResponse.ok(plan);
     }
     
     /**
-     * 运行MPS计算
+     * 更新MPS计划
      */
-    @PostMapping("/calculate")
-    public Map<String, Object> calculate(@RequestBody Map<String, Object> params) {
-        log.info("运行MPS计算: {}", params);
+    @PutMapping("/plans/{id}")
+    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody MpsPlan plan) {
+        plan.setId(id);
+        mpsPlanMapper.updateById(plan);
         
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 下达MPS计划
+     */
+    @PostMapping("/plans/{id}/release")
+    public ApiResponse<Void> release(@PathVariable Long id) {
+        MpsPlan plan = new MpsPlan();
+        plan.setId(id);
+        plan.setStatus("RELEASED");
+        mpsPlanMapper.updateById(plan);
+        
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 生成MPS建议
+     */
+    @GetMapping("/suggestions")
+    public ApiResponse<Map<String, Object>> getSuggestions() {
+        // TODO: 根据销售订单和预测生成MPS建议
         Map<String, Object> result = new HashMap<>();
-        result.put("plannedOrders", 10);
-        result.put("capacityCheck", "PASSED");
-        result.put("suggestions", new ArrayList<>());
+        result.put("list", List.of());
+        result.put("total", 0);
         
-        return Map.of("code", 200, "data", result, "message", "计算完成");
-    }
-    
-    /**
-     * 确认MPS计划
-     */
-    @PostMapping("/{id}/confirm")
-    public Map<String, Object> confirm(@PathVariable Long id) {
-        log.info("确认MPS计划: {}", id);
-        
-        return Map.of("code", 200, "message", "确认成功");
-    }
-    
-    /**
-     * 粗产能检查
-     */
-    @PostMapping("/{id}/capacity-check")
-    public Map<String, Object> capacityCheck(@PathVariable Long id) {
-        log.info("粗产能检查: {}", id);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("workCenter", "WC01");
-        result.put("requiredCapacity", 1000);
-        result.put("availableCapacity", 1200);
-        result.put("utilization", "83%");
-        result.put("status", "OK");
-        
-        return Map.of("code", 200, "data", result);
+        return ApiResponse.ok(result);
     }
 }

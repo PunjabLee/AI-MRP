@@ -1,96 +1,122 @@
 package com.aimrp.report.api.controller;
 
+import com.aimrp.common.result.ApiResponse;
+import com.aimrp.report.domain.entity.ReportConfig;
+import com.aimrp.report.infrastructure.persistence.mapper.ReportConfigMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * 报表中心接口
+ * 报表 Controller
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/reports")
 @RequiredArgsConstructor
 public class ReportController {
     
+    private final ReportConfigMapper reportConfigMapper;
+    
     /**
-     * 获取报表列表
+     * 查询报表列表
      */
-    @GetMapping("/list")
-    public Map<String, Object> list(@RequestParam(required = false) String reportType) {
-        List<Map<String, Object>> list = new ArrayList<>();
+    @GetMapping("/configs")
+    public ApiResponse<Map<String, Object>> list(
+            @RequestParam(required = false) String reportType,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
         
-        Map<String, Object> r1 = new HashMap<>();
-        r1.put("id", 1L);
-        r1.put("reportName", "库存台账");
-        r1.put("reportType", "INVENTORY");
-        r1.put("description", "库存余额表");
-        list.add(r1);
+        List<ReportConfig> list = reportConfigMapper.selectList(reportType, status, keyword);
         
-        Map<String, Object> r2 = new HashMap<>();
-        r2.put("id", 2L);
-        r2.put("reportName", "生产日报");
-        r2.put("reportType", "PRODUCTION");
-        r2.put("description", "每日生产情况");
-        list.add(r2);
+        // 分页
+        int total = list.size();
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
         
-        Map<String, Object> r3 = new HashMap<>();
-        r3.put("id", 3L);
-        r3.put("reportName", "采购分析");
-        r3.put("reportType", "PURCHASE");
-        r3.put("description", "采购执行分析");
-        list.add(r3);
+        List<ReportConfig> pageList = fromIndex < total ?
+                list.subList(fromIndex, toIndex) : List.of();
         
-        return Map.of("code", 200, "data", list);
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", pageList);
+        result.put("total", total);
+        
+        return ApiResponse.ok(result);
+    }
+    
+    /**
+     * 查询报表详情
+     */
+    @GetMapping("/configs/{id}")
+    public ApiResponse<ReportConfig> getById(@PathVariable Long id) {
+        ReportConfig config = reportConfigMapper.selectById(id);
+        return ApiResponse.ok(config);
+    }
+    
+    /**
+     * 创建报表配置
+     */
+    @PostMapping("/configs")
+    public ApiResponse<ReportConfig> create(@RequestBody ReportConfig config) {
+        config.setStatus("ENABLED");
+        reportConfigMapper.insert(config);
+        return ApiResponse.ok(config);
+    }
+    
+    /**
+     * 更新报表配置
+     */
+    @PutMapping("/configs/{id}")
+    public ApiResponse<Void> update(@PathVariable Long id, @RequestBody ReportConfig config) {
+        config.setId(id);
+        reportConfigMapper.updateById(config);
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 删除报表配置
+     */
+    @DeleteMapping("/configs/{id}")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        reportConfigMapper.deleteById(id);
+        return ApiResponse.ok();
     }
     
     /**
      * 执行报表
      */
-    @PostMapping("/{id}/execute")
-    public Map<String, Object> execute(@PathVariable Long id, @RequestBody Map<String, Object> params) {
-        log.info("执行报表: {}", id);
+    @PostMapping("/execute/{id}")
+    public ApiResponse<Map<String, Object>> execute(@PathVariable Long id) {
+        ReportConfig config = reportConfigMapper.selectById(id);
         
+        // TODO: 根据数据源执行报表查询
         Map<String, Object> result = new HashMap<>();
-        result.put("reportId", id);
-        result.put("rows", 100);
-        result.put("data", new ArrayList<>());
+        result.put("reportCode", config.getReportCode());
+        result.put("reportName", config.getReportName());
+        result.put("data", List.of());
+        result.put("total", 0);
         
-        return Map.of("code", 200, "data", result, "message", "报表生成完成");
+        return ApiResponse.ok(result);
     }
     
     /**
-     * 导出报表
+     * 获取报表数据（通用接口）
      */
-    @GetMapping("/{id}/export")
-    public Map<String, Object> exportReport(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "EXCEL") String format) {
-        log.info("导出报表: {}, format: {}", id, format);
+    @GetMapping("/data")
+    public ApiResponse<Map<String, Object>> getReportData(
+            @RequestParam String reportType,
+            @RequestParam(required = false) Map<String, Object> params) {
         
+        // TODO: 根据报表类型查询相应数据
         Map<String, Object> result = new HashMap<>();
-        result.put("fileName", "report_" + id + "." + format.toLowerCase());
-        result.put("downloadUrl", "/downloads/report_" + id + "." + format.toLowerCase());
+        result.put("reportType", reportType);
+        result.put("data", List.of());
+        result.put("total", 0);
         
-        return Map.of("code", 200, "data", result);
-    }
-    
-    /**
-     * 定时报表
-     */
-    @GetMapping("/scheduled")
-    public Map<String, Object> getScheduledReports() {
-        return Map.of("code", 200, "data", new ArrayList<>());
-    }
-    
-    /**
-     * 创建定时报表
-     */
-    @PostMapping("/scheduled")
-    public Map<String, Object> createScheduledReport(@RequestBody Map<String, Object> data) {
-        log.info("创建定时报表: {}", data);
-        return Map.of("code", 200, "message", "创建成功");
+        return ApiResponse.ok(result);
     }
 }
