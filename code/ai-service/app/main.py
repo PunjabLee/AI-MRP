@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.config.settings import get_settings
 from app.router import chat, predict, schedule
 from app.utils.response import ApiResponse
+from app.integration import gateway as integration_gateway
 
 settings = get_settings()
 
@@ -71,6 +72,7 @@ async def health():
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 app.include_router(predict.router, prefix="/predict", tags=["Predict"])
 app.include_router(schedule.router, prefix="/schedule", tags=["Schedule"])
+app.include_router(integration_gateway.router, prefix="/integration", tags=["Integration"])
 
 
 if __name__ == "__main__":
