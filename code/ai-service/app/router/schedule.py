@@ -26,7 +26,7 @@ class ScheduleRequest(BaseModel):
     """排程请求"""
     orders: List[Dict] = Field(..., description="生产订单列表")
     resources: List[Dict] = Field(..., description="资源/设备列表")
-    Field("makespan", description="优化 goal: str =目标: makespan, tardiness, cost, balanced")
+    goal: str = Field("makespan", description="优化目标: makespan, tardiness, cost, balanced")
     constraints: Optional[Dict] = Field({}, description="排程约束")
     
     # 高级配置
@@ -107,12 +107,13 @@ async def optimize_schedule(request: ScheduleRequest):
     if not resources:
         return ApiResponse.bad_request(message="资源不能为空")
     
-    # 执行优化
+    # 执行优化（传递求解时间限制）
     result = create_scheduler(
         orders=orders,
         resources=resources,
         goal=goal,
-        constraints=request.constraints
+        constraints=request.constraints,
+        time_limit_seconds=request.time_limit_seconds
     )
     
     # 构建可视化数据
@@ -131,7 +132,8 @@ async def optimize_schedule(request: ScheduleRequest):
         "schedule_details": result.schedule_details,
         "gantt_data": result.gantt_data,
         "metrics": result.metrics,
-        "visualization_data": viz_data
+        "visualization_data": viz_data,
+        "time_limit_seconds": request.time_limit_seconds  # 返回实际使用的时间限制
     }
     
     return ApiResponse.success(data=data, message="排程优化完成")

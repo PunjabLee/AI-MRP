@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config.settings import get_settings
-from app.router import chat, predict, schedule
+from app.router import chat, predict, schedule, model, scenario, metrics
 from app.utils.response import ApiResponse
 from app.integration import gateway as integration_gateway
 
@@ -72,6 +72,9 @@ async def health():
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 app.include_router(predict.router, prefix="/predict", tags=["Predict"])
 app.include_router(schedule.router, prefix="/schedule", tags=["Schedule"])
+app.include_router(model.router, prefix="/model", tags=["Model"])
+app.include_router(scenario.router, prefix="/scenario", tags=["Scenario"])
+app.include_router(metrics.router, prefix="/metrics", tags=["Metrics"])
 app.include_router(integration_gateway.router, prefix="/integration", tags=["Integration"])
 
 

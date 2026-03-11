@@ -226,9 +226,9 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 
 **交付**：Web 版 MVP，可处理简单场景
 
-### Phase 2：Pro 智能化（4 周）✅ 完成
+### Phase 2：Pro 智能化（4 周）✅ 已完成
 
-- [x] AI 需求预测（时序模型）
+- [x] AI 需求预测（时序模型）- Prophet/ARIMA
 - [x] AI 安全库存推荐
 - [x] OR 排程优化（Google OR-Tools）
 - [x] 工艺路线/工作中心/资源管理
@@ -241,8 +241,10 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 - [x] 成本影响分析
 - [x] 风险监控与预警
 - [x] LLM 对话式交互
+- [x] Java-Python 集成网关
+- [x] 预测结果持久化 + 回调机制
 
-**交付**：智能排程 + 语音交互 + 风险预警
+**交付**：智能排程 + 语音交互 + 风险预警 + 端到端集成
 
 ### Phase 3：Enterprise 企业级（规划中）
 
@@ -265,7 +267,7 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 | 版本 | 形态 | 定位 | 状态 |
 |------|------|------|------|
 | **v1.0.0-MVP** | Web 应用 | 核心 MRP 流程 | ✅ 已发布 |
-| **v1.0.0-Pro** | Web 应用 | 智能化能力 | ✅ 已发布 |
+| **v1.0.0-Pro** | Web 应用 | 智能化能力 | ✅ 已发布 (2026-03) |
 | **v1.0.0-Enterprise** | Web 应用 | 企业级能力 | ⏳ 规划中 |
 
 ---
@@ -300,6 +302,8 @@ AI-MRP/
 │   │   ├── aimrp-risk/          # 风险预警 ✅ Pro
 │   │   ├── aimrp-whatif/        # What-if模拟 ✅ Pro
 │   │   ├── aimrp-conversation/  # 对话服务 ✅ Pro
+│   │   ├── aimrp-notification/  # 通知模块 ✅ Pro
+│   │   ├── aimrp-integration/   # Java-Python集成网关 ✅ Pro
 │   │   ├── aimrp-system/        # 用户权限
 │   │   ├── aimrp-item/          # 物料主数据
 │   │   ├── aimrp-supplier/      # 供应商管理
@@ -340,6 +344,7 @@ AI-MRP/
 | **复杂约束求解** | 交期/产能/成本多目标优化 |
 | **人机协同** | AI 建议 + 人工审核，兼顾效率与灵活 |
 | **数据闭环** | 实际执行数据回流，持续优化模型 |
+| **Java-Python 集成** | 端到端数据流，预测→MRP→排程一体化 |
 
 ---
 
@@ -362,7 +367,10 @@ AI-MRP/
 | `aimrp-risk` | 风险监控+预警 | `/api/risk/*` | ✅ |
 | `aimrp-conversation` | AI对话 | `/api/conversation/*` | ✅ |
 | `aimrp-whatif` | What-if模拟 | `/api/whatif/*` | ✅ |
-| `aimrp-notification` | 通知模块 | - | ⏳ |
+| `aimrp-notification` | 通知模块 | `/api/notify/*` | ✅ |
+| `aimrp-integration` | Java-Python集成网关 | `/api/ai/*` | ✅ |
+| `aimrp-model` | 模型持久化服务 | `/api/model/*` | ✅ |
+| `aimrp-scenario` | What-if场景管理 | `/api/scenario/*` | ✅ |
 
 ### 待开发模块（Enterprise）
 

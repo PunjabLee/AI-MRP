@@ -168,8 +168,28 @@ async def predict_demand(request: PredictRequest):
     if method == "auto":
         method = auto_select_algorithm(historical_data)
     
-    # 创建引擎
-    engine = create_forecast_engine(method)
+    # 构建引擎参数
+    engine_kwargs = {}
+    if method == "prophet":
+        if request.prophet_changepoint_prior_scale is not None:
+            engine_kwargs["prophet_changepoint_prior_scale"] = request.prophet_changepoint_prior_scale
+        if request.prophet_seasonality_mode is not None:
+            engine_kwargs["prophet_seasonality_mode"] = request.prophet_seasonality_mode
+        if request.prophet_yearly_seasonality is not None:
+            engine_kwargs["prophet_yearly_seasonality"] = request.prophet_yearly_seasonality
+        if request.prophet_weekly_seasonality is not None:
+            engine_kwargs["prophet_weekly_seasonality"] = request.prophet_weekly_seasonality
+    elif method == "lstm":
+        if request.lstm_sequence_length is not None:
+            engine_kwargs["lstm_sequence_length"] = request.lstm_sequence_length
+        if request.lstm_epochs is not None:
+            engine_kwargs["lstm_epochs"] = request.lstm_epochs
+    elif method == "arima":
+        if any([request.arima_p is not None, request.arima_d is not None, request.arima_q is not None]):
+            engine_kwargs["order"] = (request.arima_p or 5, request.arima_d or 1, request.arima_q or 0)
+    
+    # 创建引擎（带参数）
+    engine = create_forecast_engine(method, **engine_kwargs)
     
     # Prophet 特殊参数
     if method == "prophet" and request.prophet_changepoint_prior_scale:
@@ -196,12 +216,28 @@ async def predict_demand(request: PredictRequest):
     # 可视化数据
     viz_data = _build_forecast_visualization(forecast, metrics)
     
-    # 构建参数（只返回非敏感参数）
+    # 构建参数（返回实际使用的参数）
     params = {
         "forecast_days": request.forecast_days,
         "method": method,
         "confidence_level": request.confidence_level
     }
+    
+    # 添加方法特定参数
+    if method == "prophet":
+        params.update({
+            "prophet_changepoint_prior_scale": engine_kwargs.get("prophet_changepoint_prior_scale", 0.05),
+            "prophet_seasonality_mode": engine_kwargs.get("prophet_seasonality_mode", "multiplicative"),
+            "prophet_yearly_seasonality": engine_kwargs.get("prophet_yearly_seasonality", True),
+            "prophet_weekly_seasonality": engine_kwargs.get("prophet_weekly_seasonality", True)
+        })
+    elif method == "lstm":
+        params.update({
+            "lstm_sequence_length": engine_kwargs.get("lstm_sequence_length", 30),
+            "lstm_epochs": engine_kwargs.get("lstm_epochs", 50)
+        })
+    elif method == "arima" and "order" in engine_kwargs:
+        params["arima_order"] = engine_kwargs["order"]
     
     data = {
         "item_code": item_code,

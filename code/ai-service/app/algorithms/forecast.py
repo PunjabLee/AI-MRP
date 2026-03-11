@@ -39,13 +39,35 @@ class ForecastEngine(ABC):
 class ProphetForecast(ForecastEngine):
     """Facebook Prophet 预测实现"""
     
-    def __init__(self):
+    def __init__(self,
+                 changepoint_prior_scale: float = 0.05,
+                 seasonality_mode: str = 'multiplicative',
+                 yearly_seasonality: bool = True,
+                 weekly_seasonality: bool = True,
+                 daily_seasonality: bool = False):
+        """
+        Prophet 预测引擎初始化
+        
+        Args:
+            changepoint_prior_scale: 趋势变化灵敏度 (0.001-0.5)
+            seasonality_mode: 季节性模式 ('multiplicative' 或 'additive')
+            yearly_seasonality: 是否启用年度季节性
+            weekly_seasonality: 是否启用周季节性
+            daily_seasonality: 是否启用日季节性
+        """
         self.model = None
         self.future = None
         self.forecast_df = None
         self.historical_df = None
         self._fitted = False
         self._model_type = "prophet"
+        
+        # 保存参数
+        self.changepoint_prior_scale = changepoint_prior_scale
+        self.seasonality_mode = seasonality_mode
+        self.yearly_seasonality = yearly_seasonality
+        self.weekly_seasonality = weekly_seasonality
+        self.daily_seasonality = daily_seasonality
     
     def fit(self, historical_data: List[Dict]) -> 'ProphetForecast':
         """使用 Prophet 训练模型"""
@@ -58,13 +80,13 @@ class ProphetForecast(ForecastEngine):
                 for d in historical_data
             ])
             
-            # 创建并训练模型
+            # 创建并训练模型 - 使用实例参数
             self.model = Prophet(
-                yearly_seasonality=True,
-                weekly_seasonality=True,
-                daily_seasonality=False,
-                seasonality_mode='multiplicative',
-                changepoint_prior_scale=0.05
+                yearly_seasonality=self.yearly_seasonality,
+                weekly_seasonality=self.weekly_seasonality,
+                daily_seasonality=self.daily_seasonality,
+                seasonality_mode=self.seasonality_mode,
+                changepoint_prior_scale=self.changepoint_prior_scale
             )
             self.model.fit(self.historical_df)
             self._fitted = True
@@ -758,16 +780,28 @@ def create_forecast_engine(method: str, **kwargs) -> ForecastEngine:
     Args:
         method: 预测方法 (prophet, arima, lstm, xgboost, moving_average, exponential_smoothing)
         **kwargs: 引擎特定参数
+            - prophet: changepoint_prior_scale, seasonality_mode, yearly_seasonality, weekly_seasonality
+            - arima: order (tuple)
+            - lstm: sequence_length, epochs, layers
+            - xgboost: n_estimators, max_depth
+            - moving_average: window
+            - exponential_smoothing: alpha, beta
     
     Returns:
         ForecastEngine 实例
     """
     engines = {
-        "prophet": ProphetForecast,
+        "prophet": lambda: ProphetForecast(
+            changepoint_prior_scale=kwargs.get("prophet_changepoint_prior_scale", 0.05),
+            seasonality_mode=kwargs.get("prophet_seasonality_mode", 'multiplicative'),
+            yearly_seasonality=kwargs.get("prophet_yearly_seasonality", True),
+            weekly_seasonality=kwargs.get("prophet_weekly_seasonality", True),
+            daily_seasonality=kwargs.get("prophet_daily_seasonality", False)
+        ),
         "arima": lambda: ARIMAForecast(kwargs.get("order", (5, 1, 0))),
         "lstm": lambda: LSTMForecast(
-            sequence_length=kwargs.get("sequence_length", 30),
-            epochs=kwargs.get("epochs", 50)
+            sequence_length=kwargs.get("lstm_sequence_length", 30),
+            epochs=kwargs.get("lstm_epochs", 50)
         ),
         "xgboost": XGBoostForecast,
         "moving_average": lambda: MovingAverageForecast(window=kwargs.get("window", 7)),

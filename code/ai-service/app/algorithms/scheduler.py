@@ -85,13 +85,20 @@ class ScheduleResult:
 class ORToolsScheduler:
     """OR-Tools 排程优化器"""
     
-    def __init__(self):
+    def __init__(self, time_limit_seconds: int = 30):
+        """
+        初始化排程优化器
+        
+        Args:
+            time_limit_seconds: 求解时间限制（秒）
+        """
         self.orders: List[ProductionOrder] = []
         self.resources: List[Resource] = []
         self.goal = OptimizationGoal.MAKESPAN
         self.constraints: Dict = {}
         self._cp_model = None
         self._solution = None
+        self._time_limit_seconds = time_limit_seconds
     
     def set_orders(self, orders: List[Dict]) -> 'ORToolsScheduler':
         """设置生产订单"""
@@ -304,7 +311,7 @@ class ORToolsScheduler:
             # ===== 求解 =====
             
             solver = cp_model.CpSolver()
-            solver.parameters.max_time_in_seconds = 30
+            solver.parameters.max_time_in_seconds = self._time_limit_seconds
             solver.parameters.num_workers = 4
             
             status = solver.Solve(model)
@@ -592,7 +599,8 @@ def create_scheduler(
     orders: List[Dict],
     resources: List[Dict],
     goal: str = "makespan",
-    constraints: Optional[Dict] = None
+    constraints: Optional[Dict] = None,
+    time_limit_seconds: int = 30
 ) -> ScheduleResult:
     """
     创建排程优化器并求解
@@ -602,11 +610,12 @@ def create_scheduler(
         resources: 资源列表
         goal: 优化目标
         constraints: 约束条件
+        time_limit_seconds: 求解时间限制（秒），默认30秒
     
     Returns:
         ScheduleResult 排程结果
     """
-    scheduler = ORToolsScheduler()
+    scheduler = ORToolsScheduler(time_limit_seconds=time_limit_seconds)
     scheduler.set_orders(orders)
     scheduler.set_resources(resources)
     scheduler.set_goal(goal)

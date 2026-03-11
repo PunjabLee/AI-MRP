@@ -304,6 +304,170 @@ class LogChannel(NotificationChannel):
         return results
 
 
+class RabbitMQChannel(NotificationChannel):
+    """RabbitMQ 消息队列渠道"""
+    
+    def __init__(self, host: str = "localhost", port: int = 5672,
+                 username: str = "guest", password: str = "guest",
+                 virtual_host: str = "/", exchange: str = "ai_mrp_notifications",
+                 routing_key: str = "notification"):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.virtual_host = virtual_host
+        self.exchange = exchange
+        self.routing_key = routing_key
+        self._connection = None
+        self._channel = None
+    
+    @property
+    def name(self) -> str:
+        return "rabbitmq"
+    
+    def is_available(self) -> bool:
+        try:
+            import pika
+            credentials = pika.PlainCredentials(self.username, self.password)
+            params = pika.ConnectionParameters(
+                host=self.host,
+                port=self.port,
+                virtual_host=self.virtual_host,
+                credentials=credentials,
+                connection_attempts=1,
+                socket_timeout=5
+            )
+            connection = pika.BlockingConnection(params)
+            connection.close()
+            return True
+        except:
+            return False
+    
+    def _get_connection(self):
+        """获取连接"""
+        import pika
+        if self._connection is None or self._connection.is_closed:
+            credentials = pika.PlainCredentials(self.username, self.password)
+            params = pika.ConnectionParameters(
+                host=self.host,
+                port=self.port,
+                virtual_host=self.virtual_host,
+                credentials=credentials
+            )
+            self._connection = pika.BlockingConnection(params)
+        return self._connection
+    
+    async def send(self, notification: Notification) -> bool:
+        """发送到 RabbitMQ"""
+        try:
+            import pika
+            import json
+            
+            connection = self._get_connection()
+            channel = connection.channel()
+            
+            # 声明交换机
+            channel.exchange_declare(
+                exchange=self.exchange,
+                exchange_type='topic',
+                durable=True
+            )
+            
+            # 发送消息
+            message = json.dumps(notification.to_dict(), ensure_ascii=False)
+            
+            channel.basic_publish(
+                exchange=self.exchange,
+                routing_key=self.routing_key,
+                body=message,
+                properties=pika.BasicProperties(
+                    delivery_mode=2,  # 持久化
+                    content_type='application/json'
+                )
+            )
+            
+            logger.info(f"📨 Sent to RabbitMQ: {notification.title}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to send to RabbitMQ: {e}")
+            # 关闭连接以便重试
+            self._connection = None
+            return False
+    
+    async def batch_send(self, notifications: List[Notification]) -> List[bool]:
+        """批量发送"""
+        results = []
+        for notif in notifications:
+            results.append(await self.send(notif))
+        return results
+    
+    def close(self):
+        """关闭连接"""
+        if self._connection and not self._connection.is_closed:
+            self._connection.close()
+
+
+class KafkaChannel(NotificationChannel):
+    """Kafka 消息队列渠道"""
+    
+    def __init__(self, bootstrap_servers: str = "localhost:9092",
+                 topic: str = "ai-mrp-notifications",
+                 producer_config: Dict = None):
+        self.bootstrap_servers = bootstrap_servers
+        self.topic = topic
+        self.producer_config = producer_config or {}
+        self._producer = None
+    
+    @property
+    def name(self) -> str:
+        return "kafka"
+    
+    def is_available(self) -> bool:
+        try:
+            from kafka import KafkaProducer
+            from kafka.admin import KafkaAdminClient
+            admin = KafkaAdminClient(
+                bootstrap_servers=self.bootstrap_servers,
+                request_timeout_ms=5000
+            )
+            admin.close()
+            return True
+        except:
+            return False
+    
+    def _get_producer(self):
+        """获取生产者"""
+        from kafka import KafkaProducer
+        if self._producer is None:
+            self._producer = KafkaProducer(
+                bootstrap_servers=self.bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                **self.producer_config
+            )
+        return self._producer
+    
+    async def send(self, notification: Notification) -> bool:
+        """发送到 Kafka"""
+        try:
+            producer = self._get_producer()
+            producer.send(self.topic, value=notification.to_dict())
+            producer.flush()
+            logger.info(f"📨 Sent to Kafka: {notification.title}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send to Kafka: {e}")
+            self._producer = None
+            return False
+    
+    async def batch_send(self, notifications: List[Notification]) -> List[bool]:
+        """批量发送"""
+        results = []
+        for notif in notifications:
+            results.append(await self.send(notif))
+        return results
+
+
 class NotificationManager:
     """通知管理器"""
     
@@ -483,22 +647,40 @@ class RiskAlertManager:
 # ========== 便捷函数 =========-
 
 def create_notification_manager(config: Dict = None) -> NotificationManager:
-    """创建通知管理器"""
+    """Create notification manager with configurable channels"""
     manager = NotificationManager()
     
-    # 默认注册日志渠道
+    # Default: register log channel
     manager.register_channel("log", LogChannel())
     
-    # 注册其他渠道
     if config:
+        # Register email channel
         if config.get("email"):
             manager.register_channel("email", EmailChannel(**config["email"]))
+        
+        # Register SMS channel
         if config.get("sms"):
             manager.register_channel("sms", SMSChannel(**config["sms"]))
+        
+        # Register webhook channel
         if config.get("webhook"):
             manager.register_channel("webhook", WebhookChannel(**config["webhook"]))
+        
+        # Register Redis channel
         if config.get("redis"):
             manager.register_channel("redis", RedisChannel(**config["redis"]))
+        
+        # Register RabbitMQ channel
+        if config.get("rabbitmq"):
+            manager.register_channel("rabbitmq", RabbitMQChannel(**config["rabbitmq"]))
+        
+        # Register Kafka channel
+        if config.get("kafka"):
+            manager.register_channel("kafka", KafkaChannel(**config["kafka"]))
+        
+        # Enable specified channels
+        if config.get("enabled"):
+            manager.enabled_channels = config["enabled"]
     
     return manager
 
