@@ -7,6 +7,8 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 import random
 
+from app.utils.response import ApiResponse
+
 router = APIRouter()
 
 
@@ -29,7 +31,7 @@ class DeliveryPredictResponse(BaseModel):
     alternative_suppliers: List[Dict[str, Any]]  # 替代供应商建议
 
 
-@router.post("/predict", response_model=DeliveryPredictResponse)
+@router.post("/predict")
 async def predict_delivery(request: DeliveryPredictRequest):
     """
     供应商交期预测
@@ -49,7 +51,16 @@ async def predict_delivery(request: DeliveryPredictRequest):
     factors = _analyze_factors(supplier_code)
     alternatives = _find_alternatives(supplier_code, item_code)
     
-    return DeliveryPredictResponse(
+    data = {
+        "supplier_code": supplier_code,
+        "item_code": item_code,
+        "predicted_lead_time": predicted_lead_time,
+        "confidence": confidence,
+        "risk_level": risk_level,
+        "factors": factors,
+        "alternative_suppliers": alternatives
+    }
+    return ApiResponse.success(data=data, message="预测成功")
         supplier_code=supplier_code,
         item_code=item_code,
         predicted_lead_time=predicted_lead_time,
@@ -67,7 +78,7 @@ async def get_supplier_performance(supplier_code: str):
     """
     # TODO: 从数据库查询供应商绩效数据
     
-    return {
+    data = {
         "supplier_code": supplier_code,
         "on_time_rate": 0.85,  # 准时交货率
         "avg_lead_time": 12,  # 平均交期
@@ -80,12 +91,13 @@ async def get_supplier_performance(supplier_code: str):
             {"date": "2025-12", "on_time_rate": 0.82, "avg_lead_time": 13},
         ]
     }
+    return ApiResponse.success(data=data, message="获取成功")
 
 
 @router.get("/methods")
 async def get_prediction_methods():
     """获取支持的预测方法"""
-    return {
+    methods_data = {
         "methods": [
             {
                 "name": "historical_average",
@@ -108,6 +120,7 @@ async def get_prediction_methods():
         ],
         "default": "historical_average"
     }
+    return ApiResponse.success(data=methods_data, message="获取成功")
 
 
 # 内部方法

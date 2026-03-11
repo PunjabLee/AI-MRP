@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta
 
+from app.utils.response import ApiResponse
+
 router = APIRouter()
 
 
@@ -27,7 +29,7 @@ class InventoryPredictResponse(BaseModel):
     replenishment_suggestion: dict  # 补货建议
 
 
-@router.post("/predict", response_model=InventoryPredictResponse)
+@router.post("/predict")
 async def predict_inventory(request: InventoryPredictRequest):
     """
     库存预测
@@ -55,15 +57,16 @@ async def predict_inventory(request: InventoryPredictRequest):
     # 补货建议
     suggestion = _generate_replenishment_suggestion(current_qty, predicted_min)
     
-    return InventoryPredictResponse(
-        item_code=item_code,
-        warehouse_code=warehouse_code,
-        current_qty=current_qty,
-        predicted_min=predicted_min,
-        predicted_max=predicted_max,
-        risk_dates=risk_dates,
-        replenishment_suggestion=suggestion
-    )
+    data = {
+        "item_code": item_code,
+        "warehouse_code": warehouse_code,
+        "current_qty": current_qty,
+        "predicted_min": predicted_min,
+        "predicted_max": predicted_max,
+        "risk_dates": risk_dates,
+        "replenishment_suggestion": suggestion
+    }
+    return ApiResponse.success(data=data, message="预测成功")
 
 
 @router.get("/safety-stock-recommendation")
@@ -89,7 +92,7 @@ async def recommend_safety_stock(item_code: str, warehouse_code: str = None):
     # 再订货点: ROP = D * LT + SS
     reorder_point = avg_demand * lead_time + safety_stock
     
-    return {
+    data = {
         "item_code": item_code,
         "warehouse_code": warehouse_code,
         "avg_daily_demand": avg_demand,
@@ -101,6 +104,7 @@ async def recommend_safety_stock(item_code: str, warehouse_code: str = None):
         "service_level": 0.95,
         "calculation_method": "continuous_review"
     }
+    return ApiResponse.success(data=data, message="预测成功")
 
 
 @router.get("/reorder-alert")
@@ -131,10 +135,10 @@ async def get_reorder_alerts(warehouse_code: str = None):
         }
     ]
     
-    return {
+    return ApiResponse.success(data={
         "alerts": alerts,
         "total_count": len(alerts)
-    }
+    }, message="获取成功")
 
 
 # 内部方法
