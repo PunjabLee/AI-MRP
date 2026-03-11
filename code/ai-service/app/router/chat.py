@@ -19,6 +19,7 @@ import json
 from datetime import datetime
 
 from app.algorithms import LLMClient, LLMConfig, Message, ToolDefinition, get_mrp_tools
+from app.utils.response import ApiResponse
 
 router = APIRouter()
 
@@ -468,7 +469,7 @@ def _build_action(intent: str, entities: Dict[str, Any]) -> Dict[str, Any]:
 
 # ========== API 接口 ==========
 
-@router.post("/", response_model=ChatResponse)
+@router.post("/")
 async def chat(request: ChatRequest):
     """
     AI 对话接口
@@ -502,44 +503,54 @@ async def chat(request: ChatRequest):
         session_id, "assistant", response.message, response.intent, response.entities
     )
     
-    return response
+    data = {
+        "message": response.message,
+        "session_id": response.session_id,
+        "intent": response.intent,
+        "entities": response.entities,
+        "suggestions": response.suggestions,
+        "action": response.action,
+        "confidence": response.confidence,
+        "mode": response.mode
+    }
+    return ApiResponse.success(data=data, message="对话成功")
 
 
 @router.get("/history/{session_id}")
 async def get_history(session_id: str, limit: int = 10):
     """获取对话历史"""
     history = conversation_context.get_history(session_id)
-    return {
+    return ApiResponse.success(data={
         "session_id": session_id,
         "messages": history[-limit:]
-    }
+    }, message="获取成功")
 
 
 @router.delete("/history/{session_id}")
 async def clear_history(session_id: str):
     """清空对话历史"""
     conversation_context.clear(session_id)
-    return {"status": "success", "message": "对话历史已清空"}
+    return ApiResponse.success(message="对话历史已清空")
 
 
 @router.get("/intents")
 async def get_supported_intents():
     """获取支持的意图列表"""
-    return {
+    return ApiResponse.success(data={
         "intents": list(INTENT_PATTERNS.keys()),
         "total": len(INTENT_PATTERNS)
-    }
+    }, message="获取成功")
 
 
 @router.get("/mode")
 async def get_chat_mode():
     """获取当前对话模式"""
     llm_client = get_llm_client()
-    return {
+    return ApiResponse.success(data={
         "rule_mode": True,
         "llm_mode": llm_client is not None,
         "llm_configured": llm_client is not None and bool(llm_client.config.api_key)
-    }
+    }, message="获取成功")
 
 
 @router.post("/feedback")
@@ -548,10 +559,7 @@ async def submit_feedback(session_id: str, message: str,
     """
     用户反馈 - 用于意图识别训练
     """
-    return {
-        "status": "success",
-        "message": "感谢反馈，我们将持续优化识别准确率"
-    }
+    return ApiResponse.success(message="感谢反馈，我们将持续优化识别准确率")
 
 
 # ========== 意图推荐服务 ==========
@@ -590,8 +598,8 @@ async def get_intent_recommendations(session_id: str):
         }
     ]
     
-    return {
+    return ApiResponse.success(data={
         "session_id": session_id,
         "recommendations": recommendations,
         "reason": "基于您的操作习惯和系统状态"
-    }
+    }, message="获取成功")

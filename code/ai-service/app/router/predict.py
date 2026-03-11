@@ -20,6 +20,7 @@ from app.algorithms import (
     auto_select_algorithm,
     SafetyStockEngine
 )
+from app.utils.response import ApiResponse
 
 router = APIRouter()
 
@@ -141,7 +142,7 @@ class ForecastComparisonResponse(BaseModel):
 
 # ========== API Endpoints ==========
 
-@router.post("/demand", response_model=PredictResponse)
+@router.post("/demand")
 async def predict_demand(request: PredictRequest):
     """
     需求预测接口 - 增强版
@@ -160,7 +161,7 @@ async def predict_demand(request: PredictRequest):
         historical_data = _generate_mock_data(item_code)
     
     if not historical_data:
-        raise HTTPException(status_code=400, detail="无历史数据")
+        return ApiResponse.bad_request(message="无历史数据")
     
     # 选择方法
     method = request.method
@@ -202,18 +203,20 @@ async def predict_demand(request: PredictRequest):
         "confidence_level": request.confidence_level
     }
     
-    return PredictResponse(
-        item_code=item_code,
-        method=method,
-        forecast=forecast,
-        confidence=request.confidence_level,
-        metrics=metrics,
-        parameters=params,
-        visualization_data=viz_data
-    )
+    data = {
+        "item_code": item_code,
+        "method": method,
+        "forecast": forecast,
+        "confidence": request.confidence_level,
+        "metrics": metrics,
+        "parameters": params,
+        "visualization_data": viz_data
+    }
+    
+    return ApiResponse.success(data=data, message="预测成功")
 
 
-@router.post("/safety-stock", response_model=SafetyStockResponse)
+@router.post("/safety-stock")
 async def calculate_safety_stock(request: SafetyStockRequest):
     """安全库存计算 - 增强版"""
     item_code = request.item_code
@@ -223,7 +226,7 @@ async def calculate_safety_stock(request: SafetyStockRequest):
         historical_demand = _generate_demand_data(item_code)
     
     if not historical_demand:
-        raise HTTPException(status_code=400, detail="无历史需求数据")
+        return ApiResponse.bad_request(message="无历史需求数据")
     
     engine = SafetyStockEngine()
     result = engine.calculate(
@@ -242,21 +245,23 @@ async def calculate_safety_stock(request: SafetyStockRequest):
     # 可视化数据
     viz_data = _build_safety_stock_visualization(result)
     
-    return SafetyStockResponse(
-        item_code=item_code,
-        safety_stock=result.safety_stock,
-        reorder_point=round(result.reorder_point, 2),
-        optimal_order_qty=result.optimal_order_qty,
-        service_level_achieved=result.service_level_achieved,
-        method=result.method,
-        parameters=result.parameters,
-        analysis=result.analysis,
-        recommendations=result.recommendations,
-        visualization_data=viz_data
-    )
+    data = {
+        "item_code": item_code,
+        "safety_stock": result.safety_stock,
+        "reorder_point": round(result.reorder_point, 2),
+        "optimal_order_qty": result.optimal_order_qty,
+        "service_level_achieved": result.service_level_achieved,
+        "method": result.method,
+        "parameters": result.parameters,
+        "analysis": result.analysis,
+        "recommendations": result.recommendations,
+        "visualization_data": viz_data
+    }
+    
+    return ApiResponse.success(data=data, message="安全库存计算成功")
 
 
-@router.post("/batch", response_model=BatchForecastResponse)
+@router.post("/batch")
 async def batch_forecast(request: BatchForecastRequest):
     """批量预测 - 增强版"""
     forecasts = []
@@ -304,24 +309,26 @@ async def batch_forecast(request: BatchForecastRequest):
     # 批量可视化数据
     viz_data = _build_batch_visualization(all_dates, all_values, request.item_codes)
     
-    return BatchForecastResponse(
-        forecasts=forecasts,
-        summary={
+    data = {
+        "forecasts": forecasts,
+        "summary": {
             "total_items": len(request.item_codes),
             "methods_used": methods_used,
             "forecast_days": request.forecast_days
         },
-        visualization_data=viz_data
-    )
+        "visualization_data": viz_data
+    }
+    
+    return ApiResponse.success(data=data, message=f"批量预测完成，共{len(forecasts)}个物料")
 
 
-@router.post("/compare", response_model=ForecastComparisonResponse)
+@router.post("/compare")
 async def compare_forecasts(request: ForecastComparisonRequest):
     """预测方法对比"""
     historical_data = _generate_mock_data(request.item_code)
     
     if not historical_data:
-        raise HTTPException(status_code=400, detail="无历史数据")
+        return ApiResponse.bad_request(message="无历史数据")
     
     comparisons = []
     metrics_list = []
@@ -348,13 +355,15 @@ async def compare_forecasts(request: ForecastComparisonRequest):
     # 可视化数据
     viz_data = _build_comparison_visualization(comparisons)
     
-    return ForecastComparisonResponse(
-        item_code=request.item_code,
-        comparisons=comparisons,
-        best_method=best_method,
-        recommendation=f"基于MAPE指标，推荐使用 {best_method} 方法",
-        visualization_data=viz_data
-    )
+    data = {
+        "item_code": request.item_code,
+        "comparisons": comparisons,
+        "best_method": best_method,
+        "recommendation": f"基于MAPE指标，推荐使用 {best_method} 方法",
+        "visualization_data": viz_data
+    }
+    
+    return ApiResponse.success(data=data, message="预测方法对比完成")
 
 
 # ========== 可视化数据构建 ==========
@@ -535,22 +544,21 @@ def _generate_demand_data(item_code: str) -> List[Dict]:
 @router.get("/methods")
 async def get_forecast_methods():
     """获取预测方法列表及参数配置"""
-    return {
-        "methods": [
-            {
-                "name": "prophet",
-                "display_name": "Facebook Prophet",
-                "description": "支持季节性和趋势的时间序列预测",
-                "parameters": {
-                    "changepoint_prior_scale": {"type": "float", "default": 0.05, "range": [0.001, 0.5], "description": "趋势变化灵敏度"},
-                    "seasonality_mode": {"type": "select", "default": "multiplicative", "options": ["multiplicative", "additive"], "description": "季节性模式"},
-                    "yearly_seasonality": {"type": "boolean", "default": True, "description": "年度季节性"},
-                    "weekly_seasonality": {"type": "boolean", "default": True, "description": "周季节性"}
-                },
-                "pros": ["自动检测季节性", "处理节假日", "鲁棒性好"],
-                "cons": ["计算较慢", "需要较多数据"],
-                "data_requirement": "建议90+条历史数据"
+    methods_data = [
+        {
+            "name": "prophet",
+            "display_name": "Facebook Prophet",
+            "description": "支持季节性和趋势的时间序列预测",
+            "parameters": {
+                "changepoint_prior_scale": {"type": "float", "default": 0.05, "range": [0.001, 0.5], "description": "趋势变化灵敏度"},
+                "seasonality_mode": {"type": "select", "default": "multiplicative", "options": ["multiplicative", "additive"], "description": "季节性模式"},
+                "yearly_seasonality": {"type": "boolean", "default": True, "description": "年度季节性"},
+                "weekly_seasonality": {"type": "boolean", "default": True, "description": "周季节性"}
             },
+            "pros": ["自动检测季节性", "处理节假日", "鲁棒性好"],
+            "cons": ["计算较慢", "需要较多数据"],
+            "data_requirement": "建议90+条历史数据"
+        },
             {
                 "name": "lstm",
                 "display_name": "LSTM 深度学习",
@@ -623,27 +631,27 @@ async def get_forecast_methods():
             }
         ]
     }
+    return ApiResponse.success(data={"methods": methods_data}, message="获取成功")
 
 
 @router.get("/safety-stock/methods")
 async def get_safety_stock_methods():
     """获取安全库存计算方法"""
-    return {
-        "methods": [
-            {
-                "name": "auto",
-                "display_name": "自动选择",
-                "description": "根据数据特征自动选择"
-            },
-            {
-                "name": "statistical",
-                "display_name": "统计法",
-                "description": "经典公式 SS = Z × σ × √LT"
-            },
-            {
-                "name": "service",
-                "display_name": "服务水平法",
-                "description": "基于目标服务水平迭代计算"
+    methods_data = [
+        {
+            "name": "auto",
+            "display_name": "自动选择",
+            "description": "根据数据特征自动选择"
+        },
+        {
+            "name": "statistical",
+            "display_name": "统计法",
+            "description": "经典公式 SS = Z × σ × √LT"
+        },
+        {
+            "name": "service",
+            "display_name": "服务水平法",
+            "description": "基于目标服务水平迭代计算"
             },
             {
                 "name": "ml",
@@ -663,3 +671,9 @@ async def get_safety_stock_methods():
             "0.99": "99% - 高服务"
         }
     }
+    return ApiResponse.success(data={"methods": methods_data, "service_levels": {
+            "0.80": "80% - 成本优先",
+            "0.90": "90% - 平衡",
+            "0.95": "95% - 标准",
+            "0.99": "99% - 高服务"
+        }}, message="获取成功")

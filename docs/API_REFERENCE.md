@@ -1,6 +1,6 @@
 # AI MRP Python API 接口文档
 
-> **版本**: 2.0  
+> **版本**: 3.0  
 > **日期**: 2026-03-11  
 > **基础URL**: `http://localhost:8000`
 
@@ -8,13 +8,124 @@
 
 ## 目录
 
-1. [预测服务 API](#一预测服务-api)
-2. [排程服务 API](#二排程服务-api)
-3. [安全库存 API](#三安全库存-api)
-4. [对话服务 API](#四对话服务-api)
-5. [What-if 模拟 API](#五what-if-模拟-api)
-6. [插单影响分析 API](#六插单影响分析-api)
-7. [通知服务 API](#七通知服务-api)
+1. [统一响应结构](#统一响应结构)
+2. [预测服务 API](#一预测服务-api)
+3. [排程服务 API](#二排程服务-api)
+4. [安全库存 API](#三安全库存-api)
+5. [对话服务 API](#四对话服务-api)
+6. [What-if 模拟 API](#五what-if-模拟-api)
+7. [插单影响分析 API](#六插单影响分析-api)
+8. [通知服务 API](#七通知服务-api)
+9. [Java 调用示例](#八java-调用示例)
+10. [C# 调用示例](#九c-调用示例)
+
+---
+
+## 统一响应结构
+
+所有API接口统一使用以下响应格式：
+
+### 响应结构
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "success": true,
+  "data": {},
+  "error": null,
+  "timestamp": "2026-03-11T12:00:00",
+  "request_id": "abc12345",
+  "metadata": null
+}
+```
+
+### 响应字段说明
+
+| 字段 | 类型 | 必返回 | 说明 | 示例 |
+|------|------|--------|------|------|
+| code | int | ✅ | HTTP状态码 | 200, 400, 500 |
+| message | string | ✅ | 状态描述 | "success", "error message" |
+| success | bool | ✅ | 是否成功 | true, false |
+| data | any | ✅ | 响应数据 | {...} |
+| error | object | ❌ | 错误详情 | {"field": "error"} |
+| timestamp | string | ✅ | 时间戳 | ISO 8601格式 |
+| request_id | string | ✅ | 请求ID | 8位随机字符串 |
+| metadata | object | ❌ | 元数据 | {"pagination": {...}} |
+
+### 成功响应示例
+
+```json
+{
+  "code": 200,
+  "message": "预测成功",
+  "success": true,
+  "data": {
+    "item_code": "ITEM001",
+    "method": "prophet",
+    "forecast": [...]
+  },
+  "error": null,
+  "timestamp": "2026-03-11T12:00:00.123456",
+  "request_id": "a1b2c3d4",
+  "metadata": null
+}
+```
+
+### 错误响应示例
+
+```json
+{
+  "code": 400,
+  "message": "Bad Request",
+  "success": false,
+  "data": null,
+  "error": {
+    "field": "item_code",
+    "reason": "物料编码不能为空"
+  },
+  "timestamp": "2026-03-11T12:00:00.123456",
+  "request_id": "e5f6g7h8",
+  "metadata": null
+}
+```
+
+### 常见状态码
+
+| code | message | 说明 |
+|------|---------|------|
+| 200 | success | 成功 |
+| 201 | Created | 创建成功 |
+| 400 | Bad Request | 请求参数错误 |
+| 401 | Unauthorized | 未授权 |
+| 403 | Forbidden | 禁止访问 |
+| 404 | Not Found | 资源不存在 |
+| 422 | Validation Error | 验证错误 |
+| 500 | Internal Server Error | 服务器内部错误 |
+| 503 | Service Unavailable | 服务不可用 |
+
+### 分页响应示例
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "success": true,
+  "data": [...],
+  "timestamp": "2026-03-11T12:00:00",
+  "request_id": "i1j2k3l4",
+  "metadata": {
+    "pagination": {
+      "page": 1,
+      "page_size": 20,
+      "total": 100,
+      "total_pages": 5,
+      "has_next": true,
+      "has_prev": false
+    }
+  }
+}
+```
 
 ---
 

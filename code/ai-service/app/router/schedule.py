@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 import json
 
 from app.algorithms import create_scheduler, compare_scenarios
+from app.utils.response import ApiResponse
 
 router = APIRouter()
 
@@ -85,7 +86,7 @@ class CapacityAnalysisRequest(BaseModel):
 
 # ========== API Endpoints ==========
 
-@router.post("/optimize", response_model=ScheduleResponse)
+@router.post("/optimize")
 async def optimize_schedule(request: ScheduleRequest):
     """
     智能排程优化 - 增强版
@@ -101,10 +102,10 @@ async def optimize_schedule(request: ScheduleRequest):
     goal = request.goal
     
     if not orders:
-        raise HTTPException(status_code=400, detail="生产订单不能为空")
+        return ApiResponse.bad_request(message="生产订单不能为空")
     
     if not resources:
-        raise HTTPException(status_code=400, detail="资源不能为空")
+        return ApiResponse.bad_request(message="资源不能为空")
     
     # 执行优化
     result = create_scheduler(
@@ -119,19 +120,21 @@ async def optimize_schedule(request: ScheduleRequest):
     viz_data.update(_build_utilization_chart(result.resource_utilization))
     viz_data.update(_build_metrics_summary(result))
     
-    return ScheduleResponse(
-        schedule_id=result.schedule_id,
-        status=result.status,
-        makespan_hours=result.makespan_hours,
-        makespan_days=result.makespan_days,
-        total_tardiness=result.total_tardiness_hours,
-        total_cost=result.total_cost,
-        resource_utilization=result.resource_utilization,
-        schedule_details=result.schedule_details,
-        gantt_data=result.gantt_data,
-        metrics=result.metrics,
-        visualization_data=viz_data
-    )
+    data = {
+        "schedule_id": result.schedule_id,
+        "status": result.status,
+        "makespan_hours": result.makespan_hours,
+        "makespan_days": result.makespan_days,
+        "total_tardiness": result.total_tardiness_hours,
+        "total_cost": result.total_cost,
+        "resource_utilization": result.resource_utilization,
+        "schedule_details": result.schedule_details,
+        "gantt_data": result.gantt_data,
+        "metrics": result.metrics,
+        "visualization_data": viz_data
+    }
+    
+    return ApiResponse.success(data=data, message="排程优化完成")
 
 
 @router.post("/feasibility-check")
@@ -200,7 +203,7 @@ async def check_feasibility(request: ScheduleRequest):
         }
     }
     
-    return {
+    data = {
         "feasible": is_feasible,
         "total_work_minutes": total_work,
         "total_capacity_minutes": total_capacity,
@@ -212,15 +215,16 @@ async def check_feasibility(request: ScheduleRequest):
         "suggestions": _generate_suggestions(is_feasible, total_work, total_capacity),
         "visualization_data": viz_data
     }
+    return ApiResponse.success(data=data, message="可行性检查完成")
 
 
-@router.post("/scenarios", response_model=Dict)
+@router.post("/scenarios")
 async def compare_scheduling_scenarios(request: ScenarioRequest):
     """场景对比分析 - 增强版"""
     scenarios = request.scenarios
     
     if len(scenarios) < 2:
-        raise HTTPException(status_code=400, detail="至少需要2个场景")
+        return ApiResponse.bad_request(message="至少需要2个场景")
     
     result = compare_scenarios(scenarios)
     
