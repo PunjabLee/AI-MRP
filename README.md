@@ -1,3 +1,14 @@
+---
+AIGC:
+    ContentProducer: Minimax Agent AI
+    ContentPropagator: Minimax Agent AI
+    Label: AIGC
+    ProduceID: 2cbd125d702897f30f510adf00e91c57
+    PropagateID: 2cbd125d702897f30f510adf00e91c57
+    ReservedCode1: 3046022100acc8154e208bea8fd28fd50dcf037d12fdf746f57d00d5785b59ea9a855264f0022100ebb5d20a926ec24f852de544290019ba9c998b4a4ecfbbae5aeb5c20cde8549e
+    ReservedCode2: 3045022027c31a9154789ce261ee00729e8683f03c168a0baa912458f23531a98ecc80040221009b58f1d18e73a6adb2bbf6bdb947904a673b6e7129ce0b418eb7a9dd67fec5fd
+---
+
 <!--
 ---
 AIGC:
@@ -10,7 +21,7 @@ AIGC:
     ReservedCode2: 3046022100b9f1a1ca5f810f8ccc94437472e56745ea797b8d42a1b861f6f1eb72dda59e65022100e6561b14336cc6b85bf407659753388525c3e31af7421b8f42b369dab349c973
 ---
 -->
-# 🚙 AI MRP 智能物料需求计划系统
+# AI MRP 智能物料需求计划系统
 
 > **项目代号**：AI-MRP  
 > **版本**：v1.0.0-Pro  
@@ -415,5 +426,5 @@ develop          → Enterprise 开发中
 
 ---
 
-*由 小jeep 🚙（天蓝色）整理*
-*AI MRP Team © 2026*
+*由 小jeep 🚙 整理*
+*Punjab's AI Team © 2026*
