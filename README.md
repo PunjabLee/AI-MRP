@@ -10,7 +10,7 @@ AIGC:
     ReservedCode2: 3046022100b9f1a1ca5f810f8ccc94437472e56745ea797b8d42a1b861f6f1eb72dda59e65022100e6561b14336cc6b85bf407659753388525c3e31af7421b8f42b369dab349c973
 ---
 -->
-# AI MRP 智能物料需求计划系统
+# 🚙 AI MRP 智能物料需求计划系统
 
 > **项目代号**：AI-MRP  
 > **版本**：v1.0.0-Pro  
