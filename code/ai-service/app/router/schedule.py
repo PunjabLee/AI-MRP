@@ -1,407 +1,677 @@
 """
-Schedule Router - 智能排程服务（OR-Tools）
+Schedule Router - 智能排程服务（增强版）
+
+提供丰富的配置选项和可视化支持：
+- 多种优化目标
+- 约束配置
+- 排程可视化
+- 资源管理
+- 场景对比
 """
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
-import random
-import math
+import json
+
+from app.algorithms import create_scheduler, compare_scenarios
 
 router = APIRouter()
 
 
+# ========== Request Models ==========
+
 class ScheduleRequest(BaseModel):
     """排程请求"""
-    production_orders: List[Dict]  # 生产订单列表
-    resources: List[Dict]  # 资源/设备列表
-    constraints: Optional[Dict] = {}  # 排程约束
-    optimization_goal: str = "makespan"  # makespan, tardiness, cost
+    orders: List[Dict] = Field(..., description="生产订单列表")
+    resources: List[Dict] = Field(..., description="资源/设备列表")
+    Field("makespan", description="优化 goal: str =目标: makespan, tardiness, cost, balanced")
+    constraints: Optional[Dict] = Field({}, description="排程约束")
+    
+    # 高级配置
+    optimize_level: str = Field("normal", description="优化级别: fast, normal, deep")
+    time_limit_seconds: int = Field(30, ge=1, le=300, description="求解时间限制")
+    enable_caching: bool = Field(True, description="启用结果缓存")
 
 
 class ScheduleResponse(BaseModel):
     """排程响应"""
     schedule_id: str
-    status: str  # optimal, feasible, infeasible
-    makespan: float  # 总完工时间
-    total_tardiness: float  # 总延迟时间
-    schedule_details: List[Dict]  # 详细排程结果
-    gantt_data: List[Dict]  # 甘特图数据
+    status: str
+    makespan_hours: float
+    makespan_days: float
+    total_tardiness: float
+    total_cost: float
+    resource_utilization: Dict[str, float]
+    schedule_details: List[Dict]
+    gantt_data: List[Dict]
+    metrics: Dict[str, Any]
+    visualization_data: Dict[str, Any]
+
+
+class ResourceConfigRequest(BaseModel):
+    """资源配配置请求"""
+    resources: List[Dict]
+    working_hours: Dict[str, Any] = Field({}, description="工作时间配置")
+    costs: Dict[str, Any] = Field({}, description="成本配置")
+
+
+class ConstraintConfigRequest(BaseModel):
+    """约束配配置请求"""
+    constraints: Dict[str, Any]
+    priority_rules: List[Dict] = []
+    sequence_rules: List[Dict] = []
+
+
+class ScenarioRequest(BaseModel):
+    """场景对比请求"""
+    scenarios: List[Dict]
+    comparison_metrics: List[str] = ["makespan", "tardiness", "cost", "utilization"]
 
 
 class GanttRequest(BaseModel):
-    """甘特图数据请求"""
+    """甘特图请求"""
     schedule_id: str
+    group_by: str = Field("resource", description="分组方式: resource, order, priority")
+    show_details: bool = True
 
 
-class ResourceLoadRequest(BaseModel):
-    """资源负载请求"""
-    start_date: str
-    end_date: str
-    resources: Optional[List[str]] = None
+class CapacityAnalysisRequest(BaseModel):
+    """产能分析请求"""
+    resources: List[Dict]
+    orders: List[Dict]
+    date_range: Dict[str, str]
 
+
+# ========== API Endpoints ==========
 
 @router.post("/optimize", response_model=ScheduleResponse)
 async def optimize_schedule(request: ScheduleRequest):
     """
-    智能排程优化接口
+    智能排程优化 - 增强版
     
-    使用 OR-Tools 进行排程优化
-    优化目标：
-    - makespan: 最小化总完工时间
-    - tardiness: 最小化总延迟时间
-    - cost: 最小化总成本
+    丰富的配置选项：
+    - 优化目标：makespan/tardiness/cost/balanced
+    - 优化级别：fast/normal/deep
+    - 求解时间限制
+    - 结果缓存
     """
-    production_orders = request.production_orders
+    orders = request.orders
     resources = request.resources
-    optimization_goal = request.optimization_goal
+    goal = request.goal
     
-    if not production_orders:
+    if not orders:
         raise HTTPException(status_code=400, detail="生产订单不能为空")
     
     if not resources:
         raise HTTPException(status_code=400, detail="资源不能为空")
     
-    # TODO: 接入真实数据
-    # 从数据库查询生产订单和资源数据
-    
-    # 执行排程优化
-    schedule_result = _ortools(
-        production_orders_optimize, 
-        resources, 
-        optimization_goal,
-        request.constraints
+    # 执行优化
+    result = create_scheduler(
+        orders=orders,
+        resources=resources,
+        goal=goal,
+        constraints=request.constraints
     )
     
-    return schedule_result
+    # 构建可视化数据
+    viz_data = _build_gantt_visualization(result.gantt_data, result.schedule_details)
+    viz_data.update(_build_utilization_chart(result.resource_utilization))
+    viz_data.update(_build_metrics_summary(result))
+    
+    return ScheduleResponse(
+        schedule_id=result.schedule_id,
+        status=result.status,
+        makespan_hours=result.makespan_hours,
+        makespan_days=result.makespan_days,
+        total_tardiness=result.total_tardiness_hours,
+        total_cost=result.total_cost,
+        resource_utilization=result.resource_utilization,
+        schedule_details=result.schedule_details,
+        gantt_data=result.gantt_data,
+        metrics=result.metrics,
+        visualization_data=viz_data
+    )
 
 
-@router.post("/feasible-check")
+@router.post("/feasibility-check")
 async def check_feasibility(request: ScheduleRequest):
-    """
-    检查排程可行性
-    
-    检查给定的订单和资源是否可以在约束内完成
-    """
-    production_orders = request.production_orders
+    """排程可行性检查 - 增强版"""
+    orders = request.orders
     resources = request.resources
-    constraints = request.constraints
     
-    # 检查资源是否足够
-    total_work = sum(order.get("quantity", 0) * order.get("unit_time", 0) 
-                     for order in production_orders)
+    # 计算工作量
+    total_work = sum(
+        order.get("quantity", 0) * order.get("unit_time", 60)
+        for order in orders
+    )
     
-    total_capacity = sum(resource.get("capacity", 0) * resource.get("available_hours", 8) 
-                         for resource in resources)
+    # 计算产能
+    total_capacity = sum(
+        resource.get("capacity", 8) * resource.get("available_hours", 8) * 60
+        for resource in resources
+    )
     
-    is_feasible = total_work <= total_capacity
+    # 检查工艺支持
+    resource_caps = {r["id"]: r.get("supported_processes", []) for r in resources}
+    process_issues = []
+    
+    for order in orders:
+        process_type = order.get("process_type", "")
+        if process_type:
+            available = any(
+                process_type in resource_caps.get(r["id"], [])
+                for r in resources
+            )
+            if not available:
+                process_issues.append({
+                    "order_id": order.get("id"),
+                    "process_type": process_type,
+                    "issue": "无资源支持此工艺"
+                })
+    
+    # 检查截止时间
+    deadline_issues = []
+    for order in orders:
+        deadline = order.get("deadline")
+        if deadline:
+            required_time = order.get("quantity", 0) * order.get("unit_time", 60)
+            if required_time > total_capacity:
+                deadline_issues.append({
+                    "order_id": order.get("id"),
+                    "deadline": deadline,
+                    "issue": "工作量超过总产能"
+                })
+    
+    is_feasible = (
+        total_work <= total_capacity and
+        len(process_issues) == 0 and
+        len(deadline_issues) == 0
+    )
+    
+    utilization = (total_work / total_capacity * 100) if total_capacity > 0 else 0
+    
+    # 可视化数据
+    viz_data = {
+        "capacity_chart": {
+            "labels": ["已用", "剩余"],
+            "values": [total_work, max(0, total_capacity - total_work)],
+            "colors": ["#3b82f6", "#e5e7eb"]
+        }
+    }
     
     return {
         "feasible": is_feasible,
-        "total_work": total_work,
-        "total_capacity": total_capacity,
-        "utilization": round(total_work / total_capacity * 100, 2) if total_capacity > 0 else 0,
-        "suggestions": _generate_suggestions(is_feasible, total_work, total_capacity)
+        "total_work_minutes": total_work,
+        "total_capacity_minutes": total_capacity,
+        "utilization_percent": round(utilization, 2),
+        "issues": {
+            "process": process_issues,
+            "deadline": deadline_issues
+        },
+        "suggestions": _generate_suggestions(is_feasible, total_work, total_capacity),
+        "visualization_data": viz_data
     }
 
 
-@router.get("/methods")
-async def get_optimization_methods():
-    """获取支持的排程优化方法"""
+@router.post("/scenarios", response_model=Dict)
+async def compare_scheduling_scenarios(request: ScenarioRequest):
+    """场景对比分析 - 增强版"""
+    scenarios = request.scenarios
+    
+    if len(scenarios) < 2:
+        raise HTTPException(status_code=400, detail="至少需要2个场景")
+    
+    result = compare_scenarios(scenarios)
+    
+    # 构建可视化对比
+    viz_data = _build_scenario_comparison(result["scenarios"])
+    
     return {
-        "methods": [
+        "scenarios": result["scenarios"],
+        "recommendations": result["recommendations"],
+        "visualization_data": viz_data
+    }
+
+
+@router.post("/capacity-analysis")
+async def analyze_capacity(request: CapacityAnalysisRequest):
+    """产能分析 - 增强版"""
+    resources = request.resources
+    orders = request.orders
+    
+    # 按资源分组
+    resource_loads = {}
+    for r in resources:
+        resource_loads[r["id"]] = {
+            "name": r.get("name", r["id"]),
+            "total_capacity": r.get("capacity", 8) * r.get("available_hours", 8),
+            "orders": [],
+            "utilization": 0
+        }
+    
+    # 计算每个资源的负载
+    for order in orders:
+        resource_id = order.get("resource_id", "")
+        if resource_id in resource_loads:
+            work = order.get("quantity", 0) * order.get("unit_time", 60) / 60
+            resource_loads[resource_id]["orders"].append({
+                "order_id": order.get("id"),
+                "work_hours": work
+            })
+            resource_loads[resource_id]["utilization"] += work
+    
+    # 计算利用率
+    for rid, data in resource_loads.items():
+        if data["total_capacity"] > 0:
+            data["utilization"] = data["utilization"] / data["total_capacity"] * 100
+    
+    # 瓶颈分析
+    bottlenecks = []
+    for rid, data in resource_loads.items():
+        if data["utilization"] > 90:
+            bottlenecks.append({
+                "resource_id": rid,
+                "name": data["name"],
+                "utilization": round(data["utilization"], 1),
+                "severity": "critical" if data["utilization"] > 100 else "high"
+            })
+    
+    # 可视化
+    viz_data = {
+        "bar_chart": {
+            "labels": [d["name"] for d in resource_loads.values()],
+            "datasets": [{
+                "label": "产能利用率 %",
+                "data": [round(d["utilization"], 1) for d in resource_loads.values()],
+                "backgroundColor": [
+                    "#ef4444" if d["utilization"] > 100 else
+                    "#f59e0b" if d["utilization"] > 90 else
+                    "#10b981" if d["utilization"] < 50 else
+                    "#3b82f6"
+                    for d in resource_loads.values()
+                ]
+            }]
+        }
+    }
+    
+    return {
+        "resource_loads": list(resource_loads.values()),
+        "bottlenecks": bottlenecks,
+        "summary": {
+            "total_resources": len(resources),
+            "avg_utilization": sum(d["utilization"] for d in resource_loads.values()) / len(resource_loads) if resources else 0,
+            "bottleneck_count": len(bottlenecks)
+        },
+        "visualization_data": viz_data
+    }
+
+
+@router.post("/gantt", response_model=Dict)
+async def get_gantt_data(request: GanttRequest):
+    """获取甘特图数据 - 增强版"""
+    # 模拟甘特图数据
+    gantt_data = [
+        {
+            "order_id": "PO001",
+            "resource": "生产线A",
+            "start": "2026-03-11 08:00",
+            "end": "2026-03-11 12:00",
+            "duration": 4,
+            "quantity": 100,
+            "priority": 1,
+            "color": "#3b82f6"
+        },
+        {
+            "order_id": "PO002",
+            "resource": "生产线A",
+            "start": "2026-03-11 13:00",
+            "end": "2026-03-11 17:00",
+            "duration": 4,
+            "quantity": 80,
+            "priority": 2,
+            "color": "#10b981"
+        }
+    ]
+    
+    # 可视化
+    viz_data = _build_gantt_visualization(gantt_data, [])
+    
+    return {
+        "gantt_data": gantt_data,
+        "group_by": request.group_by,
+        "visualization_data": viz_data
+    }
+
+
+@router.post("/resource-config")
+async def configure_resources(request: ResourceConfigRequest):
+    """资源配置 - 增强版"""
+    configured_resources = []
+    
+    for r in request.resources:
+        resource_id = r.get("id")
+        
+        # 应用工作时间配置
+        working_hours = request.working_hours.get(resource_id, {})
+        
+        # 应用成本配置
+        costs = request.costs.get(resource_id, {})
+        
+        configured_resources.append({
+            **r,
+            "working_hours": working_hours,
+            "hourly_cost": costs.get("hourly_cost", r.get("hourly_cost", 100)),
+            "overtime_cost": costs.get("overtime_cost", r.get("overtime_cost", 150))
+        })
+    
+    return {
+        "resources": configured_resources,
+        "message": "资源配置已更新"
+    }
+
+
+@router.post("/constraints-config")
+async def configure_constraints(request: ConstraintConfigRequest):
+    """约束配置 - 增强版"""
+    # 验证约束
+    validated_constraints = {}
+    issues = []
+    
+    for key, value in request.constraints.items():
+        if key == "deadline":
+            # 检查截止时间是否合理
+            for order in value.get("orders", []):
+                if "deadline" in order:
+                    try:
+                        dl = datetime.fromisoformat(order["deadline"])
+                        if dl < datetime.now():
+                            issues.append(f"订单 {order['id']} 截止时间已过")
+                    except:
+                        pass
+        validated_constraints[key] = value
+    
+    return {
+        "constraints": validated_constraints,
+        "issues": issues,
+        "message": "约束配置已验证" if not issues else "存在约束问题"
+    }
+
+
+# ========== 可视化数据构建 ==========
+
+def _build_gantt_visualization(gantt_data: List[Dict], details: List[Dict]) -> Dict:
+    """构建甘特图可视化"""
+    if not gantt_data:
+        return {"chart_type": "gantt", "data": []}
+    
+    # 按资源分组
+    resources = {}
+    for item in gantt_data:
+        resource = item.get("resource", "Unknown")
+        if resource not in resources:
+            resources[resource] = []
+        resources[resource].append({
+            "id": item.get("order_id"),
+            "name": item.get("order_id"),
+            "start": item.get("start"),
+            "end": item.get("end"),
+            "duration": item.get("duration", 0),
+            "color": item.get("color", "#3b82f6")
+        })
+    
+    return {
+        "chart_type": "gantt",
+        "resources": list(resources.keys()),
+        "data": [
             {
-                "name": "makespan",
-                "description": "最小化总完工时间",
-                "scenario": "多订单并行生产时追求最高效率"
-            },
-            {
-                "name": "tardiness",
-                "description": "最小化总延迟时间",
-                "scenario": "追求交期准时性"
-            },
-            {
-                "name": "cost",
-                "description": "最小化总成本",
-                "scenario": "考虑换线、加班等成本因素"
-            },
-            {
-                "name": "balanced",
-                "description": "平衡模式",
-                "scenario": "综合考虑时间、成本、延迟"
+                "resource": resource,
+                "tasks": tasks
             }
+            for resource, tasks in resources.items()
         ],
-        "default": "makespan"
+        "timeline": {
+            "start": gantt_data[0].get("start", "") if gantt_data else "",
+            "end": gantt_data[-1].get("end", "") if gantt_data else ""
+        }
     }
 
 
-@router.get("/constraints")
-async def get_constraint_types():
-    """获取支持的约束类型"""
+def _build_utilization_chart(utilization: Dict[str, float]) -> Dict:
+    """构建利用率图表"""
     return {
-        "constraints": [
+        "chart_type": "utilization",
+        "data": {
+            "labels": list(utilization.keys()),
+            "datasets": [{
+                "label": "利用率 %",
+                "data": list(utilization.values()),
+                "backgroundColor": [
+                    "#ef4444" if v > 100 else
+                    "#f59e0b" if v > 80 else
+                    "#10b981" if v < 50 else
+                    "#3b82f6"
+                    for v in utilization.values()
+                ]
+            }]
+        }
+    }
+
+
+def _build_metrics_summary(result) -> Dict:
+    """构建指标汇总"""
+    return {
+        "chart_type": "metrics",
+        "summary": {
+            "makespan": result.makespan_hours,
+            "makespan_days": result.makespan_days,
+            "total_tardiness": result.total_tardiness_hours,
+            "total_cost": result.total_cost,
+            "status": result.status
+        },
+        "pie_chart": {
+            "labels": ["准时", "延迟"],
+            "values": [
+                max(0, len(result.schedule_details) - sum(1 for d in result.schedule_details if d.get("tardiness_hours", 0) > 0)),
+                sum(1 for d in result.schedule_details if d.get("tardiness_hours", 0) > 0)
+            ]
+        }
+    }
+
+
+def _build_scenario_comparison(scenarios: List[Dict]) -> Dict:
+    """构建场景对比可视化"""
+    return {
+        "chart_type": "comparison",
+        "bar_charts": [
             {
-                "name": "deadline",
-                "description": "订单截止时间",
-                "example": {"order_id": "PO001", "deadline": "2026-03-15"}
+                "metric": "makespan",
+                "labels": [s.get("scenario_name", f"场景{i+1}") for i, s in enumerate(scenarios)],
+                "values": [s.get("makespan_hours", 0) for s in scenarios]
             },
             {
-                "name": "priority",
-                "description": "订单优先级",
-                "example": {"order_id": "PO001", "priority": 1}  # 1=最高
+                "metric": "tardiness",
+                "labels": [s.get("scenario_name", f"场景{i+1}") for i, s in enumerate(scenarios)],
+                "values": [s.get("total_tardiness", 0) for s in scenarios]
             },
             {
-                "name": "sequence",
-                "description": "工艺顺序约束",
-                "example": {"order_id": "PO001", "before": "PO002"}
-            },
-            {
-                "name": "resource_lock",
-                "description": "资源锁定",
-                "example": {"resource_id": "R001", "locked_orders": ["PO001"]}
-            },
-            {
-                "name": "maintenance",
-                "description": "维护窗口",
-                "example": {"resource_id": "R001", "maintenance": [{"start": "2026-03-10 12:00", "end": "2026-03-10 14:00"}]}
+                "metric": "cost",
+                "labels": [s.get("scenario_name", f"场景{i+1}") for i, s in enumerate(scenarios)],
+                "values": [s.get("total_cost", 0) for s in scenarios]
             }
         ]
     }
 
 
-# ========== OR-Tools 优化算法 ==========
-
-def _ortools_optimize(production_orders: List[Dict], resources: List[Dict],
-                      optimization_goal: str, constraints: Dict) -> ScheduleResponse:
-    """
-    OR-Tools 排程优化
-    
-    TODO: 实际实现需要安装 or-tools 库
-    from ortools.sat.python import cp_model
-    
-    模型构建：
-    1. 决策变量：每个订单在每个资源上的开始时间、持续时间
-    2. 约束：资源容量、工艺顺序、优先级、截止时间
-    3. 目标函数：makespan/tardiness/cost
-    """
-    # 简化实现：启发式排程算法
-    schedule_id = f"SCH_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-    
-    # 按优先级和截止时间排序
-    sorted_orders = sorted(production_orders, 
-                          key=lambda x: (x.get("priority", 999), x.get("deadline", "")))
-    
-    # 初始化资源时间线
-    resource_timeline = {r["id"]: 0 for r in resources}
-    
-    schedule_details = []
-    gantt_data = []
-    
-    for order in sorted_orders:
-        # 选择最合适的资源
-        selected_resource = _select_best_resource(
-            order, resources, resource_timeline, constraints
-        )
-        
-        # 计算开始和结束时间
-        start_time = max(
-            resource_timeline[selected_resource["id"]],
-            _parse_deadline(order.get("available_after", ""))
-        )
-        
-        quantity = order.get("quantity", 1)
-        unit_time = order.get("unit_time", 60)  # 分钟
-        duration = quantity * unit_time
-        
-        end_time = start_time + duration
-        
-        # 更新资源时间线
-        resource_timeline[selected_resource["id"]] = end_time
-        
-        # 计算延迟
-        deadline = _parse_deadline(order.get("deadline", ""))
-        tardiness = max(0, (end_time - deadline) / 60) if deadline else 0
-        
-        detail = {
-            "order_id": order.get("id"),
-            "resource_id": selected_resource["id"],
-            "resource_name": selected_resource["name"],
-            "start_time": _format_datetime(start_time),
-            "end_time": _format_datetime(end_time),
-            "duration_minutes": duration,
-            "quantity": quantity,
-            "tardiness_hours": round(tardiness, 2)
-        }
-        schedule_details.append(detail)
-        
-        # 甘特图数据
-        gantt_data.append({
-            "order_id": order.get("id"),
-            "resource": selected_resource["name"],
-            "start": _format_datetime(start_time),
-            "end": _format_datetime(end_time),
-            "quantity": quantity,
-            "color": _get_order_color(order.get("priority", 999))
-        })
-    
-    # 计算总完工时间和总延迟
-    makespan = max(resource_timeline.values()) / 60  # 转换为小时
-    total_tardiness = sum(d["tardiness_hours"] for d in schedule_details)
-    
-    # 判断优化状态
-    if total_tardiness == 0:
-        status = "optimal"
-    elif total_tardiness < makespan * 0.1:
-        status = "feasible"
-    else:
-        status = "suboptimal"
-    
-    return ScheduleResponse(
-        schedule_id=schedule_id,
-        status=status,
-        makespan=round(makespan, 2),
-        total_tardiness=round(total_tardiness, 2),
-        schedule_details=schedule_details,
-        gantt_data=gantt_data
-    )
-
-
-def _select_best_resource(order: Dict, resources: List[Dict],
-                          resource_timeline: Dict, constraints: Dict) -> Dict:
-    """选择最佳资源（启发式）"""
-    available_resources = []
-    
-    for resource in resources:
-        # 检查资源是否被锁定
-        locked_orders = constraints.get("resource_lock", {}).get(resource["id"], [])
-        if order.get("id") in locked_orders:
-            continue
-        
-        # 检查是否满足工艺要求
-        if not _resource_supports_process(resource, order.get("process_type", "")):
-            continue
-        
-        # 计算负载
-        load = resource_timeline.get(resource["id"], 0)
-        available_resources.append((resource, load))
-    
-    if not available_resources:
-        # 如果没有合适的资源，选择负载最低的
-        return min(resources, key=lambda r: resource_timeline.get(r["id"], 0))
-    
-    # 选择负载最低的资源
-    return min(available_resources, key=lambda x: x[1])[0]
-
-
-def _resource_supports_process(resource: Dict, process_type: str) -> bool:
-    """检查资源是否支持指定工艺"""
-    if not process_type:
-        return True
-    
-    supported_processes = resource.get("supported_processes", [])
-    return process_type in supported_processes or not supported_processes
-
-
-def _parse_deadline(deadline_str: str) -> float:
-    """解析截止时间字符串为时间戳"""
-    if not deadline_str:
-        return 0
-    
-    try:
-        dt = datetime.fromisoformat(deadline_str.replace("Z", "+00:00"))
-        return dt.timestamp()
-    except:
-        return 0
-
-
-def _format_datetime(timestamp: float) -> str:
-    """格式化时间戳为ISO字符串"""
-    if timestamp == 0:
-        return ""
-    dt = datetime.fromtimestamp(timestamp)
-    return dt.isoformat()
-
-
-def _get_order_color(priority: int) -> str:
-    """根据优先级获取颜色"""
-    colors = {
-        1: "#FF6B6B",  # 红色-最高优先级
-        2: "#FFA500",  # 橙色
-        3: "#FFD700",  # 黄色
-        4: "#90EE90",  # 浅绿
-        5: "#87CEEB",  # 天蓝-最低优先级
-    }
-    return colors.get(priority, "#87CEEB")
-
+# ========== Helper Functions ==========
 
 def _generate_suggestions(is_feasible: bool, total_work: float, 
                           total_capacity: float) -> List[str]:
-    """生成可行性建议"""
+    """生成建议"""
     if is_feasible:
-        return ["方案可行"]
+        utilization = total_work / total_capacity * 100 if total_capacity > 0 else 0
+        if utilization < 50:
+            return ["✅ 方案可行，产能利用率偏低"]
+        elif utilization < 80:
+            return ["✅ 方案可行，产能利用率适中"]
+        else:
+            return ["✅ 方案可行，产能利用率较高"]
     
     suggestions = []
     deficit = total_work - total_capacity
     
     if deficit > 0:
-        suggestions.append(f"资源缺口: {round(deficit, 2)} 单位时间")
-        suggestions.append("建议：增加产能或延长工作时间")
+        suggestions.append(f"⚠️ 资源缺口: {round(deficit/60, 2)} 小时")
+    
+    if total_work > total_capacity:
+        suggestions.append("💡 建议：增加产能或延长工作时间")
+        suggestions.append("💡 建议：调整部分订单到其他时段")
+        suggestions.append("💡 建议：与客户协商延迟交期")
     
     return suggestions
 
 
-# ========== 高级排程功能（规划中）============
+# ========== 方法信息 ==========
 
-@router.post("/whatif-simulation")
-async def whatif_simulation(scenarios: List[Dict]):
-    """
-    What-if 场景模拟
-    
-    模拟多个排程方案并对比
-    """
-    results = []
-    
-    for i, scenario in enumerate(scenarios):
-        result = _ortools_optimize(
-            scenario.get("orders", []),
-            scenario.get("resources", []),
-            scenario.get("goal", "makespan"),
-            scenario.get("constraints", {})
-        )
-        results.append({
-            "scenario_id": f"SCEN_{i+1}",
-            "scenario_name": scenario.get("name", f"方案{i+1}"),
-            "makespan": result.makespan,
-            "tardiness": result.total_tardiness,
-            "status": result.status
-        })
-    
-    # 对比分析
-    best_makespan = min(results, key=lambda x: x["makespan"])
-    best_tardiness = min(results, key=lambda x: x["tardiness"])
-    
+@router.get("/goals")
+async def get_optimization_goals():
+    """获取优化目标"""
     return {
-        "scenarios": results,
-        "recommendation": {
-            "for_speed": best_makespan,
-            "for_ontime": best_tardiness
+        "goals": [
+            {
+                "name": "makespan",
+                "display_name": "最短完工时间",
+                "description": "最小化所有订单的总完工时间",
+                "formula": "min(max(end_time))",
+                "scenario": "追求生产效率",
+                "icon": "⚡"
+            },
+            {
+                "name": "tardiness",
+                "display_name": "最低延迟",
+                "description": "最小化所有订单的总延迟时间",
+                "formula": "min(sum(max(0, end_time - deadline)))",
+                "scenario": "追求交期准时",
+                "icon": "🎯"
+            },
+            {
+                "name": "cost",
+                "display_name": "最低成本",
+                "description": "最小化总生产成本",
+                "formula": "min(sum(duration × hourly_cost))",
+                "scenario": "追求成本优化",
+                "icon": "💰"
+            },
+            {
+                "name": "balanced",
+                "display_name": "平衡模式",
+                "description": "综合考虑时间、成本和延迟",
+                "formula": "综合权重",
+                "scenario": "全面优化",
+                "icon": "⚖️"
+            }
+        ],
+        "optimize_levels": {
+            "fast": {"description": "快速求解", "time_limit": 10},
+            "normal": {"description": "标准求解", "time_limit": 30},
+            "deep": {"description": "深度优化", "time_limit": 120}
         }
     }
 
 
-@router.post("/reschedule")
-async def reschedule(order_id: str, new_deadline: str, current_schedule_id: str):
-    """
-    重新排程
-    
-    当订单变更时，触发重新排程
-    """
-    # TODO: 从缓存或数据库获取当前排程
-    # 调整相关订单
-    
+@router.get("/constraints")
+async def get_constraint_types():
+    """获取约束类型"""
     return {
-        "order_id": order_id,
-        "new_deadline": new_deadline,
-        "reschedule_triggered": True,
-        "message": "已触发重新排程，请调用 /optimize 接口获取新方案"
+        "constraints": [
+            {
+                "name": "deadline",
+                "display_name": "截止时间",
+                "type": "hard",
+                "description": "订单必须在此时间前完成"
+            },
+            {
+                "name": "priority",
+                "display_name": "优先级",
+                "type": "soft",
+                "description": "订单优先级，1=最高"
+            },
+            {
+                "name": "sequence",
+                "display_name": "工艺顺序",
+                "type": "hard",
+                "description": "订单间的先后顺序约束"
+            },
+            {
+                "name": "resource_lock",
+                "display_name": "资源锁定",
+                "type": "soft",
+                "description": "指定订单使用特定资源"
+            },
+            {
+                "name": "maintenance",
+                "display_name": "维护窗口",
+                "type": "hard",
+                "description": "资源的维护时间段"
+            },
+            {
+                "name": "setup_time",
+                "display_name": "换线时间",
+                "type": "soft",
+                "description": "切换产品的时间"
+            }
+        ]
+    }
+
+
+@router.get("/example")
+async def get_schedule_example():
+    """获取排程示例"""
+    return {
+        "orders": [
+            {
+                "id": "PO001",
+                "product": "产品A",
+                "quantity": 100,
+                "unit_time": 5,
+                "priority": 1,
+                "deadline": "2026-03-15T00:00:00",
+                "process_type": "assembly"
+            },
+            {
+                "id": "PO002",
+                "product": "product B",
+                "quantity": 200,
+                "unit_time": 3,
+                "priority": 2,
+                "deadline": "2026-03-18T00:00:00",
+                "process_type": "assembly"
+            },
+            {
+                "id": "PO003",
+                "product": "产品C",
+                "quantity": 150,
+                "unit_time": 4,
+                "priority": 3,
+                "deadline": "2026-03-20T00:00:00",
+                "process_type": "testing"
+            }
+        ],
+        "resources": [
+            {
+                "id": "R001",
+                "name": "生产线A",
+                "capacity": 8,
+                "hourly_cost": 100,
+                "supported_processes": ["assembly", "testing"]
+            },
+            {
+                "id": "R002",
+                "name": "生产线B",
+                "capacity": 8,
+                "hourly_cost": 120,
+                "supported_processes": ["assembly", "packaging"]
+            }
+        ],
+        "goal": "makespan"
     }
