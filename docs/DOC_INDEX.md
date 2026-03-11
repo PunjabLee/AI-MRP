@@ -1,132 +1,180 @@
 # AI MRP 项目文档清单
 
-> **版本**：1.1  
-> **日期**：2026-03-09  
+> **版本**：2.0  
+> **日期**：2026-03-11  
 > **状态**：已完成
 
 ---
 
-## 一、文档清单
+## 一、产品需求类
 
-| # | 文档 | 状态 | 说明 |
+| # | 文档 | 说明 | 状态 |
 |---|------|------|------|
-| 1 | `README.md` | ✅ | 项目概述 |
-| 2 | `docs/PRD.md` | ✅ | 产品需求文档 |
-| 3 | `docs/MARKET_RESEARCH.md` | ✅ | 市场调研报告 |
-| 4 | `docs/TECHNICAL_ARCHITECTURE.md` | ✅ | 技术架构设计 |
-| 5 | `docs/CODE_FRAMEWORK.md` | ✅ | 代码框架设计 |
-| 6 | `docs/CODE_LAYER_DESIGN.md` | ✅ | 代码分层设计（DDD） |
-| 7 | `docs/GIT_WORKFLOW.md` | ✅ | Git 分支管理 |
-| 8 | `docs/ITERATION_PLAN.md` | ✅ | 迭代规划 |
-| 9 | `docs/BRANCH_LIST.md` | ✅ | 功能分支清单 |
-| 10 | `docs/TEST_BRANCH_LIST.md` | ✅ | 测试分支清单 |
-| 11 | `docs/DEVELOPMENT_PLAN.md` | ✅ | 开发计划 |
-| 12 | `docs/OR_SCHEDULER_PLAN.md` | ✅ | OR排程规划 |
-| 13 | `docs/MVP_REVIEW.md` | ✅ | MVP Review报告 |
-| 14 | `docs/MVP_FULL_REVIEW.md` | ✅ | MVP全面Review报告 |
-| 15 | `docs/NEXT_STEPS.md` | ✅ | 下一步工作清单 |
-| **16** | **`docs/data-architecture/`** | ✅ | **数据架构（DDL）** |
+| 1 | `PRD.md` | 产品需求文档 | ✅ |
+| 2 | `MARKET_RESEARCH.md` | 市场调研报告 | ✅ |
+| 3 | `BUSINESS_LOGIC_MEMO.md` | 业务逻辑备忘录 | ✅ |
+| 4 | `MRP_FACTORS.md` | MRP业务因子 | ✅ |
 
 ---
 
-## 二、核心特性总结
+## 二、架构设计类
 
-### 2.1 产品定位
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 5 | `TECHNICAL_ARCHITECTURE.md` | 技术架构设计 | ✅ |
+| 6 | `CODE_FRAMEWORK.md` | 代码框架设计 | ✅ |
+| 7 | `CODE_LAYER_DESIGN.md` | 代码分层设计(DDD) | ✅ |
+| 8 | `MICROSERVICES_ARCHITECTURE_PLAN.md` | 微服务架构规划 | ✅ |
+| 9 | `PYTHON_AI_SERVICE_ARCH.md` | Python AI服务架构 | ✅ |
+| 10 | `MODULE_DEPENDENCY.md` | 模块依赖关系图 | ✅ |
+| 11 | `CORE_FLOWCHARTS.md` | 核心流程图(完整方法链) | ✅ |
+| 12 | `END_TO_END_ARCH.md` | 端到端架构图 | ✅ |
+| 13 | `END_TO_END_DETAIL.md` | 端到端调用链详解 | ✅ |
+| 14 | `END_TO_END_V2.md` | 超完整端到端技术手册 | ✅ |
 
-- **产品名称**：AI MRP（智能物料需求计划系统）
-- **核心特色**：可对话式配置的智能 MRP
-- **目标用户**：中小制造企业、计划主管、供应链管理
+---
 
-### 2.2 核心功能
+## 三、集成开发类
 
-| 模块 | 功能 |
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 15 | `INTEGRATION_GUIDE.md` | Java集成指南 | ✅ |
+| 16 | `ALGORITHM_REVIEW.md` | 算法Review | ✅ |
+
+---
+
+## 四、开发设计类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 17 | `DEVELOPER_GUIDE.md` | 开发用户手册 | ✅ |
+| 18 | `CODE_STANDARD.md` | 代码规范 | ✅ |
+| 19 | `DEPLOYMENT_GUIDE.md` | 部署手册(Docker/K8s) | ✅ |
+| 20 | `OPS_GUIDE.md` | 运维手册 | ✅ |
+| 21 | `TROUBLESHOOTING_GUIDE.md` | 故障排查手册 | ✅ |
+| 22 | `BUSINESS_FLOW.md` | 业务流文档 | ✅ |
+
+---
+
+## 五、API文档类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 23 | `API_REFERENCE.md` | API接口文档 | ✅ |
+
+---
+
+## 六、数据架构类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 24 | `docs/data-architecture/DATA_ARCHITECTURE.md` | 数据架构设计 | ✅ |
+| 25 | `docs/data-architecture/DOMAIN_MODEL.md` | 领域模型 | ✅ |
+| 26 | `docs/data-architecture/DATABASE_DDL.sql` | 数据库DDL | ✅ |
+
+---
+
+## 七、项目管理类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 27 | `ITERATION_PLAN.md` | 迭代规划 | ✅ |
+| 28 | `DEVELOPMENT_PLAN.md` | 开发计划 | ✅ |
+| 29 | `ACTION_PLAN.md` | 行动计划 | ✅ |
+| 30 | `GIT_WORKFLOW.md` | Git工作流 | ✅ |
+| 31 | `BRANCH_LIST.md` | 功能分支清单 | ✅ |
+| 32 | `TEST_BRANCH_LIST.md` | 测试分支清单 | ✅ |
+
+---
+
+## 八、Review报告类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 33 | `MVP_REVIEW.md` | MVP Review报告 | ✅ |
+| 34 | `MVP_PRO_REVIEW.md` | MVP+Pro Review报告 | ✅ |
+| 35 | `COMPREHENSIVE_REVIEW.md` | 全面Review报告 | ✅ |
+| 36 | `COMPREHENSIVE_REVIEW_V2.md` | 全面Review报告V2 | ✅ |
+| 37 | `COMPREHENSIVE_REVIEW_V3.md` | 全面Review报告V3 | ✅ |
+| 38 | `FINAL_REVIEW.md` | 最终Review报告 | ✅ |
+| 39 | `OVERALL_REVIEW.md` | 整体完成度Review | ✅ |
+| 40 | `ARCHITECTURE_REVIEW.md` | 架构Review | ✅ |
+| 41 | `ARCHITECTURE_REVIEW_JAVA.md` | Java架构Review | ✅ |
+| 42 | `CONTROLLER_VO_REVIEW.md` | Controller VO Review | ✅ |
+| 43 | `PRODUCT_REVIEW.md` | 产品Review | ✅ |
+| 44 | `MILESTONE_REVIEW.md` | 里程碑Review | ✅ |
+
+---
+
+## 九、任务清单类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 45 | `MVP_TASKS.md` | MVP任务清单 | ✅ |
+| 46 | `PRO_TASKS_ANALYSIS.md` | Pro任务分析 | ✅ |
+| 47 | `NEXT_PLAN.md` | 下一步计划 | ✅ |
+| 48 | `NEXT_STEPS.md` | 后续步骤 | ✅ |
+| 49 | `REMAINING_TASKS.md` | 剩余任务 | ✅ |
+| 50 | `TASK_CHECKLIST.md` | 任务检查清单 | ✅ |
+| 51 | `TASK_PRIORITY_CHECKLIST.md` | 任务优先级清单 | ✅ |
+
+---
+
+## 十、Enterprise规划类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 52 | `ENTERPRISE_PLAN_SUGGESTION.md` | Enterprise规划建议 | ✅ |
+| 53 | `ENTERPRISE_REVIEW.md` | Enterprise Review | ✅ |
+| 54 | `ENTERPRISE_ITERATION_PLAN.md` | Enterprise迭代规划 | ✅ |
+
+---
+
+## 十一、其他类
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 55 | `OR_SCHEDULER_PLAN.md` | OR排程规划 | ✅ |
+
+---
+
+## 文档统计
+
+| 类别 | 数量 |
 |------|------|
-| **对话式交互** | 自然语言对话、意图识别、实体提取、执行路由 |
-| **需求管理** | 销售订单、需求预测、需求池 |
-| **BOM 管理** | BOM 维护、BOM 展开、多层展开 |
-| **库存管理** | 库存查询、库存交易、库龄分析 |
-| **MRP 计算** | MRP 引擎、采购建议、生产建议 |
-| **AI 智能** | 需求预测、安全库存推荐、OR 排程 |
-| **影响分析** | 插单影响、What-if 模拟、成本分析 |
-| **风险预警** | 供应商风险、库存风险、需求突变 |
-| **沙箱机制** | 数据隔离、计算预览、业务模拟、参数调优 |
+| 产品需求类 | 4 |
+| 架构设计类 | 8 |
+| 集成开发类 | 2 |
+| 开发设计类 | 6 |
+| API文档类 | 1 |
+| 数据架构类 | 3 |
+| 项目管理类 | 6 |
+| Review报告类 | 12 |
+| 任务清单类 | 7 |
+| Enterprise规划类 | 3 |
+| 其他类 | 1 |
+| **总计** | **55** |
 
-### 2.3 技术架构
+---
 
-| 层级 | 技术栈 |
-|------|--------|
-| 后端 | Java 17 + Spring Boot 3 + PostgreSQL |
-| AI 服务 | Python + LangChain + OR-Tools + Prophet |
-| 前端 | React + TypeScript + Vite |
-| 部署 | Docker + Kubernetes |
-| 数据库 | PostgreSQL 15+ (主从/读写分离) |
+## 文档行数统计
 
-### 2.4 沙箱机制
+| 指标 | 数值 |
+|------|------|
+| 总文档数 | 55 |
+| 总行数 | 19,388 |
+| 平均行数 | 352 |
 
-| 方案 | 架构 | 场景 |
+---
+
+## 版本历史
+
+| 版本 | 日期 | 说明 |
 |------|------|------|
-| 独立数据库 | aimrp_prod + aimrp_sandbox | 生产环境 |
-| 容器化沙箱 | 独立 PostgreSQL 容器 | 开发/测试 |
-| Schema 隔离 | 同一库不同 schema | 低成本 |
+| 1.0 | 2026-03-09 | 初始版本 |
+| 2.0 | 2026-03-11 | 完整更新，包含所有55个文档 |
 
 ---
 
-## 三、迭代规划
-
-### 3.1 阶段划分
-
-| 阶段 | 时间 | 交付 | 规划数 | 已完成 |
-|------|------|------|--------|--------|
-| MVP | W1-4 | 对话式 MRP 原型 | 22 | 21 |
-| Pro | W5-8 | 智能化 MRP | 20 | 11 |
-| Enterprise | W9-12 | 企业级 MRP | 12 | 0 |
-| **总计** | **12 周** | | **54** | **32** |
-
-### 3.2 里程碑
-
-| 里程碑 | 时间 | 交付 | 状态 |
-|--------|------|------|------|
-| M1 | W2 末 | 项目骨架 + 基础 CRUD | ✅ |
-| M2 | W4 末 | 对话式 MRP 原型 | ✅ |
-| M3 | W8 末 | 智能化 MRP | ⏳ 进行中 |
-| M4 | W12 末 | 企业级 MRP | ⏳ |
-
----
-
-## 四、文档索引
-
-### 4.1 产品
-
-- `README.md` - 项目概述
-- `docs/PRD.md` - 产品需求文档（完整功能清单）
-
-### 4.2 技术
-
-- `docs/TECHNICAL_ARCHITECTURE.md` - 技术架构（DDD + 沙箱）
-- `docs/CODE_FRAMEWORK.md` - 代码框架（Java/Python/前端）
-
-### 4.3 流程
-
-- `docs/GIT_WORKFLOW.md` - Git 分支管理规范
-- `docs/ITERATION_PLAN.md` - 迭代规划（12 周）
-- `docs/DEVELOPMENT_PLAN.md` - 开发计划
-
-### 4.4 实施
-
-- `docs/BRANCH_LIST.md` - 功能分支清单（51 个）
-- `docs/TEST_BRANCH_LIST.md` - 测试分支清单（23 个）
-- `docs/MARKET_RESEARCH.md` - 市场调研报告
-
----
-
-## 五、版本历史
-
-| 版本 | 日期 | 变更 |
-|------|------|------|
-| 1.0 | 2026-03-08 | 初始版本 |
-| 1.1 | 2026-03-09 | 添加OR排程规划，更新MVP/Pro状态 |
-| 1.2 | 2026-03-09 | 添加Enterprise规划文档，完整业务逻辑备忘录 |
-
----
-
-*文档清单完成*
+*由 小jeep 🚙 整理*
+*Punjab's AI Team © 2026*
