@@ -59,6 +59,22 @@ spring:
           filters:
             - StripPrefix=1
 
+        # MPS 服务
+        - id: aimrp-mps
+          uri: lb://aimrp-mps
+          predicates:
+            - Path=/api/mps/**
+          filters:
+            - StripPrefix=1
+
+        # DRP 服务
+        - id: aimrp-drp
+          uri: lb://aimrp-drp
+          predicates:
+            - Path=/api/drp/**
+          filters:
+            - StripPrefix=1
+
         # 采购服务
         - id: aimrp-purchase
           uri: lb://aimrp-purchase

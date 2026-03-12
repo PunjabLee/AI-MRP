@@ -237,6 +237,7 @@
         <module>aimrp-org</module>
         <module>aimrp-warehouse</module>
         <module>aimrp-mps</module>
+        <module>aimrp-drp</module>
         <module>aimrp-supplier-portal</module>
         <module>aimrp-report</module>
         <module>aimrp-cost</module>

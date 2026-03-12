@@ -9,25 +9,15 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aimrp-mps</artifactId>
-    <name>aimrp-mps</name>
-    <description>MPS 主生产计划模块</description>
+    <artifactId>aimrp-drp</artifactId>
+    <name>aimrp-drp</name>
+    <description>DRP 配送需求计划模块</description>
 
     <dependencies>
         <dependency>
             <groupId>com.aimrp</groupId>
             <artifactId>aimrp-common</artifactId>
             <version>${project.version}</version>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.aimrp</groupId>
-            <artifactId>aimrp-demand</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.aimrp</groupId>
-            <artifactId>aimrp-mrp</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
