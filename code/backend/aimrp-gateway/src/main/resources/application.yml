@@ -1,0 +1,110 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: aimrp-gateway
+
+  # Nacos 配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+      config:
+        server-addr: ${NACOS_SERVER:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yml
+
+    # Gateway 路由配置
+    gateway:
+      discovery:
+        locator:
+          enabled: true  # 启用服务发现
+          lower-case-service-id: true  # 服务名小写
+
+      # 静态路由规则（可配合 Nacos 配置中心动态配置）
+      routes:
+        # 认证服务
+        - id: aimrp-system
+          uri: lb://aimrp-system
+          predicates:
+            - Path=/api/system/**
+          filters:
+            - StripPrefix=1
+
+        # 需求服务
+        - id: aimrp-demand
+          uri: lb://aimrp-demand
+          predicates:
+            - Path=/api/orders/**,/api/demand/**
+          filters:
+            - StripPrefix=1
+
+        # 库存服务
+        - id: aimrp-inventory
+          uri: lb://aimrp-inventory
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=1
+
+        # MRP 服务
+        - id: aimrp-mrp
+          uri: lb://aimrp-mrp
+          predicates:
+            - Path=/api/mrp/**
+          filters:
+            - StripPrefix=1
+
+        # 采购服务
+        - id: aimrp-purchase
+          uri: lb://aimrp-purchase
+          predicates:
+            - Path=/api/purchase/**
+          filters:
+            - StripPrefix=1
+
+        # 生产服务
+        - id: aimrp-production
+          uri: lb://aimrp-production
+          predicates:
+            - Path=/api/production/**
+          filters:
+            - StripPrefix=1
+
+        # 风险服务
+        - id: aimrp-risk
+          uri: lb://aimrp-risk
+          predicates:
+            - Path=/api/risk/**
+          filters:
+            - StripPrefix=1
+
+        # What-If 服务
+        - id: aimrp-whatif
+          uri: lb://aimrp-whatif
+          predicates:
+            - Path=/api/whatif/**
+          filters:
+            - StripPrefix=1
+
+        # AI 对话服务
+        - id: aimrp-conversation
+          uri: lb://aimrp-conversation
+          predicates:
+            - Path=/api/chat/**,/api/conversation/**
+          filters:
+            - StripPrefix=1
+
+  # 默认路由（兜底）
+  default-filters:
+    - DedupeResponseFilter=LOWER
+
+# 日志配置
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.aimrp: DEBUG

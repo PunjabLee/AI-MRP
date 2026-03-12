@@ -1,0 +1,19 @@
+# 微服务模式配置
+# 使用方式: spring.profiles.active=microservice
+# 需要配合 Nacos 使用
+
+spring:
+  cloud:
+    # 微服务模式启用服务发现
+    discovery:
+      enabled: true
+    nacos:
+      discovery:
+        enabled: true
+
+# 微服务模式配置
+aimrp:
+  microservice:
+    enabled: true
+    # 服务名称（微服务模式下使用）
+    service-name: ${spring.application.name}

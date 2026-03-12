@@ -1,0 +1,12 @@
+# 单体模式配置
+# 使用方式: spring.profiles.active=standalone
+# 或者不设置任何 profile，默认使用此配置
+
+spring:
+  cloud:
+    # 单体模式禁用服务发现
+    discovery:
+      enabled: false
+
+# 单体模式下不注册到 Nacos
+# 服务以 monolith 模式运行
