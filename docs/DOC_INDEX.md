@@ -1,8 +1,8 @@
 # AI MRP 项目文档清单
 
-> **版本**：6.0  
-> **日期**：2026-03-12  
-> **状态**：已完成模块设计分类
+> **版本**：7.0
+> **日期**：2026-03-12
+> **状态**：已完成微服务架构改造
 
 ---
 
@@ -12,10 +12,10 @@
 docs/
 ├── 01-product/           # 产品规划 (4)
 ├── 02-business/          # 业务架构 (1)
-├── 03-application/      # 应用架构 (17)
+├── 03-application/      # 应用架构 (18)
 │   ├── 01-core-business/      # 核心业务层 (6)
 │   ├── 02-intelligent-engine/ # 智能引擎层 (6)
-│   └── 03-enterprise/         # Enterprise扩展 (5)
+│   └── 03-enterprise/        # Enterprise扩展 (6)
 ├── 04-technology/        # 技术架构 (10)
 ├── 05-data/             # 数据架构 (6)
 ├── 06-development/       # 开发规范 (5)
@@ -83,6 +83,7 @@ docs/
 | 3 | `DRP_MODULE_DESIGN.md` | DRP配送模块 | ✅ |
 | 4 | `MOBILE_APP_DESIGN.md` | 移动端模块 | ✅ |
 | 5 | `DASHBOARD_DESIGN.md` | Dashboard模块 | ✅ |
+| 6 | `MPS_MRP_DRP_INTEGRATION.md` | MPS+MRP+DRP联动设计 | ✅ |
 
 ---
 
@@ -218,7 +219,7 @@ docs/
 |------|------|
 | 01-product | 4 |
 | 02-business | 1 |
-| 03-application | 17 |
+| 03-application | 18 |
 | 04-technology | 10 |
 | 05-data | 6 |
 | 06-development | 5 |
@@ -227,7 +228,7 @@ docs/
 | 09-project | 11 |
 | 10-reviews | 12 |
 | 11-tasks | 7 |
-| **总计** | **77** |
+| **总计** | **78** |
 
 ---
 
@@ -241,6 +242,7 @@ docs/
 | 4.0 | 2026-03-12 | 目录结构整理完成 |
 | 5.0 | 2026-03-12 | 补充12个核心模块设计 |
 | 6.0 | 2026-03-12 | 模块设计分类完成 |
+| 7.0 | 2026-03-12 | 微服务架构改造完成 |
 
 ---
 
