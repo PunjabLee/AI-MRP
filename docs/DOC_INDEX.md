@@ -1,8 +1,8 @@
 # AI MRP 项目文档清单
 
-> **版本**：5.0  
+> **版本**：6.0  
 > **日期**：2026-03-12  
-> **状态**：已完成模块设计补充
+> **状态**：已完成模块设计分类
 
 ---
 
@@ -12,7 +12,10 @@
 docs/
 ├── 01-product/           # 产品规划 (4)
 ├── 02-business/          # 业务架构 (1)
-├── 03-application/      # 应用架构 (17) ⭐
+├── 03-application/      # 应用架构 (17)
+│   ├── 01-core-business/      # 核心业务层 (6)
+│   ├── 02-intelligent-engine/ # 智能引擎层 (6)
+│   └── 03-enterprise/         # Enterprise扩展 (5)
 ├── 04-technology/        # 技术架构 (10)
 ├── 05-data/             # 数据架构 (6)
 ├── 06-development/       # 开发规范 (5)
@@ -49,7 +52,7 @@ docs/
 
 ## 三、应用架构 (03-application) - 模块设计
 
-### 3.1 核心业务层 (6个)
+### 03-1 核心业务层 (01-core-business)
 
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
@@ -60,26 +63,26 @@ docs/
 | 5 | `PURCHASE_MANAGEMENT_DESIGN.md` | 采购管理模块 | ✅ |
 | 6 | `PRODUCTION_MANAGEMENT_DESIGN.md` | 生产管理模块 | ✅ |
 
-### 3.2 智能引擎层 (6个)
+### 03-2 智能引擎层 (02-intelligent-engine)
 
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
-| 7 | `LLM_UNDERSTANDING_DESIGN.md` | LLM理解模块 | ✅ |
-| 8 | `OR_SOLVER_DESIGN.md` | OR求解模块 | ✅ |
-| 9 | `PREDICTION_ANALYSIS_DESIGN.md` | 预测分析模块 | ✅ |
-| 10 | `ANOMALY_DIAGNOSIS_DESIGN.md` | 异常诊断模块 | ✅ |
-| 11 | `RISK_WARNING_DESIGN.md` | 风险预警模块 | ✅ |
-| 12 | `IMPACT_ANALYSIS_DESIGN.md` | 影响分析模块 | ✅ |
+| 1 | `LLM_UNDERSTANDING_DESIGN.md` | LLM理解模块 | ✅ |
+| 2 | `OR_SOLVER_DESIGN.md` | OR求解模块 | ✅ |
+| 3 | `PREDICTION_ANALYSIS_DESIGN.md` | 预测分析模块 | ✅ |
+| 4 | `ANOMALY_DIAGNOSIS_DESIGN.md` | 异常诊断模块 | ✅ |
+| 5 | `RISK_WARNING_DESIGN.md` | 风险预警模块 | ✅ |
+| 6 | `IMPACT_ANALYSIS_DESIGN.md` | 影响分析模块 | ✅ |
 
-### 3.3 Enterprise扩展 (5个)
+### 03-3 Enterprise扩展 (03-enterprise)
 
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
-| 13 | `APPROVAL_FLOW_DESIGN.md` | 审批流模块 | ✅ |
-| 14 | `BUDGET_MODULE_DESIGN.md` | 预算管理模块 | ✅ |
-| 15 | `DRP_MODULE_DESIGN.md` | DRP配送模块 | ✅ |
-| 16 | `MOBILE_APP_DESIGN.md` | 移动端模块 | ✅ |
-| 17 | `DASHBOARD_DESIGN.md` | Dashboard模块 | ✅ |
+| 1 | `APPROVAL_FLOW_DESIGN.md` | 审批流模块 | ✅ |
+| 2 | `BUDGET_MODULE_DESIGN.md` | 预算管理模块 | ✅ |
+| 3 | `DRP_MODULE_DESIGN.md` | DRP配送模块 | ✅ |
+| 4 | `MOBILE_APP_DESIGN.md` | 移动端模块 | ✅ |
+| 5 | `DASHBOARD_DESIGN.md` | Dashboard模块 | ✅ |
 
 ---
 
@@ -192,8 +195,8 @@ docs/
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
 | 1 | `MVP_TASKS.md` | MVP任务清单 | ✅ |
-| 2 | `PROALYSIS.md` | Pro任务分析 | ✅ |
-|_TASKS_AN 3 | `NEXT_PLAN.md` | 下一步计划 | ✅ |
+| 2 | `PRO_TASKS_ANALYSIS.md` | Pro任务分析 | ✅ |
+| 3 | `NEXT_PLAN.md` | 下一步计划 | ✅ |
 | 4 | `NEXT_STEPS.md` | 后续步骤 | ✅ |
 | 5 | `REMAINING_TASKS.md` | 剩余任务 | ✅ |
 | 6 | `TASK_CHECKLIST.md` | 任务检查清单 | ✅ |
@@ -215,7 +218,7 @@ docs/
 |------|------|
 | 01-product | 4 |
 | 02-business | 1 |
-| 03-application | **17** |
+| 03-application | 17 |
 | 04-technology | 10 |
 | 05-data | 6 |
 | 06-development | 5 |
@@ -228,42 +231,6 @@ docs/
 
 ---
 
-## 模块设计完成度
-
-### 核心业务层 (6个) ✅
-
-| 模块 | 文档 | 状态 |
-|------|------|------|
-| 需求管理 | DEMAND_MANAGEMENT_DESIGN.md | ✅ |
-| BOM管理 | BOM_MANAGEMENT_DESIGN.md | ✅ |
-| 库存管理 | INVENTORY_MANAGEMENT_DESIGN.md | ✅ |
-| MRP计算 | MRP_CALCULATION_DESIGN.md | ✅ |
-| 采购管理 | PURCHASE_MANAGEMENT_DESIGN.md | ✅ |
-| 生产管理 | PRODUCTION_MANAGEMENT_DESIGN.md | ✅ |
-
-### 智能引擎层 (6个) ✅
-
-| 模块 | 文档 | 状态 |
-|------|------|------|
-| LLM理解 | LLM_UNDERSTANDING_DESIGN.md | ✅ |
-| OR求解 | OR_SOLVER_DESIGN.md | ✅ |
-| 预测分析 | PREDICTION_ANALYSIS_DESIGN.md | ✅ |
-| 异常诊断 | ANOMALY_DIAGNOSIS_DESIGN.md | ✅ |
-| 风险预警 | RISK_WARNING_DESIGN.md | ✅ |
-| 影响分析 | IMPACT_ANALYSIS_DESIGN.md | ✅ |
-
-### Enterprise扩展 (5个) ✅
-
-| 模块 | 文档 | 状态 |
-|------|------|------|
-| 审批流 | APPROVAL_FLOW_DESIGN.md | ✅ |
-| 预算管理 | BUDGET_MODULE_DESIGN.md | ✅ |
-| DRP配送 | DRP_MODULE_DESIGN.md | ✅ |
-| 移动端 | MOBILE_APP_DESIGN.md | ✅ |
-| Dashboard | DASHBOARD_DESIGN.md | ✅ |
-
----
-
 ## 版本历史
 
 | 版本 | 日期 | 说明 |
@@ -273,6 +240,7 @@ docs/
 | 3.0 | 2026-03-12 | 新增5个Enterprise模块设计 |
 | 4.0 | 2026-03-12 | 目录结构整理完成 |
 | 5.0 | 2026-03-12 | 补充12个核心模块设计 |
+| 6.0 | 2026-03-12 | 模块设计分类完成 |
 
 ---
 
