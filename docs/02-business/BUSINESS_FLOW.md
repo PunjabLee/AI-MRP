@@ -1,3 +1,14 @@
+---
+AIGC:
+    ContentProducer: Minimax Agent AI
+    ContentPropagator: Minimax Agent AI
+    Label: AIGC
+    ProduceID: 2f26b0c966115dd9e1e8b830d389cd16
+    PropagateID: 2f26b0c966115dd9e1e8b830d389cd16
+    ReservedCode1: 3044022048f65abfac43afff25fd99e4076e8b030be4f7f24802caa97da0eb86e3e271c80220131fc5c611cd2bfa5152a659cc42c5a55da86d885599bb5a7de9dfb0a0379c71
+    ReservedCode2: 3045022013a6560e9df84202e77bd82f1338cc04da177811de16654c6beadc6321978976022100c180e211e91b068e9b63027f13ec742097c00dc200417ffb16b42acaae3ffa02
+---
+
 # AI MRP 业务流文档
 
 > **版本**: 1.0  

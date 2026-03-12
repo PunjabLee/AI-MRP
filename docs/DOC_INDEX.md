@@ -1,8 +1,8 @@
 # AI MRP 项目文档清单
 
-> **版本**：4.0  
+> **版本**：5.0  
 > **日期**：2026-03-12  
-> **状态**：已完成目录结构整理
+> **状态**：已完成模块设计补充
 
 ---
 
@@ -12,7 +12,7 @@
 docs/
 ├── 01-product/           # 产品规划 (4)
 ├── 02-business/          # 业务架构 (1)
-├── 03-application/      # 应用架构 - 模块设计 (5)
+├── 03-application/      # 应用架构 (17) ⭐
 ├── 04-technology/        # 技术架构 (10)
 ├── 05-data/             # 数据架构 (6)
 ├── 06-development/       # 开发规范 (5)
@@ -20,7 +20,7 @@ docs/
 ├── 08-operations/       # 运维文档 (3)
 ├── 09-project/          # 项目管理
 │   ├── 01-process/      # 流程规范 (3)
-│   └── 02-planning/    # 规划计划 (8)
+│   └── 02-planning/     # 规划计划 (8)
 ├── 10-reviews/          # Review报告 (12)
 ├── 11-tasks/            # 任务清单 (7)
 └── 99-archive/          # 历史归档
@@ -47,15 +47,39 @@ docs/
 
 ---
 
-## 三、应用架构 (03-application) - Enterprise模块设计
+## 三、应用架构 (03-application) - 模块设计
 
-| # | 文档 | 说明 | 状态 | 预估工时 |
-|---|------|------|------|----------|
-| 1 | `APPROVAL_FLOW_DESIGN.md` | 审批流模块设计 | ✅ | 88h |
-| 2 | `BUDGET_MODULE_DESIGN.md` | 预算管理模块设计 | ✅ | 80h |
-| 3 | `DRP_MODULE_DESIGN.md` | DRP配送计划模块设计 | ✅ | 80h |
-| 4 | `MOBILE_APP_DESIGN.md` | 移动端设计文档 | ✅ | 120h |
-| 5 | `DASHBOARD_DESIGN.md` | 运营Dashboard设计文档 | ✅ | 80h |
+### 3.1 核心业务层 (6个)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 1 | `DEMAND_MANAGEMENT_DESIGN.md` | 需求管理模块 | ✅ |
+| 2 | `BOM_MANAGEMENT_DESIGN.md` | BOM管理模块 | ✅ |
+| 3 | `INVENTORY_MANAGEMENT_DESIGN.md` | 库存管理模块 | ✅ |
+| 4 | `MRP_CALCULATION_DESIGN.md` | MRP计算模块 | ✅ |
+| 5 | `PURCHASE_MANAGEMENT_DESIGN.md` | 采购管理模块 | ✅ |
+| 6 | `PRODUCTION_MANAGEMENT_DESIGN.md` | 生产管理模块 | ✅ |
+
+### 3.2 智能引擎层 (6个)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 7 | `LLM_UNDERSTANDING_DESIGN.md` | LLM理解模块 | ✅ |
+| 8 | `OR_SOLVER_DESIGN.md` | OR求解模块 | ✅ |
+| 9 | `PREDICTION_ANALYSIS_DESIGN.md` | 预测分析模块 | ✅ |
+| 10 | `ANOMALY_DIAGNOSIS_DESIGN.md` | 异常诊断模块 | ✅ |
+| 11 | `RISK_WARNING_DESIGN.md` | 风险预警模块 | ✅ |
+| 12 | `IMPACT_ANALYSIS_DESIGN.md` | 影响分析模块 | ✅ |
+
+### 3.3 Enterprise扩展 (5个)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 13 | `APPROVAL_FLOW_DESIGN.md` | 审批流模块 | ✅ |
+| 14 | `BUDGET_MODULE_DESIGN.md` | 预算管理模块 | ✅ |
+| 15 | `DRP_MODULE_DESIGN.md` | DRP配送模块 | ✅ |
+| 16 | `MOBILE_APP_DESIGN.md` | 移动端模块 | ✅ |
+| 17 | `DASHBOARD_DESIGN.md` | Dashboard模块 | ✅ |
 
 ---
 
@@ -168,8 +192,8 @@ docs/
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
 | 1 | `MVP_TASKS.md` | MVP任务清单 | ✅ |
-| 2 | `PRO_TASKS_ANALYSIS.md` | Pro任务分析 | ✅ |
-| 3 | `NEXT_PLAN.md` | 下一步计划 | ✅ |
+| 2 | `PROALYSIS.md` | Pro任务分析 | ✅ |
+|_TASKS_AN 3 | `NEXT_PLAN.md` | 下一步计划 | ✅ |
 | 4 | `NEXT_STEPS.md` | 后续步骤 | ✅ |
 | 5 | `REMAINING_TASKS.md` | 剩余任务 | ✅ |
 | 6 | `TASK_CHECKLIST.md` | 任务检查清单 | ✅ |
@@ -191,17 +215,52 @@ docs/
 |------|------|
 | 01-product | 4 |
 | 02-business | 1 |
-| 03-application | 5 |
+| 03-application | **17** |
 | 04-technology | 10 |
 | 05-data | 6 |
 | 06-development | 5 |
 | 07-api | 1 |
 | 08-operations | 3 |
-| 09-project/01-process | 3 |
-| 09-project/02-planning | 8 |
+| 09-project | 11 |
 | 10-reviews | 12 |
 | 11-tasks | 7 |
-| **总计** | **65** |
+| **总计** | **77** |
+
+---
+
+## 模块设计完成度
+
+### 核心业务层 (6个) ✅
+
+| 模块 | 文档 | 状态 |
+|------|------|------|
+| 需求管理 | DEMAND_MANAGEMENT_DESIGN.md | ✅ |
+| BOM管理 | BOM_MANAGEMENT_DESIGN.md | ✅ |
+| 库存管理 | INVENTORY_MANAGEMENT_DESIGN.md | ✅ |
+| MRP计算 | MRP_CALCULATION_DESIGN.md | ✅ |
+| 采购管理 | PURCHASE_MANAGEMENT_DESIGN.md | ✅ |
+| 生产管理 | PRODUCTION_MANAGEMENT_DESIGN.md | ✅ |
+
+### 智能引擎层 (6个) ✅
+
+| 模块 | 文档 | 状态 |
+|------|------|------|
+| LLM理解 | LLM_UNDERSTANDING_DESIGN.md | ✅ |
+| OR求解 | OR_SOLVER_DESIGN.md | ✅ |
+| 预测分析 | PREDICTION_ANALYSIS_DESIGN.md | ✅ |
+| 异常诊断 | ANOMALY_DIAGNOSIS_DESIGN.md | ✅ |
+| 风险预警 | RISK_WARNING_DESIGN.md | ✅ |
+| 影响分析 | IMPACT_ANALYSIS_DESIGN.md | ✅ |
+
+### Enterprise扩展 (5个) ✅
+
+| 模块 | 文档 | 状态 |
+|------|------|------|
+| 审批流 | APPROVAL_FLOW_DESIGN.md | ✅ |
+| 预算管理 | BUDGET_MODULE_DESIGN.md | ✅ |
+| DRP配送 | DRP_MODULE_DESIGN.md | ✅ |
+| 移动端 | MOBILE_APP_DESIGN.md | ✅ |
+| Dashboard | DASHBOARD_DESIGN.md | ✅ |
 
 ---
 
@@ -213,6 +272,7 @@ docs/
 | 2.0 | 2026-03-11 | 完整更新 |
 | 3.0 | 2026-03-12 | 新增5个Enterprise模块设计 |
 | 4.0 | 2026-03-12 | 目录结构整理完成 |
+| 5.0 | 2026-03-12 | 补充12个核心模块设计 |
 
 ---
 
