@@ -8,33 +8,26 @@
         <artifactId>aimrp</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>aimrp-item</artifactId>
-    <packaging>jar</packaging>
-    <name>AI MRP Item</name>
-    <description>物料主数据模块</description>
+
+    <artifactId>aimrp-mps</artifactId>
+    <name>aimrp-mps</name>
+    <description>MPS 主生产计划模块</description>
+
     <dependencies>
         <dependency>
             <groupId>com.aimrp</groupId>
             <artifactId>aimrp-common</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aimrp</groupId>
+            <artifactId>aimrp-demand</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <groupId>com.aimrp</groupId>
+            <artifactId>aimrp-mrp</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

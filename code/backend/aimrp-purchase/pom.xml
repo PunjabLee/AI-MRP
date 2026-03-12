@@ -7,7 +7,8 @@
     <name>AI MRP Purchase</name>
     <description>采购管理模块</description>
     <dependencies>
-        <dependency><groupId>com.aimrp</groupId><artifactId>aimrp-common</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>com.aimrp</groupId><artifactId>aimrp-common</artifactId>
+            <version>${project.version}</version><version>${project.version}</version></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
         <dependency><groupId>com.baomidou</groupId><artifactId>mybatis-plus-spring-boot3-starter</artifactId></dependency>
         <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId></dependency>

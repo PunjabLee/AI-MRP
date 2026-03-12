@@ -9,33 +9,15 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>aimrp-bom</artifactId>
-    <packaging>jar</packaging>
-    <name>AI MRP BOM</name>
-    <description>BOM管理模块</description>
+    <artifactId>aimrp-integration</artifactId>
+    <name>aimrp-integration</name>
+    <description>集成模块</description>
 
     <dependencies>
         <dependency>
             <groupId>com.aimrp</groupId>
             <artifactId>aimrp-common</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <!-- Spring Cloud Feign -->

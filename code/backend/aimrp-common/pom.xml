@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>aimrp-common</artifactId>
+            <version>${project.version}</version>
     <packaging>jar</packaging>
 
     <name>AI MRP Common</name>

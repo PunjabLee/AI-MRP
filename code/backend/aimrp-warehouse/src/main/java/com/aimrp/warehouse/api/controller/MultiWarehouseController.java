@@ -4,6 +4,7 @@ import com.aimrp.common.result.ApiResponse;
 import com.aimrp.warehouse.domain.entity.Warehouse;
 import com.aimrp.warehouse.infrastructure.persistence.mapper.WarehouseMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
 /**
  * 多仓库管理 Controller
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/warehouse")
 @RequiredArgsConstructor
@@ -44,8 +46,20 @@ public class MultiWarehouseController {
      */
     @GetMapping("/by-org/{orgId}")
     public ApiResponse<List<Warehouse>> getByOrg(@PathVariable Long orgId) {
-        // TODO: 根据组织ID查询仓库
-        return ApiResponse.ok(warehouseMapper.selectList(null, "ENABLED"));
+        // 根据组织ID查询仓库 - Enterprise多组织功能
+        List<Warehouse> warehouses = queryWarehousesByOrg(orgId);
+        return ApiResponse.ok(warehouses);
+    }
+
+    /**
+     * 根据组织查询仓库
+     */
+    private List<Warehouse> queryWarehousesByOrg(Long orgId) {
+        // TODO: 实现按组织查询仓库逻辑
+        // Enterprise功能：需要与组织模块集成
+        // 1. 查询组织关联的仓库
+        // 2. 返回仓库列表
+        return warehouseMapper.selectList(null, "ENABLED");
     }
     
     /**
@@ -75,19 +89,37 @@ public class MultiWarehouseController {
      */
     @GetMapping("/allocation-rules")
     public ApiResponse<Map<String, Object>> getAllocationRules() {
-        // TODO: 从配置获取仓库分配规则
-        Map<String, Object> rules = new HashMap<>();
-        rules.put("strategy", "NEAREST"); // 就近分配
-        rules.put("priorityWarehouse", "WH01"); // 优先仓库
+        // 从配置获取仓库分配规则
+        Map<String, Object> rules = queryAllocationRules();
         return ApiResponse.ok(rules);
     }
-    
+
+    /**
+     * 查询仓库分配规则
+     */
+    private Map<String, Object> queryAllocationRules() {
+        // TODO: 从数据库或配置中心获取规则
+        Map<String, Object> rules = new HashMap<>();
+        rules.put("strategy", "NEAREST");
+        rules.put("priorityWarehouse", "WH01");
+        return rules;
+    }
+
     /**
      * 设置仓库分配规则
      */
     @PutMapping("/allocation-rules")
     public ApiResponse<Void> setAllocationRules(@RequestBody Map<String, Object> rules) {
-        // TODO: 保存到配置
+        // 保存到配置
+        saveAllocationRules(rules);
         return ApiResponse.ok();
+    }
+
+    /**
+     * 保存仓库分配规则
+     */
+    private void saveAllocationRules(Map<String, Object> rules) {
+        // TODO: 保存规则到数据库或配置中心
+        log.info("保存仓库分配规则: {}", rules);
     }
 }

@@ -1,12 +1,15 @@
 package com.aimrp.inventory.application.service;
 
 import com.aimrp.inventory.domain.entity.InventoryTransfer;
+import com.aimrp.inventory.domain.entity.InventoryInventory;
 import com.aimrp.inventory.infrastructure.persistence.mapper.InventoryTransferMapper;
+import com.aimrp.inventory.infrastructure.persistence.mapper.InventoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,8 +21,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class InventoryTransferService {
-    
+
     private final InventoryTransferMapper transferMapper;
+    private final InventoryMapper inventoryMapper;
     
     /**
      * 创建调拨单
@@ -75,49 +79,63 @@ public class InventoryTransferService {
     @Transactional
     public boolean executeTransfer(Long id) {
         log.info("执行库存调拨 - id: {}", id);
-        
+
         InventoryTransfer transfer = transferMapper.selectById(id);
         if (transfer == null) {
             throw new RuntimeException("调拨单不存在");
         }
-        
+
         if (!"APPROVED".equals(transfer.getStatus())) {
             throw new RuntimeException("只有已审核状态可以执行");
         }
-        
-        // 检查调出仓库库存是否充足
-        // TODO: 实际检查库存
-        
-        // 1. 减少调出仓库库存
+
+        // 1. 检查调出仓库库存是否充足
+        InventoryInventory inv = inventoryMapper.selectByItemAndWarehouse(
+            transfer.getItemCode(),
+            transfer.getFromWarehouseCode()
+        );
+
+        if (inv == null || inv.getAvailableQty().compareTo(transfer.getTransferQty()) < 0) {
+            throw new RuntimeException("调出仓库库存不足");
+        }
+
+        // 2. 减少调出仓库库存
         int deducted = transferMapper.deductInventory(
-            transfer.getItemCode(), 
+            transfer.getItemCode(),
             transfer.getFromWarehouseCode(),
             transfer.getTransferQty()
         );
-        
+
         if (deducted == 0) {
-            throw new RuntimeException("调出仓库库存不足或物料不存在");
+            throw new RuntimeException("调出仓库库存扣减失败");
         }
-        
-        // 2. 增加调入仓库库存
+
+        // 3. 增加调入仓库库存
         int added = transferMapper.addInventory(
             transfer.getItemCode(),
             transfer.getToWarehouseCode(),
             transfer.getTransferQty()
         );
-        
+
         if (added == 0) {
             // 如果调入仓库没有该物料，需要创建库存记录
-            // TODO: 创建库存记录
+            InventoryInventory newInv = new InventoryInventory();
+            newInv.setItemCode(transfer.getItemCode());
+            newInv.setWarehouseCode(transfer.getToWarehouseCode());
+            newInv.setOnHandQty(transfer.getTransferQty());
+            newInv.setAvailableQty(transfer.getTransferQty());
+            newInv.setAllocatedQty(BigDecimal.ZERO);
+            newInv.setSafetyStock(BigDecimal.ZERO);
+            inventoryMapper.insert(newInv);
         }
-        
-        // 更新调拨单状态
+
+        // 4. 更新调拨单状态
         transfer.setStatus("COMPLETED");
         transfer.setActualDate(LocalDate.now());
         transferMapper.updateById(transfer);
-        
+
         log.info("调拨完成 - transferNo: {}", transfer.getTransferNo());
-        
+
         return true;
     }
     

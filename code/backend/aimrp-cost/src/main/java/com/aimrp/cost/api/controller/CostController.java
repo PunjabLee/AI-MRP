@@ -6,6 +6,7 @@ import com.aimrp.cost.infrastructure.persistence.mapper.CostElementMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,15 +91,64 @@ public class CostController {
     @PostMapping("/calculate")
     public ApiResponse<Map<String, Object>> calculate(@RequestBody Map<String, Object> params) {
         String itemCode = (String) params.get("itemCode");
-        
-        // TODO: 根据BOM和成本要素计算产品成本
+        BigDecimal quantity = params.get("quantity") != null
+            ? new BigDecimal(params.get("quantity").toString()) : BigDecimal.ONE;
+
+        // 根据BOM和成本要素计算产品成本
+        Map<String, Object> result = calculateProductCost(itemCode, quantity);
+
+        return ApiResponse.ok(result);
+    }
+
+    /**
+     * 计算产品成本
+     * 根据BOM结构和成本要素计算
+     */
+    private Map<String, Object> calculateProductCost(String itemCode, BigDecimal quantity) {
         Map<String, Object> result = new HashMap<>();
         result.put("itemCode", itemCode);
-        result.put("materialCost", 0);
-        result.put("laborCost", 0);
-        result.put("overheadCost", 0);
-        result.put("totalCost", 0);
-        
-        return ApiResponse.ok(result);
+        result.put("quantity", quantity);
+
+        // 1. 获取物料成本 - 通过BOM展开计算
+        BigDecimal materialCost = calculateMaterialCost(itemCode, quantity);
+        result.put("materialCost", materialCost);
+
+        // 2. 获取人工成本
+        BigDecimal laborCost = calculateLaborCost(itemCode, quantity);
+        result.put("laborCost", laborCost);
+
+        // 3. 获取制造费用
+        BigDecimal overheadCost = calculateOverheadCost(itemCode, quantity);
+        result.put("overheadCost", overheadCost);
+
+        // 4. 计算总成本
+        BigDecimal totalCost = materialCost.add(laborCost).add(overheadCost);
+        result.put("totalCost", totalCost);
+        result.put("unitCost", totalCost.divide(quantity, 2, java.math.RoundingMode.HALF_UP));
+
+        return result;
+    }
+
+    private BigDecimal calculateMaterialCost(String itemCode, BigDecimal quantity) {
+        // TODO: 通过BOM展开计算物料成本
+        // 1. 展开BOM获取所有子物料
+        // 2. 查询每个物料的单价
+        // 3. 汇总计算
+        return BigDecimal.ZERO;
+    }
+
+    private BigDecimal calculateLaborCost(String itemCode, BigDecimal quantity) {
+        // TODO: 根据工艺路线计算人工成本
+        // 1. 获取物料的工艺路线
+        // 2. 获取每个工序的标准工时
+        // 3. 获取人工费率
+        return BigDecimal.ZERO;
+    }
+
+    private BigDecimal calculateOverheadCost(String itemCode, BigDecimal quantity) {
+        // TODO: 根据制造费用分摊规则计算
+        // 1. 获取制造费用分摊率
+        // 2. 根据分摊基数（人工工时/机器工时）计算
+        return BigDecimal.ZERO;
     }
 }

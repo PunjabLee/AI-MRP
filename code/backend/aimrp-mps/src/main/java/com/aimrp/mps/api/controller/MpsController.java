@@ -6,6 +6,8 @@ import com.aimrp.mps.infrastructure.persistence.mapper.MpsPlanMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,14 +96,49 @@ public class MpsController {
     
     /**
      * 生成MPS建议
+     * 根据销售订单和预测生成主生产计划建议
      */
     @GetMapping("/suggestions")
     public ApiResponse<Map<String, Object>> getSuggestions() {
-        // TODO: 根据销售订单和预测生成MPS建议
+        // 根据销售订单和预测生成MPS建议
+        List<Map<String, Object>> suggestions = generateMpsSuggestions();
+
         Map<String, Object> result = new HashMap<>();
-        result.put("list", List.of());
-        result.put("total", 0);
-        
+        result.put("list", suggestions);
+        result.put("total", suggestions.size());
+
         return ApiResponse.ok(result);
+    }
+
+    /**
+     * 生成MPS建议
+     * 1. 获取所有销售订单需求
+     * 2. 获取需求预测数据
+     * 3. 合并计算总需求
+     * 4. 根据MPS规则生成建议
+     */
+    private List<Map<String, Object>> generateMpsSuggestions() {
+        // TODO: 实现完整的MPS建议生成逻辑
+        // 1. 查询销售订单
+        // 2. 查询需求预测
+        // 3. 需求合并
+        // 4. 批量计算
+        // 5. 生成建议
+
+        List<Map<String, Object>> suggestions = new ArrayList<>();
+
+        // 模拟数据
+        Map<String, Object> suggestion = new HashMap<>();
+        suggestion.put("id", 1L);
+        suggestion.put("itemCode", "FG001");
+        suggestion.put("itemName", "成品001");
+        suggestion.put("suggestedQty", 1000);
+        suggestion.put("dueDate", LocalDate.now().plusDays(30));
+        suggestion.put("priority", 1);
+        suggestion.put("sourceType", "ORDER");
+        suggestion.put("sourceNo", "SO20260310001");
+        suggestions.add(suggestion);
+
+        return suggestions;
     }
 }

@@ -106,7 +106,14 @@
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
             </dependency>
-            
+
+            <!-- Spring Cloud Feign -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>4.1.0</version>
+            </dependency>
+
             <!-- Test -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -155,7 +162,6 @@
     <!-- 模块列表 -->
     <modules>
         <module>aimrp-common</module>
-        <module>aimrp-core</module>
         <module>aimrp-demand</module>
         <module>aimrp-forecast</module>
         <module>aimrp-bom</module>
@@ -164,12 +170,22 @@
         <module>aimrp-purchase</module>
         <module>aimrp-production</module>
         <module>aimrp-risk</module>
-        <module>aimrp-sandbox</module>
         <module>aimrp-whatif</module>
         <module>aimrp-conversation</module>
         <module>aimrp-system</module>
         <module>aimrp-notification</module>
         <module>aimrp-api</module>
+        <module>aimrp-supplier</module>
+        <module>aimrp-item</module>
+        <module>aimrp-org</module>
+        <module>aimrp-warehouse</module>
+        <module>aimrp-mps</module>
+        <module>aimrp-supplier-portal</module>
+        <module>aimrp-report</module>
+        <module>aimrp-cost</module>
+        <module>aimrp-equipment</module>
+        <module>aimrp-quality</module>
+        <module>aimrp-integration</module>
     </modules>
 
 </project>

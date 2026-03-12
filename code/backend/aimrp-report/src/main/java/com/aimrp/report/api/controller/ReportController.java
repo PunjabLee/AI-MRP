@@ -92,17 +92,62 @@ public class ReportController {
     @PostMapping("/execute/{id}")
     public ApiResponse<Map<String, Object>> execute(@PathVariable Long id) {
         ReportConfig config = reportConfigMapper.selectById(id);
-        
-        // TODO: 根据数据源执行报表查询
+
+        // 根据数据源执行报表查询
+        Map<String, Object> result = executeReportByDataSource(config);
+
+        return ApiResponse.ok(result);
+    }
+
+    /**
+     * 根据数据源类型执行报表
+     */
+    private Map<String, Object> executeReportByDataSource(ReportConfig config) {
         Map<String, Object> result = new HashMap<>();
         result.put("reportCode", config.getReportCode());
         result.put("reportName", config.getReportName());
-        result.put("data", List.of());
-        result.put("total", 0);
-        
-        return ApiResponse.ok(result);
+        result.put("dataSource", config.getDataSource());
+
+        // 根据数据源类型查询数据
+        List<Map<String, Object>> data = switch (config.getDataSource()) {
+            case "DEMAND" -> queryDemandReport(config);
+            case "INVENTORY" -> queryInventoryReport(config);
+            case "PURCHASE" -> queryPurchaseReport(config);
+            case "PRODUCTION" -> queryProductionReport(config);
+            case "MRP" -> queryMrpReport(config);
+            default -> List.of();
+        };
+
+        result.put("data", data);
+        result.put("total", data.size());
+        return result;
     }
-    
+
+    private List<Map<String, Object>> queryDemandReport(ReportConfig config) {
+        // TODO: 实际实现需求报表查询
+        return List.of();
+    }
+
+    private List<Map<String, Object>> queryInventoryReport(ReportConfig config) {
+        // TODO: 实际实现库存报表查询
+        return List.of();
+    }
+
+    private List<Map<String, Object>> queryPurchaseReport(ReportConfig config) {
+        // TODO: 实际实现采购报表查询
+        return List.of();
+    }
+
+    private List<Map<String, Object>> queryProductionReport(ReportConfig config) {
+        // TODO: 实际实现生产报表查询
+        return List.of();
+    }
+
+    private List<Map<String, Object>> queryMrpReport(ReportConfig config) {
+        // TODO: 实际实现MRP报表查询
+        return List.of();
+    }
+
     /**
      * 获取报表数据（通用接口）
      */
@@ -110,13 +155,48 @@ public class ReportController {
     public ApiResponse<Map<String, Object>> getReportData(
             @RequestParam String reportType,
             @RequestParam(required = false) Map<String, Object> params) {
-        
-        // TODO: 根据报表类型查询相应数据
+
+        // 根据报表类型查询相应数据
+        List<Map<String, Object>> data = queryReportByType(reportType, params);
+
         Map<String, Object> result = new HashMap<>();
         result.put("reportType", reportType);
-        result.put("data", List.of());
-        result.put("total", 0);
-        
+        result.put("data", data);
+        result.put("total", data.size());
+
         return ApiResponse.ok(result);
+    }
+
+    /**
+     * 根据报表类型查询数据
+     */
+    private List<Map<String, Object>> queryReportByType(String reportType, Map<String, Object> params) {
+        return switch (reportType) {
+            case "MRP_SUGGESTION" -> queryMrpSuggestions(params);
+            case "INVENTORY_ALERT" -> queryInventoryAlerts(params);
+            case "SUPPLIER_PERFORMANCE" -> querySupplierPerformance(params);
+            case "PRODUCTION_EFFICIENCY" -> queryProductionEfficiency(params);
+            default -> List.of();
+        };
+    }
+
+    private List<Map<String, Object>> queryMrpSuggestions(Map<String, Object> params) {
+        // TODO: 实现MRP建议查询
+        return List.of();
+    }
+
+    private List<Map<String, Object>> queryInventoryAlerts(Map<String, Object> params) {
+        // TODO: 实现库存预警查询
+        return List.of();
+    }
+
+    private List<Map<String, Object>> querySupplierPerformance(Map<String, Object> params) {
+        // TODO: 实现供应商绩效查询
+        return List.of();
+    }
+
+    private List<Map<String, Object>> queryProductionEfficiency(Map<String, Object> params) {
+        // TODO: 实现生产效率查询
+        return List.of();
     }
 }
