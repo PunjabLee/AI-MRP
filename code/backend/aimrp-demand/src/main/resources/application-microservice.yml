@@ -20,9 +20,40 @@ spring:
         namespace: ${NACOS_NAMESPACE:production}
         group: ${NACOS_GROUP:AIMRP_GROUP}
         file-extension: yml
+    # Sentinel 熔断降级
+    sentinel:
+      enabled: true
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:localhost:8080}
+      eager: true
+
+# Sentinel 配置
+sentinel:
+  # 流控规则配置
+  flow:
+    enabled: true
+  # 熔断规则配置
+  circuitbreaker:
+    enabled: true
+  # 参数配置
+  config:
+    # 取消控制台懒加载
+    eager: true
 
 # 微服务模式配置
 aimrp:
   microservice:
     enabled: true
     service-name: ${spring.application.name}
+
+# Actuator 配置 (Sentinel)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,sentinel
+  endpoint:
+    health:
+      show-details: always
+    sentinel:
+      enabled: true
