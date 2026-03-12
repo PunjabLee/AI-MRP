@@ -1,0 +1,59 @@
+# 微服务模式配置
+spring:
+  cloud:
+    discovery:
+      enabled: true
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:production}
+        group: ${NACOS_GROUP:AIMRP_GROUP}
+        weight: 1
+      config:
+        enabled: true
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:production}
+        group: ${NACOS_GROUP:AIMRP_GROUP}
+        file-extension: yml
+    sentinel:
+      enabled: true
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:localhost:8080}
+      eager: true
+
+sentinel:
+  flow:
+    enabled: true
+  circuitbreaker:
+    enabled: true
+
+seata:
+  enabled: true
+  application-id: ${spring.application.name}
+  tx-service-group: ${SEATA_TX_GROUP:my_test_tx_group}
+  service:
+    vgroup-mapping:
+      ${SEATA_TX_GROUP:my_test_tx_group}: ${SEATA_SERVER:default}
+    grouplist:
+      default: ${SEATA_SERVER_ADDR:127.0.0.1:8091}
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+      namespace: ${NACOS_NAMESPACE:production}
+      group: ${NACOS_GROUP:AIMRP_GROUP}
+
+aimrp:
+  microservice:
+    enabled: true
+    service-name: ${spring.application.name}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,sentinel
+  endpoint:
+    health:
+      show-details: always

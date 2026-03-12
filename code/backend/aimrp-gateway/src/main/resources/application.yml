@@ -35,6 +35,14 @@ spring:
           filters:
             - StripPrefix=1
 
+        # 组织架构服务
+        - id: aimrp-org
+          uri: lb://aimrp-org
+          predicates:
+            - Path=/api/org/**
+          filters:
+            - StripPrefix=1
+
         # 需求服务
         - id: aimrp-demand
           uri: lb://aimrp-demand
@@ -72,6 +80,14 @@ spring:
           uri: lb://aimrp-drp
           predicates:
             - Path=/api/drp/**
+          filters:
+            - StripPrefix=1
+
+        # 仓库服务
+        - id: aimrp-warehouse
+          uri: lb://aimrp-warehouse
+          predicates:
+            - Path=/api/warehouse/**
           filters:
             - StripPrefix=1
 
