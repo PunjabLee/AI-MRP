@@ -13,9 +13,9 @@ AIGC:
 -->
 # AI MRP 智能物料需求计划系统
 
-> **项目代号**：AI-MRP  
-> **版本**：v1.0.0-Pro  
-> **创建日期**：2026-03-08
+> **项目代号**：AI-MRP
+> **版本**：v1.0.0-Enterprise
+> **更新日期**：2026-03-12
 
 ---
 
@@ -322,25 +322,29 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 
 **交付**：智能排程 + 语音交互 + 风险预警 + 端到端集成
 
-### Phase 3：Enterprise 企业级
+### Phase 3：Enterprise 企业级 ✅ 已完成
 
 #### 已完成模块 ✅
-- [x] **MPS 主生产计划** - aimrp-mps
-- [x] **多仓库管理** - aimrp-warehouse
-- [x] **组织架构管理** - aimrp-org
+- [x] **MPS 主生产计划** - aimrp-mps (8086)
+- [x] **多仓库管理** - aimrp-warehouse (8091)
+- [x] **组织架构管理** - aimrp-org (8090)
 - [x] **成本管理** - aimrp-cost
 - [x] **设备管理** - aimrp-equipment
 - [x] **质量管理** - aimrp-quality
-- [x] **报表模块** - aimrp-report
-- [x] **供应商门户** - aimrp-supplier-portal
+- [x] **报表模块** - aimrp-report (8093)
+- [x] **供应商门户** - aimrp-supplier-portal (8092)
+- [x] **DRP 配送需求计划** - aimrp-drp (8087)
+- [x] **ERP 对接** - aimrp-integration (8094)
+- [x] **AI 智能体编排** - aimrp-conversation (8095)
+- [x] **AI 决策可解释性** - DecisionExplanationService
 
-#### 待开发模块 ⏳
-- [ ] 微服务架构改造 (Nacos/Spring Cloud Gateway)
-- [ ] 分布式事务
-- [ ] 多工厂协同
-- [ ] DRP 配送需求计划
-- [ ] 供应商协同平台增强
-- [ ] 高级数据分析
+#### 微服务架构 ✅ 已完成
+- [x] Nacos 注册/配置中心
+- [x] Spring Cloud Gateway (8080)
+- [x] Feign 跨模块调用
+- [x] SkyWalking 链路追踪
+- [x] Sentinel 熔断降级
+- [x] Seata 分布式事务
 
 ### 迭代规划
 
@@ -349,11 +353,11 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 | 1 | 4周 | Enterprise基础 (MPS/仓库/组织) | ✅ |
 | 2 | 4周 | 生产增强 (设备/质量) | ✅ |
 | 3 | 4周 | 财务成本 (成本/报表) | ✅ |
-| 4 | 4周 | 预算/DRP/审批流 | ⏳ |
-| 5 | 4周 | Dashboard/移动端 | ⏳ |
-| 6 | 4周 | 微服务架构 | ⏳ |
+| 4 | 4周 | 微服务架构/DRP/Dashboard | ✅ |
+| 5 | 4周 | 预算/审批流 | ⏳ |
+| 6 | 4周 | 移动端 | ⏳ |
 
-**当前状态**：Enterprise 基础功能已完成，进阶功能规划中
+**当前状态**：Enterprise 微服务架构已完成
 
 ---
 
@@ -363,17 +367,17 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 |------|------|------|------|----------|
 | **v1.0.0-MVP** | Web 应用 | 核心 MRP 流程 | ✅ 已发布 | 2026-01 |
 | **v1.0.0-Pro** | Web 应用 | 智能化能力 | ✅ 已发布 | 2026-03 |
-| **v1.0.0-Enterprise** | Web 应用 | 企业级能力 | ⏳ 开发中 | - |
+| **v1.0.0-Enterprise** | 微服务 | 企业级能力 | ✅ 已发布 | 2026-03 |
 
 ### 里程碑路线图
 
 | 里程碑 | 预计日期 | 说明 |
 |--------|----------|------|
-| Enterprise Phase 1 | 2026-03 | MPS/仓库/组织/设备/质量 |
-| Enterprise Phase 2 | 2026-05 | 预算/DRP/审批流 |
-| Enterprise Phase 3 | 2026-07 | Dashboard/移动端 |
+| 微服务架构 | 2026-03-12 | ✅ 已完成 |
+| Enterprise Phase 1 | 2026-03 | MPS/仓库/组织/设备/质量 ✅ |
+| Enterprise Phase 2 | 2026-05 | 预算/审批流 |
+| Enterprise Phase 3 | 2026-07 | 移动端 |
 | v2.0.0-Enterprise | 2026-09 | 完整企业版 |
-| 微服务架构 | 2026-12 | 分布式架构 |
 
 ### v1.0.0-Pro 完成度
 
@@ -387,16 +391,33 @@ min TotalCost = Σ(库存持有成本 + 缺货成本 + 换线成本 + 运输成�
 
 ### Enterprise 模块清单
 
-| 模块 | 功能 | 代码文件数 | 状态 |
-|------|------|------------|------|
-| aimrp-mps | MPS 主生产计划 | 3 | ✅ 已开发 |
-| aimrp-warehouse | 多仓库管理 | 8 | ✅ 已开发 |
-| aimrp-org | 组织架构管理 | 7 | ✅ 已开发 |
-| aimrp-cost | 成本管理 | 3 | ✅ 已开发 |
-| aimrp-equipment | 设备管理 | 8 | ✅ 已开发 |
-| aimrp-quality | 质量管理 | 8 | ✅ 已开发 |
-| aimrp-report | 报表模块 | 3 | ✅ 已开发 |
-| aimrp-supplier-portal | 供应商门户 | 2 | ✅ 已开发 |
+| 模块 | 功能 | 端口 | 状态 |
+|------|------|------|------|
+| aimrp-mps | MPS 主生产计划 | 8086 | ✅ |
+| aimrp-drp | DRP 配送计划 | 8087 | ✅ |
+| aimrp-warehouse | 多仓库管理 | 8091 | ✅ |
+| aimrp-org | 组织架构管理 | 8090 | ✅ |
+| aimrp-cost | 成本管理 | - | ✅ |
+| aimrp-equipment | 设备管理 | - | ✅ |
+| aimrp-quality | 质量管理 | - | ✅ |
+| aimrp-report | 报表模块 | 8093 | ✅ |
+| aimrp-supplier-portal | 供应商门户 | 8092 | ✅ |
+| aimrp-integration | ERP 对接 | 8094 | ✅ |
+| aimrp-conversation | AI 智能体编排 | 8095 | ✅ |
+
+### 微服务架构清单
+
+| 服务名 | 端口 | 说明 |
+|--------|------|------|
+| aimrp-gateway | 8080 | API 网关 |
+| aimrp-mps | 8086 | 主生产计划 |
+| aimrp-drp | 8087 | 配送需求计划 |
+| aimrp-org | 8090 | 组织架构管理 |
+| aimrp-warehouse | 8091 | 多仓库支持 |
+| aimrp-supplier-portal | 8092 | 供应商门户 |
+| aimrp-report | 8093 | 运营仪表盘 |
+| aimrp-integration | 8094 | ERP 对接 |
+| aimrp-conversation | 8095 | AI 智能体编排 |
 
 ---
 
@@ -519,6 +540,19 @@ AI-MRP/
 | `aimrp-notification` | 通知模块 | `/api/notify/*` | ✅ |
 | `aimrp-integration` | Java-Python集成网关 | `/api/integration/*` | ✅ |
 
+### Enterprise 微服务模块
+
+| 模块 | 功能 | 端口 | 状态 |
+|------|------|------|------|
+| `aimrp-mps` | MPS 主生产计划 | 8086 | ✅ |
+| `aimrp-drp` | DRP 配送计划 | 8087 | ✅ |
+| `aimrp-org` | 组织架构管理 | 8090 | ✅ |
+| `aimrp-warehouse` | 多仓库支持 | 8091 | ✅ |
+| `aimrp-supplier-portal` | 供应商门户 | 8092 | ✅ |
+| `aimrp-report` | 运营仪表盘 | 8093 | ✅ |
+| `aimrp-integration` | ERP 对接 | 8094 | ✅ |
+| `aimrp-conversation` | AI 智能体编排 | 8095 | ✅ |
+
 ### Python AI Service API
 
 | API | 功能 | 状态 |
@@ -535,16 +569,13 @@ AI-MRP/
 | `GET /metrics/dashboard` | 监控仪表盘 | ✅ |
 | `POST /integration/invoke` | 统一调用入口 | ✅ |
 
-### 待开发模块（Enterprise）
+### 待开发模块
 
 | 模块 | 功能 |
 |------|------|
-| `aimrp-organization` | 组织架构管理 |
-| `aimrp-multi-warehouse` | 多仓库支持 |
-| `aimrp-mps` | MPS 主生产计划 |
-| `aimrp-drp` | DRP 配送需求计划 |
-| `aimrp-supplier-portal` | 供应商门户 |
-| `aimrp-report` | 报表模块 |
+| `aimrp-budget` | 预算管理 |
+| `aimrp-approval` | 审批流 |
+| 移动端 | Mobile App |
 
 ### API 响应规范
 
@@ -566,15 +597,16 @@ AI-MRP/
 
 ```
 master           → v1.0.0-MVP (已发布)
-release/mvp-1.0  → MVP 发布分支
 release/pro      → Pro 发布分支 (v1.0.0-Pro) ✅
-develop          → Enterprise 开发中
+release/enterprise → Enterprise 发布分支 (v1.0.0-Enterprise) ✅
+develop          → 开发主分支
 ```
 
 | 分支 | 用途 | Tag |
 |------|------|-----|
 | `master` | 生产发布 | v1.0.0-MVP |
 | `release/pro` | Pro发布 | v1.0.0-Pro |
+| `release/enterprise` | Enterprise发布 | v1.0.0-Enterprise |
 | `develop` | 开发主分支 | - |
 
 ---
