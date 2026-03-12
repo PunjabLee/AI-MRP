@@ -91,6 +91,30 @@ spring:
           filters:
             - StripPrefix=1
 
+        # 供应商门户服务
+        - id: aimrp-supplier-portal
+          uri: lb://aimrp-supplier-portal
+          predicates:
+            - Path=/api/supplier-portal/**
+          filters:
+            - StripPrefix=1
+
+        # 报表服务
+        - id: aimrp-report
+          uri: lb://aimrp-report
+          predicates:
+            - Path=/api/report/**
+          filters:
+            - StripPrefix=1
+
+        # 集成服务 (ERP对接)
+        - id: aimrp-integration
+          uri: lb://aimrp-integration
+          predicates:
+            - Path=/api/integration/**
+          filters:
+            - StripPrefix=1
+
         # 采购服务
         - id: aimrp-purchase
           uri: lb://aimrp-purchase

@@ -1,0 +1,30 @@
+# AI MRP 集成服务配置
+spring:
+  application:
+    name: aimrp-integration
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:standalone}
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:aimrp}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  config:
+    import: optional:file:./application-${spring.profiles.active}.yml
+
+server:
+  port: ${SERVER_PORT:8094}
+
+spring:
+  cloud:
+    discovery:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
