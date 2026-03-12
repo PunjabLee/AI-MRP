@@ -140,7 +140,7 @@ docs/
 
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
-| 1 | `DEPLOYMENT_GUIDE.md` | 部署手册(Docker/K8s) | ✅ |
+| 1 | `DEPLOYMENT_GUIDE.md` | 部署手册(Docker/K8s/微服务) | ✅ |
 | 2 | `OPS_GUIDE.md` | 运维手册 | ✅ |
 | 3 | `TROUBLESHOOTING_GUIDE.md` | 故障排查手册 | ✅ |
 

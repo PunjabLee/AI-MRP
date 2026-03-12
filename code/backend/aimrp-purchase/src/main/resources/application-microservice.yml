@@ -1,0 +1,23 @@
+# 微服务模式配置
+spring:
+  cloud:
+    discovery:
+      enabled: true
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:production}
+        group: ${NACOS_GROUP:AIMRP_GROUP}
+        weight: 1
+      config:
+        enabled: true
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:production}
+        group: ${NACOS_GROUP:AIMRP_GROUP}
+        file-extension: yml
+
+aimrp:
+  microservice:
+    enabled: true
+    service-name: ${spring.application.name}

@@ -1,7 +1,8 @@
 # AI MRP 部署手册
 
-> **版本**: 1.0  
-> **日期**: 2026-03-11
+> **版本**: 1.1
+> **日期**: 2026-03-12
+> **更新**: 新增微服务部署支持
 
 ---
 
@@ -435,7 +436,179 @@ gunzip -c aimrp_20240311.sql.gz | psql -U aimrp -d aimrp
 
 ---
 
-## 九、运维命令
+## 九、微服务部署
+
+### 9.1 架构概述
+
+AI MRP 支持两种运行模式：
+- **单体模式 (standalone)**: 默认模式，所有模块在同一个 JVM 中运行
+- **微服务模式 (microservice)**: 注册到 Nacos，支持服务发现和负载均衡
+
+```
+┌─────────────────────────────────────────┐
+│           aimrp-gateway                 │
+│        Spring Cloud Gateway             │
+│              端口: 8080                 │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│              aimrp-api                   │
+│         (支持双模式运行)                  │
+│  - standalone: 单体模式 (默认)           │
+│  - microservice: 微服务模式           │
+└─────────────────────────────────────────┘
+```
+
+### 9.2 Nacos 部署
+
+```bash
+# 1. 拉取 Nacos 镜像
+docker pull nacos/nacos-server:v2.2.3
+
+# 2. 启动 Nacos (单机模式)
+docker run -d \
+  --name nacos \
+  -p 8848:8848 \
+  -p 9848:9848 \
+  -e MODE=standalone \
+  -e SPRING_DATASOURCE_PLATFORM=postgres \
+  -e MYSQL_SERVICE_HOST=postgres \
+  -e MYSQL_SERVICE_PORT=5432 \
+  -e MYSQL_SERVICE_DB_NAME=nacos_config \
+  -e MYSQL_SERVICE_USER=nacos \
+  -e MYSQL_SERVICE_PASSWORD=nacos \
+  -v nacos_logs:/home/nacos/logs \
+  nacos/nacos-server:v2.2.3
+
+# 3. 访问 Nacos 控制台
+# http://localhost:8848/nacos
+# 默认账号: nacos / nacos
+```
+
+### 9.3 Gateway 部署
+
+```bash
+# 1. 构建 Gateway 镜像
+cd code/backend
+docker build -t aimrp-gateway:latest -f aimrp-gateway/Dockerfile .
+
+# 2. 启动 Gateway
+docker run -d \
+  --name aimrp-gateway \
+  -p 8080:8080 \
+  -e SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848 \
+  -e SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848 \
+  aimrp-gateway:latest
+
+# 3. 路由规则
+# /api/demand/**    -> aimrp-demand
+# /api/bom/**      -> aimrp-bom
+# /api/inventory/**-> aimrp-inventory
+# /api/mrp/**      -> aimrp-mrp
+# /api/production/** -> aimrp-production
+# /api/purchase/** -> aimrp-purchase
+```
+
+### 9.4 双模式配置
+
+```yaml
+# 单体模式 (默认)
+# java -jar aimrp-api.jar
+spring:
+  profiles:
+    active: standalone
+  cloud:
+    discovery:
+      enabled: false
+
+# 微服务模式
+# java -jar aimrp-api.jar --spring.profiles.active=microservice
+spring:
+  profiles:
+    active: microservice
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: nacos.8848
+        namespace: production
+        group: AIMRP_GROUP
+```
+
+### 9.5 微服务 Docker Compose
+
+```yaml
+# docker-compose-microservice.yml
+version: '3.8'
+
+services:
+  # Nacos
+  nacos:
+    image: nacos/nacos-server:v2.2.3
+    container_name: aimrp-nacos
+    environment:
+      MODE: standalone
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    networks:
+      - aimrp-network
+
+  # Gateway
+  gateway:
+    image: aimrp-gateway:latest
+    container_name: aimrp-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nacos
+    networks:
+      - aimrp-network
+
+  # API 服务 (微服务模式)
+  api:
+    image: aimrp-api:latest
+    container_name: aimrp-api
+    environment:
+      SPRING_PROFILES_ACTIVE: microservice
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+    depends_on:
+      - nacos
+    networks:
+      - aimrp-network
+
+networks:
+  aimrp-network:
+    driver: bridge
+```
+
+### 9.6 服务注册配置
+
+在 Nacos 控制台创建配置 `application-${spring.profiles.active}.yml`：
+
+```yaml
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR}
+        namespace: ${NAMESPACE:production}
+        group: AIMRP_GROUP
+      config:
+        server-addr: ${NACOS_SERVER_ADDR}
+        namespace: ${NAMESPACE:production}
+        group: AIMRP_GROUP
+        file-extension: yml
+        shared-configs:
+          - data-id: datasource.yml
+            group: AIMRP_GROUP
+            refresh: true
+```
+
+---
+
+## 十、运维命令
 
 ```bash
 # 重启服务
@@ -459,4 +632,4 @@ kubectl rollout undo deployment/aimrp-backend -n aimrp
 
 ---
 
-*文档版本: 1.0*
+*文档版本: 1.1*

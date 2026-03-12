@@ -1,0 +1,28 @@
+# 微服务模式配置
+# 使用方式: spring.profiles.active=microservice
+# 需要配合 Nacos 使用
+
+spring:
+  cloud:
+    # 微服务模式启用服务发现
+    discovery:
+      enabled: true
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:production}
+        group: ${NACOS_GROUP:AIMRP_GROUP}
+        weight: 1
+      config:
+        enabled: true
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:production}
+        group: ${NACOS_GROUP:AIMRP_GROUP}
+        file-extension: yml
+
+# 微服务模式配置
+aimrp:
+  microservice:
+    enabled: true
+    service-name: ${spring.application.name}

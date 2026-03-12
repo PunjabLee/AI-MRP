@@ -1,0 +1,5 @@
+# 单体模式配置
+spring:
+  cloud:
+    discovery:
+      enabled: false

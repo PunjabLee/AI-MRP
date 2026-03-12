@@ -1,7 +1,8 @@
 # AI MRP 运维手册
 
-> **版本**: 1.0  
-> **日期**: 2026-03-11
+> **版本**: 1.1
+> **日期**: 2026-03-12
+> **更新**: 新增微服务运维
 
 ---
 
@@ -318,4 +319,74 @@ pg_restore --list /backup/aimrp_latest.dump
 
 ---
 
-*文档版本: 1.0*
+## 九、微服务运维
+
+### 9.1 Nacos 运维
+
+```bash
+# 查看注册服务
+curl http://localhost:8848/nacos/v1/ns/instance/list?serviceName=aimrp-api
+
+# 查看配置列表
+curl http://localhost:8848/nacos/v1/cs/configs?dataId=application.yml&group=AIMRP_GROUP
+
+# 监听配置变化
+curl http://localhost:8848/nacos/v1/cs/configs?dataId=application.yml&group=AIMRP_GROUP&listen=true
+
+# Nacos 健康检查
+curl http://localhost:8848/nacos/v1/console/health/readiness
+curl http://localhost:8848/nacos/v1/console/health/readiness
+```
+
+### 9.2 Gateway 运维
+
+```bash
+# 查看路由状态
+curl http://localhost:8080/actuator/gateway/routes
+
+# 刷新路由
+curl -X POST http://localhost:8080/actuator/gateway/refresh
+
+# 查看全局过滤器
+curl http://localhost:8080/actuator/gateway/globalfilters
+```
+
+### 9.3 服务发现
+
+```bash
+# 服务注册状态检查
+curl http://localhost:8080/actuator/serviceregistry
+
+# 查看服务实例
+curl http://localhost:8848/nacos/v1/ns/instance/list?serviceName=aimrp-api&groupName=AIMRP_GROUP
+
+# 服务下线
+curl -X DELETE http://localhost:8848/nacos/v1/ns/instance?serviceName=aimrp-api&ip=127.0.0.1&port=8080
+```
+
+### 9.4 双模式切换
+
+```bash
+# 单体模式启动 (默认)
+java -jar aimrp-api.jar
+
+# 微服务模式启动
+java -jar aimrp-api.jar --spring.profiles.active=microservice
+
+# 或通过环境变量
+export SPRING_PROFILES_ACTIVE=microservice
+java -jar aimrp-api.jar
+```
+
+### 9.5 微服务故障排查
+
+| 症状 | 可能原因 | 解决方案 |
+|------|----------|----------|
+| 服务无法注册 | Nacos 未启动 | 检查 Nacos 服务状态 |
+| 路由失败 | Gateway 未找到服务 | 检查服务注册状态 |
+| 调用超时 | 网络或服务实例问题 | 检查服务健康状态 |
+| 配置不生效 | Nacos 配置未刷新 | 触发配置刷新 |
+
+---
+
+*文档版本: 1.1*
