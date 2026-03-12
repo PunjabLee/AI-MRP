@@ -31,6 +31,23 @@ sentinel:
   config:
     eager: true
 
+# Seata 分布式事务配置
+seata:
+  enabled: true
+  application-id: ${spring.application.name}
+  tx-service-group: ${SEATA_TX_GROUP:my_test_tx_group}
+  service:
+    vgroup-mapping:
+      ${SEATA_TX_GROUP:my_test_tx_group}: ${SEATA_SERVER:default}
+    grouplist:
+      default: ${SEATA_SERVER_ADDR:127.0.0.1:8091}
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+      namespace: ${NACOS_NAMESPACE:production}
+      group: ${NACOS_GROUP:AIMRP_GROUP}
+
 aimrp:
   microservice:
     enabled: true
