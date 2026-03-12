@@ -1,8 +1,8 @@
 # AI MRP 项目文档清单
 
-> **版本**：6.0  
+> **版本**：7.0  
 > **日期**：2026-03-12  
-> **状态**：已完成模块设计分类
+> **状态**：已完成Reviews和Tasks目录细化
 
 ---
 
@@ -20,12 +20,19 @@ docs/
 ├── 05-data/             # 数据架构 (6)
 ├── 06-development/       # 开发规范 (5)
 ├── 07-api/              # API文档 (1)
-├── 08-operations/       # 运维文档 (3)
+├── 08-operations/        # 运维文档 (3)
 ├── 09-project/          # 项目管理
 │   ├── 01-process/      # 流程规范 (3)
 │   └── 02-planning/     # 规划计划 (8)
 ├── 10-reviews/          # Review报告 (12)
+│   ├── 01-phase-reviews/    # 阶段Review (3)
+│   ├── 02-overall-reviews/  # 综合Review (4)
+│   └── 03-specialized-reviews/ # 专题Review (5)
 ├── 11-tasks/            # 任务清单 (7)
+│   ├── 01-phase-tasks/     # 阶段任务 (2)
+│   ├── 02-tracking/        # 任务追踪 (1)
+│   ├── 03-checklists/      # 检查清单 (2)
+│   └── 04-planning/        # 后续规划 (2)
 └── 99-archive/          # 历史归档
 ```
 
@@ -173,34 +180,63 @@ docs/
 
 ## 十、Review报告 (10-reviews)
 
+### 10-1 阶段Review (01-phase-reviews)
+
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
 | 1 | `MVP_REVIEW.md` | MVP Review报告 | ✅ |
 | 2 | `MVP_PRO_REVIEW.md` | MVP+Pro Review报告 | ✅ |
-| 3 | `COMPREHENSIVE_REVIEW.md` | 全面Review报告 | ✅ |
-| 4 | `COMPREHENSIVE_REVIEW_V2.md` | 全面Review报告V2 | ✅ |
-| 5 | `COMPREHENSIVE_REVIEW_V3.md` | 全面Review报告V3 | ✅ |
-| 6 | `FINAL_REVIEW.md` | 最终Review报告 | ✅ |
-| 7 | `OVERALL_REVIEW.md` | 整体完成度Review | ✅ |
-| 8 | `ARCHITECTURE_REVIEW.md` | 架构Review | ✅ |
-| 9 | `ARCHITECTURE_REVIEW_JAVA.md` | Java架构Review | ✅ |
-| 10 | `CONTROLLER_VO_REVIEW.md` | Controller VO Review | ✅ |
-| 11 | `PRODUCT_REVIEW.md` | 产品Review | ✅ |
-| 12 | `MILESTONE_REVIEW.md` | 里程碑Review | ✅ |
+| 3 | `FINAL_REVIEW.md` | 最终Review报告 | ✅ |
+
+### 10-2 综合Review (02-overall-reviews)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 1 | `COMPREHENSIVE_REVIEW.md` | 全面Review报告 | ✅ |
+| 2 | `COMPREHENSIVE_REVIEW_V2.md` | 全面Review报告V2 | ✅ |
+| 3 | `COMPREHENSIVE_REVIEW_V3.md` | 全面Review报告V3 | ✅ |
+| 4 | `OVERALL_REVIEW.md` | 整体完成度Review | ✅ |
+
+### 10-3 专题Review (03-specialized-reviews)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 1 | `ARCHITECTURE_REVIEW.md` | 架构Review | ✅ |
+| 2 | `ARCHITECTURE_REVIEW_JAVA.md` | Java架构Review | ✅ |
+| 3 | `CONTROLLER_VO_REVIEW.md` | Controller VO Review | ✅ |
+| 4 | `PRODUCT_REVIEW.md` | 产品Review | ✅ |
+| 5 | `MILESTONE_REVIEW.md` | 里程碑Review | ✅ |
 
 ---
 
 ## 十一、任务清单 (11-tasks)
 
+### 11-1 阶段任务 (01-phase-tasks)
+
 | # | 文档 | 说明 | 状态 |
 |---|------|------|------|
 | 1 | `MVP_TASKS.md` | MVP任务清单 | ✅ |
 | 2 | `PRO_TASKS_ANALYSIS.md` | Pro任务分析 | ✅ |
-| 3 | `NEXT_PLAN.md` | 下一步计划 | ✅ |
-| 4 | `NEXT_STEPS.md` | 后续步骤 | ✅ |
-| 5 | `REMAINING_TASKS.md` | 剩余任务 | ✅ |
-| 6 | `TASK_CHECKLIST.md` | 任务检查清单 | ✅ |
-| 7 | `TASK_PRIORITY_CHECKLIST.md` | 任务优先级清单 | ✅ |
+
+### 11-2 任务追踪 (02-tracking)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 1 | `REMAINING_TASKS.md` | 剩余任务 | ✅ |
+
+### 11-3 检查清单 (03-checklists)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 1 | `TASK_CHECKLIST.md` | 任务检查清单 | ✅ |
+| 2 | `TASK_PRIORITY_CHECKLIST.md` | 任务优先级清单 | ✅ |
+
+### 11-4 后续规划 (04-planning)
+
+| # | 文档 | 说明 | 状态 |
+|---|------|------|------|
+| 1 | `NEXT_PLAN.md` | 下一步计划 | ✅ |
+| 2 | `NEXT_STEPS.md` | 后续步骤 | ✅ |
 
 ---
 
@@ -241,6 +277,7 @@ docs/
 | 4.0 | 2026-03-12 | 目录结构整理完成 |
 | 5.0 | 2026-03-12 | 补充12个核心模块设计 |
 | 6.0 | 2026-03-12 | 模块设计分类完成 |
+| 7.0 | 2026-03-12 | Reviews和Tasks目录细化完成 |
 
 ---
 
