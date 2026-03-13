@@ -100,13 +100,13 @@ async def save_model(request: SaveModelRequest):
             version=request.version
         )
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={"model_id": model_id},
             message="模型保存成功"
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"保存模型失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"保存模型失败: {str(e)}")
 
 
 @router.post("/load/{model_id}")
@@ -126,7 +126,7 @@ async def load_model(model_id: str):
         model = store.load_model(model_id)
         
         if model is None:
-            return ApiResponse.bad_request(message=f"模型不存在: {model_id}")
+            return ApiResponse.response_bad_request(message=f"模型不存在: {model_id}")
         
         # 序列化模型
         try:
@@ -142,7 +142,7 @@ async def load_model(model_id: str):
         # 获取元数据
         metadata = store.get_metadata(model_id)
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={
                 "model_id": model_id,
                 "model_data": model_data,
@@ -158,7 +158,7 @@ async def load_model(model_id: str):
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"加载模型失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"加载模型失败: {str(e)}")
 
 
 @router.get("/list")
@@ -205,13 +205,13 @@ async def list_models(
                 "metrics": m.metrics
             })
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={"models": result, "total": len(result)},
             message="获取成功"
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取模型列表失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取模型列表失败: {str(e)}")
 
 
 @router.get("/metadata/{model_id}")
@@ -224,9 +224,9 @@ async def get_model_metadata(model_id: str):
         metadata = store.get_metadata(model_id)
         
         if metadata is None:
-            return ApiResponse.bad_request(message=f"模型不存在: {model_id}")
+            return ApiResponse.response_bad_request(message=f"模型不存在: {model_id}")
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={
                 "model_id": metadata.model_id,
                 "model_type": metadata.model_type,
@@ -247,7 +247,7 @@ async def get_model_metadata(model_id: str):
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取元数据失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取元数据失败: {str(e)}")
 
 
 @router.delete("/{model_id}")
@@ -260,12 +260,12 @@ async def delete_model(model_id: str):
         success = store.delete_model(model_id)
         
         if success:
-            return ApiResponse.success(message="模型删除成功")
+            return ApiResponse.response_success(message="模型删除成功")
         else:
-            return ApiResponse.bad_request(message=f"模型不存在: {model_id}")
+            return ApiResponse.response_bad_request(message=f"模型不存在: {model_id}")
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"删除模型失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"删除模型失败: {str(e)}")
 
 
 @router.post("/cleanup")
@@ -279,13 +279,13 @@ async def cleanup_old_models(days: int = 30):
         store = get_model_store()
         deleted_count = store.cleanup_old_models(days)
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={"deleted_count": deleted_count},
             message=f"已清理 {deleted_count} 个过期模型"
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"清理失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"清理失败: {str(e)}")
 
 
 @router.get("/stats")
@@ -297,10 +297,10 @@ async def get_storage_stats():
         store = get_model_store()
         stats = store.get_storage_stats()
         
-        return ApiResponse.success(data=stats, message="获取成功")
+        return ApiResponse.response_success(data=stats, message="获取成功")
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取统计失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取统计失败: {str(e)}")
 
 
 # ========== 便捷方法 ==========
@@ -319,18 +319,18 @@ async def predict_with_saved_model(model_id: str, request: Dict):
         model = store.load_model(model_id)
         
         if model is None:
-            return ApiResponse.bad_request(message=f"模型不存在: {model_id}")
+            return ApiResponse.response_bad_request(message=f"模型不存在: {model_id}")
         
         metadata = store.get_metadata(model_id)
         
         # 检查是否是预测模型
         if metadata.model_type not in [m.value for m in ModelType]:
-            return ApiResponse.bad_request(message="不是有效的预测模型类型")
+            return ApiResponse.response_bad_request(message="不是有效的预测模型类型")
         
         # 这里可以添加预测逻辑
         # 实际使用时，模型应该已经训练好并包含预测方法
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={
                 "model_id": model_id,
                 "model_type": metadata.model_type,
@@ -341,4 +341,4 @@ async def predict_with_saved_model(model_id: str, request: Dict):
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"操作失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"操作失败: {str(e)}")

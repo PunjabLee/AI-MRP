@@ -102,10 +102,10 @@ async def optimize_schedule(request: ScheduleRequest):
     goal = request.goal
     
     if not orders:
-        return ApiResponse.bad_request(message="生产订单不能为空")
+        return ApiResponse.response_bad_request(message="生产订单不能为空")
     
     if not resources:
-        return ApiResponse.bad_request(message="资源不能为空")
+        return ApiResponse.response_bad_request(message="资源不能为空")
     
     # 执行优化（传递求解时间限制）
     result = create_scheduler(
@@ -136,7 +136,7 @@ async def optimize_schedule(request: ScheduleRequest):
         "time_limit_seconds": request.time_limit_seconds  # 返回实际使用的时间限制
     }
     
-    return ApiResponse.success(data=data, message="排程优化完成")
+    return ApiResponse.response_success(data=data, message="排程优化完成")
 
 
 @router.post("/feasibility-check")
@@ -217,7 +217,7 @@ async def check_feasibility(request: ScheduleRequest):
         "suggestions": _generate_suggestions(is_feasible, total_work, total_capacity),
         "visualization_data": viz_data
     }
-    return ApiResponse.success(data=data, message="可行性检查完成")
+    return ApiResponse.response_success(data=data, message="可行性检查完成")
 
 
 @router.post("/scenarios")
@@ -226,7 +226,7 @@ async def compare_scheduling_scenarios(request: ScenarioRequest):
     scenarios = request.scenarios
     
     if len(scenarios) < 2:
-        return ApiResponse.bad_request(message="至少需要2个场景")
+        return ApiResponse.response_bad_request(message="至少需要2个场景")
     
     result = compare_scenarios(scenarios)
     

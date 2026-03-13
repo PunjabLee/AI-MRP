@@ -10,9 +10,10 @@
 - 元数据（分页等）
 """
 from typing import Any, Optional, Dict, List, Type, TypeVar
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 import uuid
+import traceback
 import traceback
 
 # 响应码定义
@@ -43,9 +44,11 @@ class ResponseCode:
 class ApiResponse(BaseModel):
     """
     统一API响应结构
-    
+
     所有API接口统一使用此响应格式
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     # 状态码
     code: int = Field(default=200, description="HTTP状态码")
     
@@ -78,17 +81,17 @@ class ApiResponse(BaseModel):
         super().__init__(**data)
     
     @classmethod
-    def success(cls, data: Any = None, message: str = "success", 
+    def response_success(cls, data: Any = None, message: str = "success",
                metadata: Dict = None, code: int = 200) -> 'ApiResponse':
         """
         成功响应
-        
+
         Args:
             data: 响应数据
             message: 成功消息
             metadata: 元数据（如分页信息）
             code: HTTP状态码
-        
+
         Returns:
             ApiResponse实例
         """
@@ -100,19 +103,19 @@ class ApiResponse(BaseModel):
             error=None,
             metadata=metadata
         )
-    
+
     @classmethod
-    def error(cls, code: int = 500, message: str = "Internal Server Error",
-              error: Dict = None, data: Any = None) -> 'ApiResponse':
+    def response_fail(cls, code: int = 500, message: str = "Internal Server Error",
+              error_detail: Dict = None, data: Any = None) -> 'ApiResponse':
         """
         错误响应
-        
+
         Args:
             code: HTTP状态码
             message: 错误消息
-            error: 错误详情
+            error_detail: 错误详情
             data: 部分错误数据（如验证失败的字段）
-        
+
         Returns:
             ApiResponse实例
         """
@@ -121,52 +124,52 @@ class ApiResponse(BaseModel):
             message=message,
             success=False,
             data=data,
-            error=error
-        )
-    
-    @classmethod
-    def bad_request(cls, message: str = "Bad Request", error: Dict = None) -> 'ApiResponse':
-        """400 错误响应"""
-        return cls.error(code=ResponseCode.BAD_REQUEST, message=message, error=error)
-    
-    @classmethod
-    def unauthorized(cls, message: str = "Unauthorized") -> 'ApiResponse':
-        """401 错误响应"""
-        return cls.error(code=ResponseCode.UNAUTHORIZED, message=message)
-    
-    @classmethod
-    def forbidden(cls, message: str = "Forbidden") -> 'ApiResponse':
-        """403 错误响应"""
-        return cls.error(code=ResponseCode.FORBIDDEN, message=message)
-    
-    @classmethod
-    def not_found(cls, message: str = "Resource Not Found") -> 'ApiResponse':
-        """404 错误响应"""
-        return cls.error(code=ResponseCode.NOT_FOUND, message=message)
-    
-    @classmethod
-    def validation_error(cls, message: str = "Validation Error", error: Dict = None) -> 'ApiResponse':
-        """422 验证错误响应"""
-        return cls.error(
-            code=ResponseCode.UNPROCESSABLE_ENTITY, 
-            message=message, 
-            error=error
-        )
-    
-    @classmethod
-    def server_error(cls, message: str = "Internal Server Error", error: Dict = None) -> 'ApiResponse':
-        """500 服务器错误响应"""
-        error_detail = error or {}
-        if not error_detail.get('stack_trace'):
-            error_detail['stack_trace'] = traceback.format_exc()[:500]
-        return cls.error(
-            code=ResponseCode.INTERNAL_ERROR, 
-            message=message, 
             error=error_detail
         )
     
     @classmethod
-    def paginated(cls, data: List, total: int, page: int = 1, 
+    def response_bad_request(cls, message: str = "Bad Request", error: Dict = None) -> 'ApiResponse':
+        """400 错误响应"""
+        return cls.response_fail(code=ResponseCode.BAD_REQUEST, message=message, error_detail=error)
+
+    @classmethod
+    def response_unauthorized(cls, message: str = "Unauthorized") -> 'ApiResponse':
+        """401 错误响应"""
+        return cls.response_fail(code=ResponseCode.UNAUTHORIZED, message=message)
+
+    @classmethod
+    def response_forbidden(cls, message: str = "Forbidden") -> 'ApiResponse':
+        """403 错误响应"""
+        return cls.response_fail(code=ResponseCode.FORBIDDEN, message=message)
+
+    @classmethod
+    def response_not_found(cls, message: str = "Resource Not Found") -> 'ApiResponse':
+        """404 错误响应"""
+        return cls.response_fail(code=ResponseCode.NOT_FOUND, message=message)
+
+    @classmethod
+    def response_validation_error(cls, message: str = "Validation Error", error: Dict = None) -> 'ApiResponse':
+        """422 验证错误响应"""
+        return cls.response_fail(
+            code=ResponseCode.UNPROCESSABLE_ENTITY,
+            message=message,
+            error_detail=error
+        )
+
+    @classmethod
+    def response_server_error(cls, message: str = "Internal Server Error", error: Dict = None) -> 'ApiResponse':
+        """500 服务器错误响应"""
+        error_detail = error or {}
+        if not error_detail.get('stack_trace'):
+            error_detail['stack_trace'] = traceback.format_exc()[:500]
+        return cls.response_fail(
+            code=ResponseCode.INTERNAL_ERROR,
+            message=message,
+            error_detail=error_detail
+        )
+
+    @classmethod
+    def response_paginated(cls, data: List, total: int, page: int = 1, 
                   page_size: int = 20, message: str = "success") -> 'ApiResponse':
         """
         分页响应
@@ -194,7 +197,7 @@ class ApiResponse(BaseModel):
             }
         }
         
-        return cls.success(data=data, message=message, metadata=metadata)
+        return cls.response_success(data=data, message=message, metadata=metadata)
 
 
 class ApiListResponse(BaseModel):

@@ -161,7 +161,7 @@ async def predict_demand(request: PredictRequest):
         historical_data = _generate_mock_data(item_code)
     
     if not historical_data:
-        return ApiResponse.bad_request(message="无历史数据")
+        return ApiResponse.response_bad_request(message="无历史数据")
     
     # 选择方法
     method = request.method
@@ -249,7 +249,7 @@ async def predict_demand(request: PredictRequest):
         "visualization_data": viz_data
     }
     
-    return ApiResponse.success(data=data, message="预测成功")
+    return ApiResponse.response_success(data=data, message="预测成功")
 
 
 @router.post("/safety-stock")
@@ -262,7 +262,7 @@ async def calculate_safety_stock(request: SafetyStockRequest):
         historical_demand = _generate_demand_data(item_code)
     
     if not historical_demand:
-        return ApiResponse.bad_request(message="无历史需求数据")
+        return ApiResponse.response_bad_request(message="无历史需求数据")
     
     engine = SafetyStockEngine()
     result = engine.calculate(
@@ -294,7 +294,7 @@ async def calculate_safety_stock(request: SafetyStockRequest):
         "visualization_data": viz_data
     }
     
-    return ApiResponse.success(data=data, message="安全库存计算成功")
+    return ApiResponse.response_success(data=data, message="安全库存计算成功")
 
 
 @router.post("/batch")
@@ -355,7 +355,7 @@ async def batch_forecast(request: BatchForecastRequest):
         "visualization_data": viz_data
     }
     
-    return ApiResponse.success(data=data, message=f"批量预测完成，共{len(forecasts)}个物料")
+    return ApiResponse.response_success(data=data, message=f"批量预测完成，共{len(forecasts)}个物料")
 
 
 @router.post("/compare")
@@ -364,7 +364,7 @@ async def compare_forecasts(request: ForecastComparisonRequest):
     historical_data = _generate_mock_data(request.item_code)
     
     if not historical_data:
-        return ApiResponse.bad_request(message="无历史数据")
+        return ApiResponse.response_bad_request(message="无历史数据")
     
     comparisons = []
     metrics_list = []
@@ -399,7 +399,7 @@ async def compare_forecasts(request: ForecastComparisonRequest):
         "visualization_data": viz_data
     }
     
-    return ApiResponse.success(data=data, message="预测方法对比完成")
+    return ApiResponse.response_success(data=data, message="预测方法对比完成")
 
 
 # ========== 可视化数据构建 ==========
@@ -595,79 +595,78 @@ async def get_forecast_methods():
             "cons": ["计算较慢", "需要较多数据"],
             "data_requirement": "建议90+条历史数据"
         },
-            {
-                "name": "lstm",
-                "display_name": "LSTM 深度学习",
-                "description": "长短期记忆网络，适合复杂模式",
-                "parameters": {
-                    "sequence_length": {"type": "int", "default": 30, "range": [7, 180], "description": "输入序列长度"},
-                    "epochs": {"type": "int", "default": 50, "range": [10, 500], "description": "训练轮数"},
-                    "layers": {"type": "int", "default": 2, "range": [1, 5], "description": "LSTM层数"}
-                },
-                "pros": ["捕捉复杂非线性关系", "预测精度高"],
-                "cons": ["计算资源要求高", "容易过拟合"],
-                "data_requirement": "建议180+条历史数据"
+        {
+            "name": "lstm",
+            "display_name": "LSTM 深度学习",
+            "description": "长短期记忆网络，适合复杂模式",
+            "parameters": {
+                "sequence_length": {"type": "int", "default": 30, "range": [7, 180], "description": "输入序列长度"},
+                "epochs": {"type": "int", "default": 50, "range": [10, 500], "description": "训练轮数"},
+                "layers": {"type": "int", "default": 2, "range": [1, 5], "description": "LSTM层数"}
             },
-            {
-                "name": "arima",
-                "display_name": "ARIMA",
-                "description": "经典时间序列分析方法",
-                "parameters": {
-                    "p": {"type": "int", "default": 5, "range": [0, 10], "description": "自回归阶数"},
-                    "d": {"type": "int", "default": 1, "range": [0, 2], "description": "差分阶数"},
-                    "q": {"type": "int", "default": 0, "range": [0, 10], "description": "移动平均阶数"}
-                },
-                "pros": ["解释性强", "计算快"],
-                "cons": ["需要平稳序列", "参数选择困难"],
-                "data_requirement": "建议50+条历史数据"
+            "pros": ["捕捉复杂非线性关系", "预测精度高"],
+            "cons": ["计算资源要求高", "容易过拟合"],
+            "data_requirement": "建议180+条历史数据"
+        },
+        {
+            "name": "arima",
+            "display_name": "ARIMA",
+            "description": "经典时间序列分析方法",
+            "parameters": {
+                "p": {"type": "int", "default": 5, "range": [0, 10], "description": "自回归阶数"},
+                "d": {"type": "int", "default": 1, "range": [0, 2], "description": "差分阶数"},
+                "q": {"type": "int", "default": 0, "range": [0, 10], "description": "移动平均阶数"}
             },
-            {
-                "name": "xgboost",
-                "display_name": "XGBoost",
-                "description": "梯度提升决策树",
-                "parameters": {
-                    "n_estimators": {"type": "int", "default": 100, "range": [10, 500], "description": "树的数量"},
-                    "max_depth": {"type": "int", "default": 5, "range": [3, 10], "description": "树的最大深度"}
-                },
-                "pros": ["训练快", "支持特征工程"],
-                "cons": ["需要特征工程"],
-                "data_requirement": "建议60+条历史数据"
+            "pros": ["解释性强", "计算快"],
+            "cons": ["需要平稳序列", "参数选择困难"],
+            "data_requirement": "建议50+条历史数据"
+        },
+        {
+            "name": "xgboost",
+            "display_name": "XGBoost",
+            "description": "梯度提升决策树",
+            "parameters": {
+                "n_estimators": {"type": "int", "default": 100, "range": [10, 500], "description": "树的数量"},
+                "max_depth": {"type": "int", "default": 5, "range": [3, 10], "description": "树的最大深度"}
             },
-            {
-                "name": "moving_average",
-                "display_name": "移动平均",
-                "description": "简单快速的基准方法",
-                "parameters": {
-                    "window": {"type": "int", "default": 7, "range": [3, 90], "description": "窗口大小"}
-                },
-                "pros": ["简单快速", "无参数"],
-                "cons": ["无法处理趋势季节性"],
-                "data_requirement": "任意"
+            "pros": ["训练快", "支持特征工程"],
+            "cons": ["需要特征工程"],
+            "data_requirement": "建议60+条历史数据"
+        },
+        {
+            "name": "moving_average",
+            "display_name": "移动平均",
+            "description": "简单快速的基准方法",
+            "parameters": {
+                "window": {"type": "int", "default": 7, "range": [3, 90], "description": "窗口大小"}
             },
-            {
-                "name": "exponential_smoothing",
-                "display_name": "指数平滑",
-                "description": "Holt-Winters 指数平滑",
-                "parameters": {
-                    "alpha": {"type": "float", "default": 0.3, "range": [0.1, 0.9], "description": "水平平滑系数"},
-                    "beta": {"type": "float", "default": 0.1, "range": [0.1, 0.9], "description": "趋势平滑系数"}
-                },
-                "pros": ["处理趋势和季节性", "计算快"],
-                "cons": ["参数敏感"],
-                "data_requirement": "建议30+条历史数据"
+            "pros": ["简单快速", "无参数"],
+            "cons": ["无法处理趋势季节性"],
+            "data_requirement": "任意"
+        },
+        {
+            "name": "exponential_smoothing",
+            "display_name": "指数平滑",
+            "description": "Holt-Winters 指数平滑",
+            "parameters": {
+                "alpha": {"type": "float", "default": 0.3, "range": [0.1, 0.9], "description": "水平平滑系数"},
+                "beta": {"type": "float", "default": 0.1, "range": [0.1, 0.9], "description": "趋势平滑系数"}
             },
-            {
-                "name": "auto",
-                "display_name": "自动选择",
-                "description": "基于数据特征自动选择最佳方法",
-                "parameters": {},
-                "pros": ["无需选择", "适用性强"],
-                "cons": ["可能不是最优"],
-                "data_requirement": "根据数据量选择"
-            }
-        ]
-    }
-    return ApiResponse.success(data={"methods": methods_data}, message="获取成功")
+            "pros": ["处理趋势和季节性", "计算快"],
+            "cons": ["参数敏感"],
+            "data_requirement": "建议30+条历史数据"
+        },
+        {
+            "name": "auto",
+            "display_name": "自动选择",
+            "description": "基于数据特征自动选择最佳方法",
+            "parameters": {},
+            "pros": ["无需选择", "适用性强"],
+            "cons": ["可能不是最优"],
+            "data_requirement": "根据数据量选择"
+        }
+    ]
+    return ApiResponse.response_success(data={"methods": methods_data}, message="获取成功")
 
 
 @router.get("/safety-stock/methods")
@@ -699,17 +698,5 @@ async def get_safety_stock_methods():
                 "display_name": "蒙特卡洛模拟",
                 "description": "随机模拟确定最优SS"
             }
-        ],
-        "service_levels": {
-            "0.80": "80% - 成本优先",
-            "0.90": "90% - 平衡",
-            "0.95": "95% - 标准",
-            "0.99": "99% - 高服务"
-        }
-    }
-    return ApiResponse.success(data={"methods": methods_data, "service_levels": {
-            "0.80": "80% - 成本优先",
-            "0.90": "90% - 平衡",
-            "0.95": "95% - 标准",
-            "0.99": "99% - 高服务"
-        }}, message="获取成功")
+    ]
+    return ApiResponse.response_success(data={"methods": methods_data}, message="获取成功")

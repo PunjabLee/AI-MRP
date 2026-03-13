@@ -60,15 +60,7 @@ async def predict_delivery(request: DeliveryPredictRequest):
         "factors": factors,
         "alternative_suppliers": alternatives
     }
-    return ApiResponse.success(data=data, message="预测成功")
-        supplier_code=supplier_code,
-        item_code=item_code,
-        predicted_lead_time=predicted_lead_time,
-        confidence=confidence,
-        risk_level=risk_level,
-        factors=factors,
-        alternative_suppliers=alternatives
-    )
+    return ApiResponse.response_success(data=data, message="预测成功")
 
 
 @router.get("/suppliers/{supplier_code}/performance")
@@ -91,7 +83,7 @@ async def get_supplier_performance(supplier_code: str):
             {"date": "2025-12", "on_time_rate": 0.82, "avg_lead_time": 13},
         ]
     }
-    return ApiResponse.success(data=data, message="获取成功")
+    return ApiResponse.response_success(data=data, message="获取成功")
 
 
 @router.get("/methods")
@@ -120,7 +112,7 @@ async def get_prediction_methods():
         ],
         "default": "historical_average"
     }
-    return ApiResponse.success(data=methods_data, message="获取成功")
+    return ApiResponse.response_success(data=methods_data, message="获取成功")
 
 
 # 内部方法

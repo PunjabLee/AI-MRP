@@ -97,13 +97,13 @@ async def save_scenario(request: SaveScenarioRequest):
             created_by=request.created_by
         )
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={"scenario_id": scenario_id},
             message="场景保存成功"
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"保存场景失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"保存场景失败: {str(e)}")
 
 
 @router.post("/load/{scenario_id}")
@@ -118,11 +118,11 @@ async def load_scenario(scenario_id: str):
         scenario = store.load_scenario(scenario_id)
         
         if scenario is None:
-            return ApiResponse.bad_request(message=f"场景不存在: {scenario_id}")
+            return ApiResponse.response_bad_request(message=f"场景不存在: {scenario_id}")
         
         metadata = store.get_metadata(scenario_id)
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={
                 "scenario_id": scenario_id,
                 "name": metadata.name,
@@ -145,7 +145,7 @@ async def load_scenario(scenario_id: str):
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"加载场景失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"加载场景失败: {str(e)}")
 
 
 @router.get("/list")
@@ -193,13 +193,13 @@ async def list_scenarios(
                 "version": s.version
             })
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={"scenarios": result, "total": len(result)},
             message="获取成功"
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取场景列表失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取场景列表失败: {str(e)}")
 
 
 @router.put("/update")
@@ -213,7 +213,7 @@ async def update_scenario(request: UpdateScenarioRequest):
         # 先加载现有场景
         existing = store.load_scenario(request.scenario_id)
         if existing is None:
-            return ApiResponse.bad_request(message=f"场景不存在: {request.scenario_id}")
+            return ApiResponse.response_bad_request(message=f"场景不存在: {request.scenario_id}")
         
         # 更新字段
         if request.name is not None:
@@ -241,12 +241,12 @@ async def update_scenario(request: UpdateScenarioRequest):
         )
         
         if success:
-            return ApiResponse.success(message="场景更新成功")
+            return ApiResponse.response_success(message="场景更新成功")
         else:
-            return ApiResponse.bad_request(message="更新失败")
+            return ApiResponse.response_bad_request(message="更新失败")
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"更新场景失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"更新场景失败: {str(e)}")
 
 
 @router.delete("/{scenario_id}")
@@ -259,12 +259,12 @@ async def delete_scenario(scenario_id: str):
         success = store.delete_scenario(scenario_id)
         
         if success:
-            return ApiResponse.success(message="场景删除成功")
+            return ApiResponse.response_success(message="场景删除成功")
         else:
-            return ApiResponse.bad_request(message=f"场景不存在: {scenario_id}")
+            return ApiResponse.response_bad_request(message=f"场景不存在: {scenario_id}")
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"删除场景失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"删除场景失败: {str(e)}")
 
 
 @router.post("/compare")
@@ -279,15 +279,15 @@ async def compare_scenarios(request: CompareScenariosRequest):
         comparison = store.compare_scenarios(request.scenario_ids)
         
         if comparison is None:
-            return ApiResponse.bad_request(message="场景对比失败")
+            return ApiResponse.response_bad_request(message="场景对比失败")
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data=comparison,
             message="对比成功"
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"对比失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"对比失败: {str(e)}")
 
 
 @router.post("/clone")
@@ -306,15 +306,15 @@ async def clone_scenario(request: CloneScenarioRequest):
         )
         
         if new_id is None:
-            return ApiResponse.bad_request(message=f"源场景不存在: {request.source_scenario_id}")
+            return ApiResponse.response_bad_request(message=f"源场景不存在: {request.source_scenario_id}")
         
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={"new_scenario_id": new_id},
             message="场景克隆成功"
         )
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"克隆失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"克隆失败: {str(e)}")
 
 
 @router.post("/{scenario_id}/archive")
@@ -327,12 +327,12 @@ async def archive_scenario(scenario_id: str):
         success = store.archive_scenario(scenario_id)
         
         if success:
-            return ApiResponse.success(message="场景已归档")
+            return ApiResponse.response_success(message="场景已归档")
         else:
-            return ApiResponse.bad_request(message=f"场景不存在: {scenario_id}")
+            return ApiResponse.response_bad_request(message=f"场景不存在: {scenario_id}")
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"归档失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"归档失败: {str(e)}")
 
 
 @router.get("/stats")
@@ -344,7 +344,7 @@ async def get_scenario_stats():
         store = get_scenario_store()
         stats = store.get_scenario_stats()
         
-        return ApiResponse.success(data=stats, message="获取成功")
+        return ApiResponse.response_success(data=stats, message="获取成功")
     
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取统计失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取统计失败: {str(e)}")

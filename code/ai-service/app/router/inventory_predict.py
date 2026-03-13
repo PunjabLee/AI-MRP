@@ -66,7 +66,7 @@ async def predict_inventory(request: InventoryPredictRequest):
         "risk_dates": risk_dates,
         "replenishment_suggestion": suggestion
     }
-    return ApiResponse.success(data=data, message="预测成功")
+    return ApiResponse.response_success(data=data, message="预测成功")
 
 
 @router.get("/safety-stock-recommendation")
@@ -104,7 +104,7 @@ async def recommend_safety_stock(item_code: str, warehouse_code: str = None):
         "service_level": 0.95,
         "calculation_method": "continuous_review"
     }
-    return ApiResponse.success(data=data, message="预测成功")
+    return ApiResponse.response_success(data=data, message="预测成功")
 
 
 @router.get("/reorder-alert")
@@ -135,7 +135,7 @@ async def get_reorder_alerts(warehouse_code: str = None):
         }
     ]
     
-    return ApiResponse.success(data={
+    return ApiResponse.response_success(data={
         "alerts": alerts,
         "total_count": len(alerts)
     }, message="获取成功")

@@ -72,9 +72,9 @@ async def record_forecast_metric(request: RecordForecastAccuracyRequest):
             predicted_qty=request.predicted_qty,
             confidence_level=request.confidence_level
         )
-        return ApiResponse.success(message="记录成功")
+        return ApiResponse.response_success(message="记录成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"记录失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"记录失败: {str(e)}")
 
 
 @router.get("/forecast/stats")
@@ -86,9 +86,9 @@ async def get_forecast_stats(
     try:
         store = get_metrics_store()
         stats = store.get_forecast_accuracy(item_code, days)
-        return ApiResponse.success(data=stats, message="获取成功")
+        return ApiResponse.response_success(data=stats, message="获取成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取失败: {str(e)}")
 
 
 # ---------- 排程效率 ----------
@@ -106,9 +106,9 @@ async def record_schedule_metric(request: RecordScheduleEfficiencyRequest):
             actual_hours=request.actual_hours,
             resource_utilization=request.resource_utilization
         )
-        return ApiResponse.success(message="记录成功")
+        return ApiResponse.response_success(message="记录成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"记录失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"记录失败: {str(e)}")
 
 
 @router.get("/schedule/stats")
@@ -117,9 +117,9 @@ async def get_schedule_stats(days: int = 30):
     try:
         store = get_metrics_store()
         stats = store.get_schedule_efficiency(days)
-        return ApiResponse.success(data=stats, message="获取成功")
+        return ApiResponse.response_success(data=stats, message="获取成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取失败: {str(e)}")
 
 
 # ---------- 系统性能 ----------
@@ -135,9 +135,9 @@ async def record_system_metric(request: RecordSystemPerformanceRequest):
             status_code=request.status_code,
             error=request.error
         )
-        return ApiResponse.success(message="记录成功")
+        return ApiResponse.response_success(message="记录成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"记录失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"记录失败: {str(e)}")
 
 
 @router.get("/system/stats")
@@ -146,9 +146,9 @@ async def get_system_stats(hours: int = 24):
     try:
         store = get_metrics_store()
         stats = store.get_system_performance(hours)
-        return ApiResponse.success(data=stats, message="获取成功")
+        return ApiResponse.response_success(data=stats, message="获取成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取失败: {str(e)}")
 
 
 # ---------- 趋势分析 ----------
@@ -162,9 +162,9 @@ async def get_metric_trend(metric_type: str, days: int = 7):
     try:
         store = get_metrics_store()
         trend = store.get_trend(metric_type, days)
-        return ApiResponse.success(data=trend, message="获取成功")
+        return ApiResponse.response_success(data=trend, message="获取成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取失败: {str(e)}")
 
 
 # ---------- 汇总仪表盘 ----------
@@ -206,9 +206,9 @@ async def get_dashboard(days: int = 7):
             "period_days": days
         }
         
-        return ApiResponse.success(data=dashboard, message="获取成功")
+        return ApiResponse.response_success(data=dashboard, message="获取成功")
     except Exception as e:
-        return ApiResponse.bad_request(message=f"获取失败: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"获取失败: {str(e)}")
 
 
 # ---------- 健康检查 ----------
@@ -218,7 +218,7 @@ async def metrics_health():
     """指标服务健康检查"""
     try:
         store = get_metrics_store()
-        return ApiResponse.success(
+        return ApiResponse.response_success(
             data={
                 "status": "healthy",
                 "forecast_count": len(store._metrics.get("forecast", [])),
@@ -228,4 +228,4 @@ async def metrics_health():
             message="健康"
         )
     except Exception as e:
-        return ApiResponse.bad_request(message=f"异常: {str(e)}")
+        return ApiResponse.response_bad_request(message=f"异常: {str(e)}")
