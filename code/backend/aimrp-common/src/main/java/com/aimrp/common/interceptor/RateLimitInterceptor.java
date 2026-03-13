@@ -19,8 +19,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final Map<String, RateLimitInfo> rateLimitMap = new ConcurrentHashMap<>();
     
     @Override
-    public boolean preHandle(javax.servlet.http.HttpServletRequest request, 
-                            javax.servlet.http.HttpServletResponse response, 
+    public boolean preHandle(jakarta.servlet.http.HttpServletRequest request, 
+                            jakarta.servlet.http.HttpServletResponse response, 
                             Object handler) {
         
         if (!(handler instanceof HandlerMethod)) {
@@ -50,7 +50,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return true;
     }
     
-    private String getKey(javax.servlet.http.HttpServletRequest request, RateLimit rateLimit) {
+    private String getKey(jakarta.servlet.http.HttpServletRequest request, RateLimit rateLimit) {
         String baseKey = rateLimit.key();
         if (baseKey.isEmpty()) {
             // 默认使用 URI + IP
@@ -59,7 +59,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return "rate_limit:" + baseKey;
     }
     
-    private String getClientIP(javax.servlet.http.HttpServletRequest request) {
+    private String getClientIP(jakarta.servlet.http.HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("X-Real-IP");
