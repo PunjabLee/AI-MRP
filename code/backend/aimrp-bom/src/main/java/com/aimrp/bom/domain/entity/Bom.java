@@ -13,6 +13,11 @@ public class Bom {
     private String bomNo;
     private String itemCode;
     private String itemName;
+    private String childItemCode;
+    private String childItemName;
+    private BigDecimal usageQty;
+    private BigDecimal lossRate;
+    private Integer level;
     private String version;
     private String status;
     private BigDecimal yield;

@@ -1,7 +1,9 @@
 package com.aimrp.demand.application.service;
 
+import com.aimrp.demand.domain.entity.SalesOrder;
 import com.aimrp.demand.domain.service.DemandDomainService;
 import com.aimrp.demand.infrastructure.persistence.mapper.SalesOrderMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,44 +19,54 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class DemandApplicationService {
-    
+
     private final DemandDomainService domainService;
     private final SalesOrderMapper salesOrderMapper;
-    
+
     /**
      * 创建销售订单
      */
     @Transactional
     public Long createOrder(CreateOrderRequest request) {
         log.info("创建销售订单 - customer: {}", request.getCustomerCode());
-        
+
         // 校验需求
         if (!domainService.validateDemand(request.getItemCode(), request.getQty())) {
             throw new IllegalArgumentException("需求无效");
         }
-        
+
         // 计算优先级
         int priority = domainService.calculatePriority(request.getCustomerLevel(), request.getQty());
-        
-        // 保存订单
-        Long orderId = salesOrderMapper.insert(
-                request.getCustomerCode(),
-                request.getItemCode(),
-                request.getQty(),
-                priority,
-                request.getDueDate());
-        
-        return orderId;
+
+        // 创建实体并保存
+        SalesOrder order = new SalesOrder();
+        order.setCustomerCode(request.getCustomerCode());
+        order.setItemCode(request.getItemCode());
+        order.setQty(request.getQty());
+        order.setPriority(priority);
+        order.setDueDate(request.getDueDate());
+        order.setStatus("DRAFT");
+
+        salesOrderMapper.insert(order);
+
+        return order.getId();
     }
-    
+
     /**
      * 查询订单列表
      */
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> listOrders(String customerCode, String status) {
-        return salesOrderMapper.selectList(customerCode, status);
+    public List<SalesOrder> listOrders(String customerCode, String status) {
+        LambdaQueryWrapper<SalesOrder> wrapper = new LambdaQueryWrapper<>();
+        if (customerCode != null && !customerCode.isEmpty()) {
+            wrapper.eq(SalesOrder::getCustomerCode, customerCode);
+        }
+        if (status != null && !status.isEmpty()) {
+            wrapper.eq(SalesOrder::getStatus, status);
+        }
+        return salesOrderMapper.selectList(wrapper);
     }
-    
+
     /**
      * 请求对象
      */

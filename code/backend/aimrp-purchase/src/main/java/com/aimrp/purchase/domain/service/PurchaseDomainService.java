@@ -32,6 +32,7 @@ public class PurchaseDomainService {
      * 计算含税金额
      */
     public BigDecimal calculateTotalWithTax(BigDecimal amount, BigDecimal taxRate) {
+        if (amount == null) return BigDecimal.ZERO;
         return amount.add(calculateTax(amount, taxRate));
     }
 }

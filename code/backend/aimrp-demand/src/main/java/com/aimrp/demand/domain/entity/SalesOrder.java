@@ -12,17 +12,24 @@ import java.time.LocalDateTime;
 @Data
 @TableName("t_sales_order")
 public class SalesOrder {
-    
+
     @TableId(type = IdType.AUTO)
     private Long id;
-    
+
     private String orderNo;          // 订单编号
     private String customerCode;     // 客户编码
     private String customerName;     // 客户名称
+    private String itemCode;         // 物料编码
+    private String itemName;         // 物料名称
+    private BigDecimal qty;          // 数量
+    private BigDecimal unitPrice;    // 单价
     private LocalDate orderDate;     // 订单日期
     private LocalDate dueDate;       // 交货日期
+    private LocalDate deliveryDate;  // 交货日期
     private String status;           // 状态
     private BigDecimal totalAmount;  // 订单金额
+    private Integer priority;         // 优先级
+    private String remark;           // 备注
     private String memo;             // 备注
     
     @TableField(fill = FieldFill.INSERT)
