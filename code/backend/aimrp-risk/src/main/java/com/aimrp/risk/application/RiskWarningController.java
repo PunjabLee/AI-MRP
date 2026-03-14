@@ -4,6 +4,7 @@ import com.aimrp.risk.domain.model.RiskItem;
 import com.aimrp.risk.domain.service.RiskMonitorService;
 import com.aimrp.risk.infrastructure.persistence.mapper.RiskWarningHistoryMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -149,20 +150,20 @@ public class RiskWarningController {
     
     // ==================== 请求模型 ====================
     
-    @lombok.Data
+    @Data
     public static class RiskWarningRequest {
         private Long riskId;
         private String recipient;
         private String channel; // EMAIL, SMS, WECHAT, DINGTALK
     }
     
-    @lombok.Data
+    @Data
     public static class BatchWarningRequest {
         private String riskLevel; // HIGH, CRITICAL
         private String channel;
     }
     
-    @lombok.Data
+    @Data
     public static class WarningRecord {
         private Long warningId;
         private Long riskId;

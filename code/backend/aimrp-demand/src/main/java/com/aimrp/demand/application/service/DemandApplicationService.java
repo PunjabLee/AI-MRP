@@ -4,6 +4,7 @@ import com.aimrp.demand.domain.entity.SalesOrder;
 import com.aimrp.demand.domain.service.DemandDomainService;
 import com.aimrp.demand.infrastructure.persistence.mapper.SalesOrderMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,7 @@ public class DemandApplicationService {
     /**
      * 请求对象
      */
-    @lombok.Data
+    @Data
     public static class CreateOrderRequest {
         private String customerCode;
         private String customerLevel;

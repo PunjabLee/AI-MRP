@@ -3,6 +3,8 @@ package com.aimrp.mrp.domain.service;
 import com.aimrp.mrp.domain.valueobject.MrpContext;
 import com.aimrp.mrp.domain.valueobject.MrpResult;
 import lombok.extern.slf4j.Slf4j;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -448,8 +450,8 @@ public class MrpCalculator {
     /**
      * 净需求内部类
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     private static class NetRequirement {
         private BigDecimal grossRequirement;
         private BigDecimal availableQty;

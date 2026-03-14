@@ -2,6 +2,7 @@ package com.aimrp.forecast.domain.service;
 
 import com.aimrp.forecast.domain.model.ForecastResult;
 import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -190,7 +191,7 @@ public class DemandForecastService {
     /**
      * 历史数据
      */
-    @lombok.Data
+    @Data
     public static class HistoricalData {
         private LocalDate date;
         private BigDecimal qty;

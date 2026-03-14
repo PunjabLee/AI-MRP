@@ -2,6 +2,7 @@ package com.aimrp.demand.application.service;
 
 import com.aimrp.demand.domain.entity.SalesOrder;
 import com.aimrp.demand.infrastructure.persistence.mapper.SalesOrderMapper;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -270,7 +271,7 @@ public class OrderImportService {
     /**
      * 导入结果
      */
-    @lombok.Data
+    @Data
     public static class ImportResult {
         private boolean success;
         private String message;

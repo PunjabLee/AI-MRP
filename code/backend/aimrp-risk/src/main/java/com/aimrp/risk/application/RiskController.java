@@ -5,6 +5,7 @@ import com.aimrp.risk.domain.service.RiskMonitorService;
 import com.aimrp.risk.domain.service.RiskMonitorService.RiskStatistics;
 import com.aimrp.risk.infrastructure.persistence.mapper.RiskItemMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -163,7 +164,7 @@ public class RiskController {
     /**
      * 风险看板
      */
-    @lombok.Data
+    @Data
     public static class RiskDashboard {
         private int totalRisks;
         private int criticalCount;

@@ -3,6 +3,7 @@ package com.aimrp.inventory.domain.service;
 import com.aimrp.inventory.infrastructure.persistence.mapper.InventoryMapper;
 import com.aimrp.inventory.infrastructure.persistence.mapper.InventoryTransactionMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -154,7 +155,7 @@ public class InventoryAnalysisService {
     /**
      * 库龄分析结果
      */
-    @lombok.Data
+    @Data
     public static class InventoryAgeing {
         private String itemCode;
         private String warehouseCode;

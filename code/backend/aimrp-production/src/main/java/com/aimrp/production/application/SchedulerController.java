@@ -3,6 +3,7 @@ package com.aimrp.production.application;
 import com.aimrp.production.domain.service.SchedulerService;
 import com.aimrp.production.domain.service.SchedulerService.*;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -95,7 +96,7 @@ public class SchedulerController {
     /**
      * 排程请求
      */
-    @lombok.Data
+    @Data
     public static class ScheduleRequest {
         private List<JobDTO> jobs;
         private Map<String, List<OperationDTO>> routes;
@@ -103,7 +104,7 @@ public class SchedulerController {
         private String method;
         private String objective;
         
-        @lombok.Data
+        @Data
         public static class JobDTO {
             private String moNo;
             private String itemCode;
@@ -113,7 +114,7 @@ public class SchedulerController {
             private Integer priority;
         }
         
-        @lombok.Data
+        @Data
         public static class OperationDTO {
             private Long operationId;
             private Integer operationNo;

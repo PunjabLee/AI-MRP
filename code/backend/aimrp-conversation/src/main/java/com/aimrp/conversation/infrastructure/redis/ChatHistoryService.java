@@ -1,6 +1,8 @@
 package com.aimrp.conversation.infrastructure.redis;
 
 import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -145,8 +147,8 @@ public class ChatHistoryService {
     /**
      * 对话消息
      */
-    @lombok.Data
-    @lombok.AllArgsConstructor
+    @Data
+    @AllArgsConstructor
     public static class ChatMessage {
         private String role;        // user/assistant/system
         private String content;      // 消息内容

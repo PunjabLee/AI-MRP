@@ -3,6 +3,7 @@ package com.aimrp.item.application.service;
 import com.aimrp.item.domain.service.ItemDomainService;
 import com.aimrp.item.infrastructure.persistence.mapper.ItemMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +47,7 @@ public class ItemApplicationService {
         return itemMapper.selectList(itemType);
     }
     
-    @lombok.Data
+    @Data
     public static class CreateItemRequest {
         private String itemCode;
         private String itemName;

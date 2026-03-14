@@ -4,6 +4,7 @@ import com.aimrp.forecast.domain.model.ForecastResult;
 import com.aimrp.forecast.domain.service.DemandForecastService;
 import com.aimrp.forecast.domain.service.DemandForecastService.HistoricalData;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -109,14 +110,14 @@ public class ForecastController {
     /**
      * 预测请求
      */
-    @lombok.Data
+    @Data
     public static class ForecastRequest {
         private String itemCode;
         private List<HistoricalDataDTO> historicalData;
         private Integer forecastDays;
         private String method;
         
-        @lombok.Data
+        @Data
         public static class HistoricalDataDTO {
             private LocalDate date;
             private BigDecimal qty;
@@ -126,7 +127,7 @@ public class ForecastController {
     /**
      * 批量预测请求
      */
-    @lombok.Data
+    @Data
     public static class BatchForecastRequest {
         private List<String> items;
         private Integer forecastDays;

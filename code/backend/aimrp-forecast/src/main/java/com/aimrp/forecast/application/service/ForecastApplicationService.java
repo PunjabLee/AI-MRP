@@ -5,6 +5,7 @@ import com.aimrp.forecast.domain.service.DemandForecastService.ForecastMethod;
 import com.aimrp.forecast.domain.service.DemandForecastService.HistoricalData;
 import com.aimrp.forecast.domain.service.SafetyStockService;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +74,7 @@ public class ForecastApplicationService {
                 "zScore", result.getZScore() != null ? result.getZScore() : 0);
     }
     
-    @lombok.Data
+    @Data
     public static class ForecastRequest {
         private String itemCode;
         private List<HistoricalData> history;
@@ -81,7 +82,7 @@ public class ForecastApplicationService {
         private String method = "SIMPLE_MA";
     }
     
-    @lombok.Data
+    @Data
     public static class SafetyStockRequest {
         private String itemCode;
         private BigDecimal avgDemand;

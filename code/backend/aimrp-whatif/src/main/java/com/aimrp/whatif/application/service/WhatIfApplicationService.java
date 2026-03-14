@@ -2,6 +2,7 @@ package com.aimrp.whatif.application.service;
 
 import com.aimrp.whatif.domain.service.WhatIfSimulationService;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,7 @@ public class WhatIfApplicationService {
         return simulationService.compare(scenarioId1, scenarioId2);
     }
     
-    @lombok.Data
+    @Data
     public static class SimulateRequest {
         private String scenarioName;
         private Map<String, Object> parameters;

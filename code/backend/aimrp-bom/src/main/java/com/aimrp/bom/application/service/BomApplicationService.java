@@ -5,6 +5,8 @@ import com.aimrp.bom.domain.service.BomDomainService;
 import com.aimrp.bom.domain.service.BomDomainService.*;
 import com.aimrp.bom.infrastructure.persistence.mapper.BomMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,8 +133,8 @@ public class BomApplicationService {
     /**
      * BOM 详情
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class BomDetail {
         private String itemCode;
         private Object bom;

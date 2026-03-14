@@ -1,6 +1,8 @@
 package com.aimrp.bom.domain.service;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -82,8 +84,8 @@ public class BomDomainService {
     /**
      * BOM 行数据
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class BomLine {
         private Long bomId;
         private String parentItemCode;
@@ -97,8 +99,8 @@ public class BomDomainService {
     /**
      * BOM 展开结果
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class BomExpandResult {
         private String childItemCode;
         private String childItemName;

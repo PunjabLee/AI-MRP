@@ -2,6 +2,7 @@ package com.aimrp.whatif.domain.service;
 
 import com.aimrp.whatif.infrastructure.persistence.mapper.WhatIfScenarioMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -126,14 +127,14 @@ public class WhatIfSimulationService {
         return result;
     }
     
-    @lombok.Data
+    @Data
     public static class SimulationResult {
         private String scenarioName;
         private Map<String, Object> results;
         private Map<String, Object> comparison;
     }
     
-    @lombok.Data
+    @Data
     public static class Scenario {
         private Long id;
         private String name;

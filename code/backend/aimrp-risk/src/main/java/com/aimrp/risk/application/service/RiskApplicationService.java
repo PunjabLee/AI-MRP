@@ -2,6 +2,7 @@ package com.aimrp.risk.application.service;
 
 import com.aimrp.risk.domain.service.RiskMonitorService;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +49,7 @@ public class RiskApplicationService {
         riskMonitorService.sendWarning(riskId);
     }
     
-    @lombok.Data
+    @Data
     public static class RiskDetectRequest {
         private String itemCode;
         private java.math.BigDecimal currentStock;

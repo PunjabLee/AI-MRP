@@ -1,6 +1,7 @@
 package com.aimrp.risk.domain.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -182,7 +183,7 @@ public class RiskDetectionService {
     /**
      * 风险评估结果
      */
-    @lombok.Data
+    @Data
     public static class RiskAssessment {
         private String overallRiskLevel;
         private Integer overallRiskValue;
@@ -197,7 +198,7 @@ public class RiskDetectionService {
     }
     
     // RiskItem简略定义（实际应引用domain model）
-    @lombok.Data
+    @Data
     public static class RiskItem {
         private String riskType;
         private String riskLevel;

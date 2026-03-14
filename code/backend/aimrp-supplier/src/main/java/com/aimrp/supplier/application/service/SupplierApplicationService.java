@@ -3,6 +3,7 @@ package com.aimrp.supplier.application.service;
 import com.aimrp.supplier.domain.service.SupplierDomainService;
 import com.aimrp.supplier.infrastructure.persistence.mapper.SupplierMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,7 @@ public class SupplierApplicationService {
         return supplierMapper.selectList(grade);
     }
     
-    @lombok.Data
+    @Data
     public static class CreateSupplierRequest {
         private String supplierCode;
         private String supplierName;

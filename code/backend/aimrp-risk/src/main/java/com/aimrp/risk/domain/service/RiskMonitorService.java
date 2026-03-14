@@ -3,6 +3,7 @@ package com.aimrp.risk.domain.service;
 import com.aimrp.notification.domain.service.NotificationService;
 import com.aimrp.risk.domain.model.RiskItem;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -279,7 +280,7 @@ public class RiskMonitorService {
     /**
      * 风险统计
      */
-    @lombok.Data
+    @Data
     public static class RiskStatistics {
         private int totalCount;
         private Map<RiskItem.RiskType, Long> byType;

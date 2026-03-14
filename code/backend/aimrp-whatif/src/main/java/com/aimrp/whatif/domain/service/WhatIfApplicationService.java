@@ -2,6 +2,8 @@ package com.aimrp.whatif.domain.service;
 
 import com.aimrp.whatif.domain.model.WhatIfScenario;
 import lombok.RequiredArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -237,8 +239,8 @@ public class WhatIfApplicationService {
     /**
      * 应用结果
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class ApplyResult {
         private boolean success;
         private String message;
@@ -250,8 +252,8 @@ public class WhatIfApplicationService {
     /**
      * 应用明细
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class ApplyDetail {
         private boolean success;
         private String targetType;
@@ -262,8 +264,8 @@ public class WhatIfApplicationService {
     /**
      * 预览结果
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class PreviewResult {
         private Long scenarioId;
         private int changeCount;
@@ -274,8 +276,8 @@ public class WhatIfApplicationService {
     /**
      * 影响分析
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class ImpactAnalysis {
         private String changeType;
         private String targetType;

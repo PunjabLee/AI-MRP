@@ -1,6 +1,8 @@
 package com.aimrp.conversation.domain.service;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -44,8 +46,8 @@ public class EntityExtractionService {
     /**
      * 实体提取结果
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class Entity {
         private EntityType type;
         private String value;

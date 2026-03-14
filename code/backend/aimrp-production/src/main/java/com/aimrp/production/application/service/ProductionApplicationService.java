@@ -3,6 +3,7 @@ package com.aimrp.production.application.service;
 import com.aimrp.production.domain.service.SchedulerService;
 import com.aimrp.production.infrastructure.persistence.mapper.ProductionOrderMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,12 +69,12 @@ public class ProductionApplicationService {
         productionOrderMapper.updateStatus(orderId, "COMPLETED");
     }
     
-    @lombok.Data
+    @Data
     public static class ScheduleRequest {
         private String method; // FIFO, PRIORITY, EDD, SPT
     }
     
-    @lombok.Data
+    @Data
     public static class CreateOrderRequest {
         private String itemCode;
         private java.math.BigDecimal qty;

@@ -1,6 +1,7 @@
 package com.aimrp.forecast.domain.service;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -194,7 +195,7 @@ public class SafetyStockService {
     /**
      * 安全库存推荐结果
      */
-    @lombok.Data
+    @Data
     public static class SafetyStockRecommendation {
         private String itemCode;
         private Integer leadTime;

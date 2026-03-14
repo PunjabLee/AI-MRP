@@ -3,6 +3,7 @@ package com.aimrp.forecast.application;
 import com.aimrp.forecast.domain.service.SafetyStockService;
 import com.aimrp.forecast.domain.service.SafetyStockService.SafetyStockRecommendation;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,7 +71,7 @@ public class SafetyStockController {
                 .toList();
     }
     
-    @lombok.Data
+    @Data
     public static class RecommendRequest {
         private String itemCode;
         private BigDecimal avgDemand;
@@ -80,11 +81,11 @@ public class SafetyStockController {
         private Double targetServiceLevel;
     }
     
-    @lombok.Data
+    @Data
     public static class BatchRecommendRequest {
         private List<ItemRecommendRequest> items;
         
-        @lombok.Data
+        @Data
         public static class ItemRecommendRequest {
             private String itemCode;
             private BigDecimal avgDemand;

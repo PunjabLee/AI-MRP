@@ -3,6 +3,7 @@ package com.aimrp.purchase.application.service;
 import com.aimrp.purchase.domain.service.PurchaseDomainService;
 import com.aimrp.purchase.infrastructure.persistence.mapper.PurchaseMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +59,7 @@ public class PurchaseApplicationService {
     /**
      * 请求对象
      */
-    @lombok.Data
+    @Data
     public static class CreatePurchaseOrderRequest {
         private String supplierCode;
         private String itemCode;

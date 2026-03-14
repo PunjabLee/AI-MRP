@@ -2,6 +2,8 @@ package com.aimrp.mrp.domain.service;
 
 import com.aimrp.mrp.domain.valueobject.MrpContext;
 import lombok.extern.slf4j.Slf4j;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -95,8 +97,8 @@ public class BomExpander {
     /**
      * BOM 展开结果
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class BomExpandResult {
         private String childItemCode;
         private String childItemName;

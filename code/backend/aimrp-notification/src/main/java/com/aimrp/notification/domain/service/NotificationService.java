@@ -1,6 +1,8 @@
 package com.aimrp.notification.domain.service;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -102,8 +104,8 @@ public class NotificationService {
     /**
      * 通知请求
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class NotificationRequest {
         private String type;           // 通知类型
         private String channel;        // 发送渠道: EMAIL/SMS/SYSTEM
