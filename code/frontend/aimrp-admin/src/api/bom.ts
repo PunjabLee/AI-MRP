@@ -3,47 +3,41 @@
  */
 import api from './index';
 
-export interface Bom {
+export interface BomItem {
   id?: number;
-  bomNo?: string;
-  itemCode?: string;
-  itemName?: string;
-  version?: string;
-  status?: string;
-  effectiveDate?: string;
-}
-
-export interface BomLine {
-  id?: number;
-  bomId?: number;
-  lineNo?: number;
+  parentItemCode?: string;
+  parentItemName?: string;
   childItemCode?: string;
   childItemName?: string;
   usageQty?: number;
   lossRate?: number;
+  level?: number;
+  validDate?: string;
+  status?: string;
 }
 
 export const bomApi = {
-  // BOM 列表
-  list: (params?: {itemCode?: string; status?: string}) => 
-    api.get<{list: Bom[]; total: number}>('/boms', { params }),
+  // BOM列表
+  list: (params: { parentItemCode?: string; keyword?: string }) => 
+    api.get<{list: BomItem[]; total: number}>('/boms', { params }),
   
-  // BOM 详情（包含行）
-  getById: (id: number) => 
-    api.get<{bom: Bom; lines: BomLine[]}>(`/boms/${id}`),
+  // BOM详情
+  get: (id: number) => api.get<BomItem>(`/boms/${id}`),
   
-  // 创建 BOM
-  create: (data: {bom: Bom; lines: BomLine[]}) => 
-    api.post<Bom>('/boms', data),
+  // 创建BOM
+  create: (data: BomItem) => api.post<BomItem>('/boms', data),
   
-  // 更新 BOM
-  update: (id: number, data: {bom: Bom; lines: BomLine[]}) => 
-    api.put<Bom>(`/boms/${id}`, data),
+  // 更新BOM
+  update: (id: number, data: BomItem) => api.put<void>(`/boms/${id}`, data),
   
-  // 删除 BOM
+  // 删除BOM
   delete: (id: number) => api.delete<void>(`/boms/${id}`),
   
-  // BOM 展开
-  expand: (itemCode: string, qty: number) => 
-    api.get<{items: any[]; total: number}>(`/boms/expand/${itemCode}`, { params: { qty } }),
+  // BOM展开
+  expand: (itemCode: string, qty: number, level?: number) => 
+    api.post<BomItem[]>('/boms/expand', { itemCode, qty, level }),
+  
+  // 获取物料的BOM
+  getByParent: (parentItemCode: string) => 
+    api.get<BomItem[]>(`/boms/parent/${parentItemCode}`),
 };

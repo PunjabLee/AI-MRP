@@ -1,6 +1,8 @@
 package com.aimrp.conversation.domain.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -45,8 +47,8 @@ public class ExecutionRouter {
     /**
      * 处理器结果
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class HandlerResult {
         private boolean success;
         private String message;
@@ -134,8 +136,8 @@ public class ExecutionRouter {
     /**
      * 路由结果
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class RouterResult {
         private String userInput;
         private IntentRecognitionService.Intent intent;

@@ -2,6 +2,7 @@ package com.aimrp.mrp.domain.valueobject;
 
 import lombok.Builder;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -60,11 +61,18 @@ public class MrpContext {
         private String itemType;        // FINISHED/SEMI/RAW
         private String source;          // MAKE/BUY/BOTH
         private Integer leadTime;       // 采购/生产提前期
-        private String lotSizeRule;    // 批量规则
+        private String lotSizeRule;    // 批量规则：LOT_FOR_LOT/EOQ/FIXED/PERIOD/MULTIPLE
         private BigDecimal minLotSize;  // 最小批量
         private BigDecimal maxLotSize;  // 最大批量
         private BigDecimal safetyStock; // 安全库存
         private BigDecimal yieldRate;  // 成品率
+        
+        // EOQ计算相关字段
+        private BigDecimal unitCost;     // 单位成本
+        private BigDecimal orderingCost; // 订货成本（每次下单费用）
+        private BigDecimal holdingRate;  // 持有成本率（年）
+        private BigDecimal setupCost;    // 换线/生产准备成本
+        private Integer lotPeriodDays;  // 期间批量天数
     }
     
     @Data

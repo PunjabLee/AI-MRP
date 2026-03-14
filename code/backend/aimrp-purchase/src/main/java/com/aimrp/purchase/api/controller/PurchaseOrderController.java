@@ -1,16 +1,15 @@
 package com.aimrp.purchase.api.controller;
 
 import com.aimrp.common.result.ApiResponse;
+import com.aimrp.purchase.api.dto.PurchaseOrderCreateRequest;
 import com.aimrp.purchase.domain.entity.PurchaseOrder;
-import com.aimrp.purchase.domain.entity.PurchaseOrderLine;
+import com.aimrp.purchase.infrastructure.persistence.mapper.PurchaseMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +19,8 @@ import java.util.Map;
 @RequestMapping("/api/purchase-orders")
 @RequiredArgsConstructor
 public class PurchaseOrderController {
+    
+    private final PurchaseMapper purchaseMapper;
     
     /**
      * 分页查询采购订单
@@ -31,22 +32,19 @@ public class PurchaseOrderController {
             @RequestParam(required = false) String supplierCode,
             @RequestParam(required = false) String status) {
         
-        // TODO: 从数据库查询
-        List<PurchaseOrder> list = new ArrayList<>();
-        PurchaseOrder order = new PurchaseOrder();
-        order.setId(1L);
-        order.setPoNo("PO20260309001");
-        order.setSupplierCode("SUP001");
-        order.setSupplierName("供应商A");
-        order.setOrderDate(LocalDate.now());
-        order.setExpectDate(LocalDate.now().plusDays(7));
-        order.setStatus("CONFIRMED");
-        order.setTotalAmount(new BigDecimal("10000"));
-        list.add(order);
+        var list = purchaseMapper.selectList(supplierCode, status);
+        
+        int total = list.size();
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
+        
+        var pageList = fromIndex < total ? list.subList(fromIndex, toIndex) : list;
         
         Map<String, Object> result = new HashMap<>();
-        result.put("list", list);
-        result.put("total", 1);
+        result.put("list", pageList);
+        result.put("total", total);
+        result.put("pageNum", pageNum);
+        result.put("pageSize", pageSize);
         
         return ApiResponse.ok(result);
     }
@@ -56,21 +54,11 @@ public class PurchaseOrderController {
      */
     @GetMapping("/{id}")
     public ApiResponse<Map<String, Object>> getById(@PathVariable Long id) {
-        // TODO: 从数据库查询
-        Map<String, Object> order = new HashMap<>();
-        order.put("id", id);
-        order.put("poNo", "PO20260309001");
-        order.put("supplierCode", "SUP001");
-        order.put("supplierName", "供应商A");
+        Map<String, Object> order = purchaseMapper.selectById(id);
         
-        List<Map<String, Object>> lines = new ArrayList<>();
-        Map<String, Object> line = new HashMap<>();
-        line.put("itemCode", "A001");
-        line.put("itemName", "物料A");
-        line.put("orderQty", 100);
-        line.put("receivedQty", 0);
-        lines.add(line);
-        order.put("lines", lines);
+        if (order == null) {
+            return ApiResponse.fail("订单不存在");
+        }
         
         return ApiResponse.ok(order);
     }
@@ -79,20 +67,36 @@ public class PurchaseOrderController {
      * 创建采购订单
      */
     @PostMapping
-    public ApiResponse<PurchaseOrder> create(@RequestBody PurchaseOrder order) {
-        order.setId(1L);
-        order.setPoNo("PO" + System.currentTimeMillis());
-        order.setStatus("DRAFT");
-        return ApiResponse.ok(order);
+    public ApiResponse<Map<String, Object>> create(@Validated @RequestBody PurchaseOrderCreateRequest request) {
+        // 计算金额
+        BigDecimal amount = BigDecimal.ZERO;
+        if (request.getOrderQty() != null && request.getUnitPrice() != null) {
+            amount = request.getOrderQty().multiply(request.getUnitPrice());
+        }
+        
+        Long id = purchaseMapper.insertPurchaseOrder(
+            request.getSupplierCode(),
+            request.getItemCode(), 
+            request.getOrderQty(), 
+            request.getUnitPrice(),
+            amount
+        );
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", id);
+        result.put("poNo", "PO" + System.currentTimeMillis());
+        result.put("status", "DRAFT");
+        
+        return ApiResponse.ok(result);
     }
     
     /**
      * 更新采购订单
      */
     @PutMapping("/{id}")
-    public ApiResponse<PurchaseOrder> update(@PathVariable Long id, @RequestBody PurchaseOrder order) {
-        order.setId(id);
-        return ApiResponse.ok(order);
+    public ApiResponse<Void> update(@PathVariable Long id, @Validated @RequestBody PurchaseOrderCreateRequest request) {
+        // 更新逻辑
+        return ApiResponse.ok();
     }
     
     /**
@@ -107,11 +111,8 @@ public class PurchaseOrderController {
      * 确认采购订单
      */
     @PostMapping("/{id}/confirm")
-    public ApiResponse<PurchaseOrder> confirm(@PathVariable Long id) {
-        PurchaseOrder order = new PurchaseOrder();
-        order.setId(id);
-        order.setStatus("CONFIRMED");
-        return ApiResponse.ok(order);
+    public ApiResponse<Void> confirm(@PathVariable Long id) {
+        return ApiResponse.ok();
     }
     
     /**
@@ -119,10 +120,14 @@ public class PurchaseOrderController {
      */
     @PostMapping("/{id}/receive")
     public ApiResponse<Map<String, Object>> receive(@PathVariable Long id, @RequestBody Map<String, Object> params) {
-        // TODO: 创建入库单，更新库存
+        BigDecimal qty = new BigDecimal(params.get("qty").toString());
+        
+        purchaseMapper.updateReceivedQty(id, qty);
+        
         Map<String, Object> result = new HashMap<>();
         result.put("receiveNo", "RCV" + System.currentTimeMillis());
         result.put("status", "COMPLETED");
+        
         return ApiResponse.ok(result);
     }
     
@@ -130,10 +135,20 @@ public class PurchaseOrderController {
      * 取消采购订单
      */
     @PostMapping("/{id}/cancel")
-    public ApiResponse<PurchaseOrder> cancel(@PathVariable Long id) {
-        PurchaseOrder order = new PurchaseOrder();
-        order.setId(id);
-        order.setStatus("CANCELLED");
-        return ApiResponse.ok(order);
+    public ApiResponse<Void> cancel(@PathVariable Long id) {
+        return ApiResponse.ok();
+    }
+    
+    /**
+     * 获取待入库订单
+     */
+    @GetMapping("/pending-receive")
+    public ApiResponse<Map<String, Object>> getPendingReceive() {
+        var list = purchaseMapper.selectList(null, "CONFIRMED");
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        
+        return ApiResponse.ok(result);
     }
 }

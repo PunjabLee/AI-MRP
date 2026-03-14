@@ -1,16 +1,15 @@
 package com.aimrp.production.api.controller;
 
 import com.aimrp.common.result.ApiResponse;
+import com.aimrp.production.api.dto.ProductionOrderCreateRequest;
 import com.aimrp.production.domain.entity.ProductionOrder;
-import com.aimrp.production.domain.entity.ProductionReport;
+import com.aimrp.production.infrastructure.persistence.mapper.ProductionOrderMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +19,8 @@ import java.util.Map;
 @RequestMapping("/api/production-orders")
 @RequiredArgsConstructor
 public class ProductionOrderController {
+    
+    private final ProductionOrderMapper productionOrderMapper;
     
     /**
      * 分页查询生产工单
@@ -31,23 +32,17 @@ public class ProductionOrderController {
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String status) {
         
-        // TODO: 从数据库查询
-        List<ProductionOrder> list = new ArrayList<>();
-        ProductionOrder order = new ProductionOrder();
-        order.setId(1L);
-        order.setMoNo("MO20260309001");
-        order.setItemCode("A001");
-        order.setItemName("产品A");
-        order.setPlanQty(new BigDecimal("1000"));
-        order.setCompletedQty(BigDecimal.ZERO);
-        order.setStatus("RELEASED");
-        order.setStartDate(LocalDate.now());
-        order.setEndDate(LocalDate.now().plusDays(7));
-        list.add(order);
+        var list = productionOrderMapper.selectList(status, itemCode);
+        
+        int total = list.size();
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
+        
+        var pageList = fromIndex < total ? list.subList(fromIndex, toIndex) : list;
         
         Map<String, Object> result = new HashMap<>();
-        result.put("list", list);
-        result.put("total", 1);
+        result.put("list", pageList);
+        result.put("total", total);
         
         return ApiResponse.ok(result);
     }
@@ -57,11 +52,12 @@ public class ProductionOrderController {
      */
     @GetMapping("/{id}")
     public ApiResponse<Map<String, Object>> getById(@PathVariable Long id) {
-        Map<String, Object> order = new HashMap<>();
-        order.put("id", id);
-        order.put("moNo", "MO20260309001");
-        order.put("itemCode", "A001");
-        order.put("planQty", 1000);
+        Map<String, Object> order = productionOrderMapper.selectById(id);
+        
+        if (order == null) {
+            return ApiResponse.fail("工单不存在");
+        }
+        
         return ApiResponse.ok(order);
     }
     
@@ -69,96 +65,63 @@ public class ProductionOrderController {
      * 创建生产工单
      */
     @PostMapping
-    public ApiResponse<ProductionOrder> create(@RequestBody ProductionOrder order) {
-        order.setId(1L);
-        order.setMoNo("MO" + System.currentTimeMillis());
-        order.setStatus("DRAFT");
-        return ApiResponse.ok(order);
+    public ApiResponse<Map<String, Object>> create(@Validated @RequestBody ProductionOrderCreateRequest request) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("mo_no", "MO" + System.currentTimeMillis());
+        data.put("item_code", request.getItemCode());
+        data.put("item_name", request.getItemName());
+        data.put("plan_qty", request.getPlanQty());
+        data.put("status", "DRAFT");
+        
+        Long id = productionOrderMapper.insert(data);
+        
+        data.put("id", id);
+        
+        return ApiResponse.ok(data);
     }
     
     /**
      * 更新生产工单
      */
     @PutMapping("/{id}")
-    public ApiResponse<ProductionOrder> update(@PathVariable Long id, @RequestBody ProductionOrder order) {
-        order.setId(id);
-        return ApiResponse.ok(order);
+    public ApiResponse<Void> update(@PathVariable Long id, @Validated @RequestBody ProductionOrderCreateRequest request) {
+        return ApiResponse.ok();
     }
     
     /**
      * 下达生产工单
      */
     @PostMapping("/{id}/release")
-    public ApiResponse<ProductionOrder> release(@PathVariable Long id) {
-        ProductionOrder order = new ProductionOrder();
-        order.setId(id);
-        order.setStatus("RELEASED");
-        order.setActualStartDate(java.time.LocalDate.now());
-        return ApiResponse.ok(order);
+    public ApiResponse<Void> release(@PathVariable Long id) {
+        productionOrderMapper.updateStatus(id, "RELEASED");
+        productionOrderMapper.updateDates(id, java.time.LocalDate.now().toString(), null);
+        return ApiResponse.ok();
     }
     
     /**
      * 开始生产
      */
     @PostMapping("/{id}/start")
-    public ApiResponse<ProductionOrder> start(@PathVariable Long id) {
-        ProductionOrder order = new ProductionOrder();
-        order.setId(id);
-        order.setStatus("PROCESSING");
-        return ApiResponse.ok(order);
+    public ApiResponse<Void> start(@PathVariable Long id) {
+        productionOrderMapper.updateStatus(id, "PROCESSING");
+        return ApiResponse.ok();
     }
     
     /**
      * 完工
      */
     @PostMapping("/{id}/complete")
-    public ApiResponse<ProductionOrder> complete(@PathVariable Long id, @RequestBody Map<String, Object> params) {
-        ProductionOrder order = new ProductionOrder();
-        order.setId(id);
-        order.setStatus("COMPLETED");
-        order.setCompletedQty(new BigDecimal(params.get("completedQty").toString()));
-        return ApiResponse.ok(order);
+    public ApiResponse<Void> complete(@PathVariable Long id, @RequestBody(required = false) Map<String, Object> params) {
+        productionOrderMapper.updateStatus(id, "COMPLETED");
+        return ApiResponse.ok();
     }
     
     /**
      * 取消生产工单
      */
     @PostMapping("/{id}/cancel")
-    public ApiResponse<ProductionOrder> cancel(@PathVariable Long id) {
-        ProductionOrder order = new ProductionOrder();
-        order.setId(id);
-        order.setStatus("CANCELLED");
-        return ApiResponse.ok(order);
-    }
-}
-
-/**
- * 生产报工 Controller
- */
-@RestController
-@RequestMapping("/api/production-reports")
-@RequiredArgsConstructor
-class ProductionReportController {
-    
-    /**
-     * 创建报工记录
-     */
-    @PostMapping
-    public ApiResponse<ProductionReport> create(@RequestBody ProductionReport report) {
-        report.setId(1L);
-        report.setReportNo("RPT" + System.currentTimeMillis());
-        report.setStatus("PENDING");
-        return ApiResponse.ok(report);
-    }
-    
-    /**
-     * 报工审核
-     */
-    @PostMapping("/{id}/approve")
-    public ApiResponse<ProductionReport> approve(@PathVariable Long id) {
-        ProductionReport report = new ProductionReport();
-        report.setId(id);
-        report.setStatus("APPROVED");
-        return ApiResponse.ok(report);
+    public ApiResponse<Void> cancel(@PathVariable Long id) {
+        productionOrderMapper.updateStatus(id, "CANCELLED");
+        return ApiResponse.ok();
     }
 }

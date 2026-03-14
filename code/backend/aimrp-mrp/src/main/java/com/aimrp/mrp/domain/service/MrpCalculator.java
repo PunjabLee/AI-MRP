@@ -3,6 +3,8 @@ package com.aimrp.mrp.domain.service;
 import com.aimrp.mrp.domain.valueobject.MrpContext;
 import com.aimrp.mrp.domain.valueobject.MrpResult;
 import lombok.extern.slf4j.Slf4j;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -205,8 +207,10 @@ public class MrpCalculator {
                 suggestionType = "PRODUCTION";
                 break;
             case "BOTH":
-                // TODO: 需要根据成本/产能等因素选择
-                suggestionType = "PURCHASE";
+                // 根据成本和产能选择：采购成本 vs 生产成本
+                BigDecimal purchaseCost = estimatePurchaseCost(netReq.getNetRequirement(), item);
+                BigDecimal productionCost = estimateProductionCost(netReq.getNetRequirement(), item);
+                suggestionType = purchaseCost.compareTo(productionCost) <= 0 ? "PURCHASE" : "PRODUCTION";
                 break;
             default:
                 suggestionType = "PURCHASE";
@@ -256,19 +260,27 @@ public class MrpCalculator {
         
         switch (rule) {
             case "FIXED":
-                // 固定批量
+                // 固定批量：按最小批量下单，不足则补齐
                 if (item.getMinLotSize() != null && orderQty.compareTo(item.getMinLotSize()) < 0) {
                     orderQty = item.getMinLotSize();
                 }
                 break;
+                
             case "EOQ":
-                // 经济批量（简化版）
-                // TODO: 实现完整 EOQ 计算
+                // 经济批量：EOQ = √(2 × 年需求 × 订货成本 / 单位持有成本)
+                orderQty = calculateEOQ(netRequirement, item);
                 break;
+                
             case "PERIOD":
-                // 期间批量
-                // TODO: 实现期间批量
+                // 期间批量：将N天的需求合并为一次订单
+                orderQty = calculatePeriodLot(netRequirement, item);
                 break;
+                
+            case "MULTIPLE":
+                // 倍批量：按最小批量的倍数下单
+                orderQty = calculateMultipleLot(netRequirement, item);
+                break;
+                
             case "LOT_FOR_LOT":
             default:
                 // 按需批量
@@ -280,7 +292,134 @@ public class MrpCalculator {
             orderQty = item.getMaxLotSize();
         }
         
+        // 确保不低于最小批量
+        if (item.getMinLotSize() != null && orderQty.compareTo(item.getMinLotSize()) < 0) {
+            orderQty = item.getMinLotSize();
+        }
+        
         return orderQty;
+    }
+    
+    /**
+     * 计算经济批量 (EOQ)
+     * 公式：EOQ = √(2 × D × S / H)
+     * D: 年需求量 (Demand)
+     * S: 订货成本 (Ordering Cost)
+     * H: 单位持有成本 (Holding Cost) = 单位成本 × 持有成本率
+     */
+    private BigDecimal calculateEOQ(BigDecimal netRequirement, MrpContext.ItemVO item) {
+        // 默认年需求 = 净需求 × 12（假设月需求）
+        BigDecimal annualDemand = netRequirement.multiply(new BigDecimal("12"));
+        
+        // 订货成本：默认值100，可从物料主数据获取
+        BigDecimal orderingCost = new BigDecimal("100");
+        if (item.getOrderingCost() != null) {
+            orderingCost = item.getOrderingCost();
+        }
+        
+        // 单位成本：默认50，可从物料主数据获取
+        BigDecimal unitCost = new BigDecimal("50");
+        if (item.getUnitCost() != null) {
+            unitCost = item.getUnitCost();
+        }
+        
+        // 持有成本率：默认20%
+        BigDecimal holdingRate = new BigDecimal("0.2");
+        if (item.getHoldingRate() != null) {
+            holdingRate = item.getHoldingRate();
+        }
+        
+        // 持有成本 H = 单位成本 × 持有成本率
+        BigDecimal holdingCost = unitCost.multiply(holdingRate);
+        
+        if (holdingCost.compareTo(BigDecimal.ZERO) == 0) {
+            return netRequirement;
+        }
+        
+        // EOQ = √(2 × D × S / H)
+        BigDecimal eoq = annualDemand.multiply(orderingCost)
+                .multiply(new BigDecimal("2"))
+                .divide(holdingCost, 2, java.math.RoundingMode.HALF_UP);
+        
+        // 开平方
+        double eoqValue = Math.sqrt(eoq.doubleValue());
+        eoq = BigDecimal.valueOf(eoqValue).setScale(2, java.math.RoundingMode.HALF_UP);
+        
+        log.info("EOQ计算 - 物料: {}, 年需求: {}, 订货成本: {}, 持有成本: {}, EOQ: {}", 
+                item.getItemCode(), annualDemand, orderingCost, holdingCost, eoq);
+        
+        // EOQ不应超过年需求
+        return eoq.compareTo(annualDemand) > 0 ? annualDemand : eoq;
+    }
+    
+    /**
+     * 计算期间批量
+     * 将指定期间的需求合并为一次订单
+     */
+    private BigDecimal calculatePeriodLot(BigDecimal netRequirement, MrpContext.ItemVO item) {
+        // 期间天数：默认30天，可从物料主数据获取
+        int periodDays = 30;
+        if (item.getLotPeriodDays() != null) {
+            periodDays = item.getLotPeriodDays();
+        }
+        
+        // 期间需求 = 日均需求 × 期间天数
+        // 假设netRequirement是日需求
+        BigDecimal periodQty = netRequirement.multiply(new BigDecimal(periodDays));
+        
+        // 调整到批量倍数
+        periodQty = roundToLotMultiplier(periodQty, item);
+        
+        log.info("期间批量计算 - 物料: {}, 期间: {}天, 批量: {}", 
+                item.getItemCode(), periodDays, periodQty);
+        
+        return periodQty;
+    }
+    
+    /**
+     * 计算倍批量
+     * 调整到最小批量的整数倍
+     */
+    private BigDecimal calculateMultipleLot(BigDecimal netRequirement, MrpContext.ItemVO item) {
+        BigDecimal minLot = item.getMinLotSize() != null ? item.getMinLotSize() : BigDecimal.ONE;
+        
+        // 向上取整到最小批量的倍数
+        double multiple = Math.ceil(netRequirement.doubleValue() / minLot.doubleValue());
+        BigDecimal orderQty = minLot.multiply(BigDecimal.valueOf(multiple));
+        
+        return orderQty;
+    }
+    
+    /**
+     * 调整到批量倍数
+     */
+    private BigDecimal roundToLotMultiplier(BigDecimal qty, MrpContext.ItemVO item) {
+        BigDecimal minLot = item.getMinLotSize() != null ? item.getMinLotSize() : BigDecimal.ONE;
+        
+        double multiple = Math.ceil(qty.doubleValue() / minLot.doubleValue());
+        return minLot.multiply(BigDecimal.valueOf(multiple));
+    }
+    
+    /**
+     * 估算采购成本
+     */
+    private BigDecimal estimatePurchaseCost(BigDecimal qty, MrpContext.ItemVO item) {
+        BigDecimal unitCost = item.getUnitCost() != null ? item.getUnitCost() : new BigDecimal("50");
+        BigDecimal orderingCost = item.getOrderingCost() != null ? item.getOrderingCost() : new BigDecimal("100");
+        
+        // 采购成本 = 物料成本 + 订货成本
+        return qty.multiply(unitCost).add(orderingCost);
+    }
+    
+    /**
+     * 估算生产成本
+     */
+    private BigDecimal estimateProductionCost(BigDecimal qty, MrpContext.ItemVO item) {
+        BigDecimal unitCost = item.getUnitCost() != null ? item.getUnitCost() : new BigDecimal("30");
+        BigDecimal setupCost = item.getSetupCost() != null ? item.getSetupCost() : new BigDecimal("200");
+        
+        // 生产成本 = 物料成本 + 换线成本
+        return qty.multiply(unitCost).add(setupCost);
     }
     
     /**
@@ -311,8 +450,8 @@ public class MrpCalculator {
     /**
      * 净需求内部类
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     private static class NetRequirement {
         private BigDecimal grossRequirement;
         private BigDecimal availableQty;

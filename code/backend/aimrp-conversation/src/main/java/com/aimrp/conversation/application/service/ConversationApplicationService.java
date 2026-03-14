@@ -3,6 +3,8 @@ package com.aimrp.conversation.application.service;
 import com.aimrp.conversation.domain.service.*;
 import com.aimrp.conversation.domain.service.ExecutionRouter.*;
 import lombok.RequiredArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -96,8 +98,8 @@ public class ConversationApplicationService {
     /**
      * 对话响应
      */
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     public static class ConversationResponse {
         private String userInput;
         private String intent;

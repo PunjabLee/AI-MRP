@@ -32,8 +32,9 @@
         
         <!-- 工具 -->
         <hutool.version>5.8.23</hutool.version>
-        <lombok.version>1.18.30</lombok.version>
+        <lombok.version>1.18.38</lombok.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <poi.version>5.2.5</poi.version>
         
         <!-- 测试 -->
         <junit.version>5.10.1</junit.version>
@@ -106,7 +107,14 @@
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
             </dependency>
-            
+
+            <!-- Apache POI -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
             <!-- Test -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -123,6 +131,46 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <!-- Validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- AOP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <!-- Tomcat (provides servlet-api) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Servlet API -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.3</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
@@ -155,20 +203,14 @@
     <!-- 模块列表 -->
     <modules>
         <module>aimrp-common</module>
-        <module>aimrp-core</module>
         <module>aimrp-demand</module>
-        <module>aimrp-forecast</module>
         <module>aimrp-bom</module>
         <module>aimrp-inventory</module>
         <module>aimrp-mrp</module>
         <module>aimrp-purchase</module>
         <module>aimrp-production</module>
-        <module>aimrp-risk</module>
-        <module>aimrp-sandbox</module>
-        <module>aimrp-whatif</module>
-        <module>aimrp-conversation</module>
         <module>aimrp-system</module>
-        <module>aimrp-notification</module>
+        <module>aimrp-item</module>
         <module>aimrp-api</module>
     </modules>
 
